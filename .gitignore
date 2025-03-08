@@ -1,0 +1,9 @@
+*\__pycache__
+*\.pytest_cache
+*\.vscode
+*\venv
+*\storage
+*\test_run
+*.pyc
+latest.log
+test.log
