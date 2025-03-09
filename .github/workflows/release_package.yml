@@ -110,5 +110,5 @@ jobs:
         artifacts: "dist/*"
         bodyFile: "body.md"
         tag: "${{ needs.tag.outputs.release-tag }}"
-        commit: "main"
+        commit: "master"
         token: ${{ secrets.GITHUB_TOKEN }}
