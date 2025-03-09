@@ -6,13 +6,40 @@ from __future__ import annotations
 
 import atexit
 import json
-import logging
 import os
 from typing import Any
 
-from .error import error
+from .error import general
 
-logger = logging.getLogger("core")
+VolatileStorage: _VolatileStorage = None
+PersistentStorage: _PersistentStorage = None
+StorageView: _StorageView = None
+
+def initialize(filename: str = "storage.json"):
+    """
+    Initialize the storage module.
+
+    This disables all log output. Use the add_<*>_handler functions to complete the setup.
+    """
+
+    full_filepath = os.path.join(os.getcwd(), filename)
+    if not os.path.isdir(os.path.dirname(full_filepath)):
+        raise general.DirNotFoundError()
+
+    global VolatileStorage
+    global PersistentStorage
+    global StorageView
+
+    VolatileStorage = _VolatileStorage()
+    PersistentStorage = _PersistentStorage()
+    StorageView = _StorageView([VolatileStorage, PersistentStorage])
+
+    VolatileStorage["storage_file"] = full_filepath
+
+    PersistentStorage.load_from_disk()
+
+    # save persistent storage before program exits
+    atexit.register(PersistentStorage.save_to_disk)
 
 class _BaseStorage():
     def __init__(self) -> None:
@@ -68,7 +95,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise error.KeyNotFound(f"Key '{key}' not found in storage")
+                raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
             return self._store[key]
 
         parts = key.split(".")
@@ -80,7 +107,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise error.KeyNotFound(f"Key '{invalid_key}' not found in storage")
+                raise general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
             # if it isn't the last part
             if c < len(parts) - 1:
                 curr_dict = curr_dict[part]
@@ -122,7 +149,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise error.KeyNotFound(f"Key '{key}' not found in storage")
+                raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
             del self._store[key]
             return
 
@@ -135,7 +162,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise error.KeyNotFound(f"Key '{invalid_key}' not found in storage")
+                raise general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
 
             # if it isn't the last part
             if c < len(parts) - 1:
@@ -158,9 +185,8 @@ class _VolatileStorage(_BaseStorage):
 
     def __init__(self) -> None:
         if _VolatileStorage._instance is not None:
-            raise error.SingletonInstantiation
+            raise general.SingletonInstantiationError()
 
-        logger.debug("Initializing VolatileStorage")
         _VolatileStorage._store = self._store = {}
         _VolatileStorage._instance = self
 
@@ -169,9 +195,8 @@ class _PersistentStorage(_BaseStorage):
 
     def __init__(self) -> None:
         if _PersistentStorage._instance is not None:
-            raise error.SingletonInstantiation
+            raise general.SingletonInstantiationError()
 
-        logger.debug("Initializing PersistentStorage")
         _PersistentStorage._store = self._store = {}
         _PersistentStorage._instance = self
 
@@ -181,25 +206,23 @@ class _PersistentStorage(_BaseStorage):
 
         return super().__setitem__(key, item)
 
-    def _load_from_disk(self) -> None:
+    def load_from_disk(self) -> None:
         if "storage_file" not in StorageView:
-            raise error.KeyNotFound()
+            raise general.KeyNotFoundError()
 
         path = StorageView["storage_file"]
         if not os.path.isfile(path):
-            logger.warning("Storage file doesn't yet exist")
             return
 
         with open(path, "r", encoding="utf8") as f:
             self._store = json.load(f)
 
-    def _save_to_disk(self) -> None:
+    def save_to_disk(self) -> None:
         if "storage_file" not in StorageView:
-            raise error.KeyNotFound()
+            raise general.KeyNotFoundError()
 
         path = StorageView["storage_file"]
         if len(self._store) == 0 and os.path.isfile(path):
-            logger.warning("Not overwriting existing storage file with empty storage")
             return
 
         with open(path, "w", encoding="utf8") as f:
@@ -211,7 +234,7 @@ class _StorageView():
     def __init__(self, storages: list[_BaseStorage]):
         for storage in storages:
             if not isinstance(storage, _BaseStorage):
-                raise error.MissingInheritance(f"Storage {type(storage)} does not inherit from _BaseStorage")
+                raise general.MissingInheritanceError(f"Storage {type(storage)} does not inherit from _BaseStorage")
             self._storages.append(storage)
 
     _storages = []
@@ -242,14 +265,7 @@ class _StorageView():
         for storage in self._storages:
             if key in storage:
                 return storage[key]
-        raise error.KeyNotFound()
+        raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
 
     def __contains__(self, key: str) -> bool:
         return self.contains(key)
-
-VolatileStorage = _VolatileStorage() if _VolatileStorage._instance is None else _VolatileStorage._instance
-PersistentStorage = _PersistentStorage() if _PersistentStorage._instance is None else _PersistentStorage._instance
-StorageView = _StorageView([VolatileStorage, PersistentStorage])
-
-# save persistent storage before program exits
-atexit.register(PersistentStorage._save_to_disk)

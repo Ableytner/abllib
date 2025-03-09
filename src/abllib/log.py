@@ -35,8 +35,11 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
         get_logger().setLevel(DEFAULT_LOG_LEVEL)
         return
 
-    if not isinstance(log_level, int):
-        raise TypeError(f"Expected log_level to be of type {int}, but got {type(log_level)}")
+    if not isinstance(log_level, (int, LogLevel)):
+        raise TypeError(f"Expected log_level to be of type {int | LogLevel}, but got {type(log_level)}")
+    
+    if isinstance(log_level, LogLevel):
+        log_level = log_level.value
 
     if log_level == LogLevel.NOTSET:
         raise ValueError("LogLevel.NOTSET is not allowed.")
