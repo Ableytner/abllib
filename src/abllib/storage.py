@@ -9,11 +9,8 @@ import json
 import os
 from typing import Any
 
+from . import fs
 from .error import general
-
-VolatileStorage: _VolatileStorage = None
-PersistentStorage: _PersistentStorage = None
-StorageView: _StorageView = None
 
 def initialize(filename: str = "storage.json"):
     """
@@ -22,19 +19,13 @@ def initialize(filename: str = "storage.json"):
     This disables all log output. Use the add_<*>_handler functions to complete the setup.
     """
 
-    full_filepath = os.path.join(os.getcwd(), filename)
+    full_filepath = fs.absolute(filename)
     if not os.path.isdir(os.path.dirname(full_filepath)):
         raise general.DirNotFoundError()
 
-    # pylint: disable=global-statement
-    global VolatileStorage
-    global PersistentStorage
-    global StorageView
-    # pylint: enable=global-statement
-
-    VolatileStorage = _VolatileStorage()
-    PersistentStorage = _PersistentStorage()
-    StorageView = _StorageView([VolatileStorage, PersistentStorage])
+    VolatileStorage._init()
+    PersistentStorage._init()
+    StorageView._init([VolatileStorage, PersistentStorage])
 
     VolatileStorage["storage_file"] = full_filepath
 
@@ -186,6 +177,9 @@ class _VolatileStorage(_BaseStorage):
     """Storage that is not saved across restarts"""
 
     def __init__(self) -> None:
+        pass
+
+    def _init(self):
         if _VolatileStorage._instance is not None:
             raise general.SingletonInstantiationError()
 
@@ -196,6 +190,9 @@ class _PersistentStorage(_BaseStorage):
     """Storage that is persistent across restarts"""
 
     def __init__(self) -> None:
+        pass
+
+    def _init(self):
         if _PersistentStorage._instance is not None:
             raise general.SingletonInstantiationError()
 
@@ -237,7 +234,10 @@ class _PersistentStorage(_BaseStorage):
 class _StorageView():
     """A read-only view on both the PersistentStorage and VolatileStorage"""
 
-    def __init__(self, storages: list[_BaseStorage]):
+    def __init__(self):
+        pass
+
+    def _init(self, storages: list[_BaseStorage]):
         for storage in storages:
             if not isinstance(storage, _BaseStorage):
                 raise general.MissingInheritanceError(f"Storage {type(storage)} does not inherit from _BaseStorage")
@@ -275,3 +275,7 @@ class _StorageView():
 
     def __contains__(self, key: str) -> bool:
         return self.contains(key)
+
+VolatileStorage = _VolatileStorage()
+PersistentStorage = _PersistentStorage()
+StorageView = _StorageView()
