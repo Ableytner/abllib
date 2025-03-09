@@ -1,4 +1,8 @@
+"""
+Ableytner's library for Python
 
+Contains many general-purpose functions which can be used across projects.
+"""
 
 from . import error, fs
 from .log import get_logger

@@ -1,9 +1,11 @@
+"""A module containing path-modification functions."""
+
 import pathlib
-import os
 
 def absolute(path: str | pathlib.Path, *paths: str) -> str:
     """
     Return an absolute path, regardless of what is input.
+
     Additionally, the path is resolved, removing any symlinks on the way.
     """
 

@@ -3,7 +3,6 @@
 # pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
 
 import json
-import pathlib
 import os
 
 import pytest
@@ -332,10 +331,10 @@ def test_volatilestorage_inheritance():
 def test_volatilestorage_instantiation():
     """Ensure that VolatileStorage behaves like a singleton"""
 
-    with pytest.raises(error.SingletonInstantiation):
+    with pytest.raises(error.SingletonInstantiationError):
         storage._VolatileStorage()
 
-    with pytest.raises(error.SingletonInstantiation):
+    with pytest.raises(error.SingletonInstantiationError):
         storage._VolatileStorage()
 
 def test_volatilestorage_valuetype():
@@ -365,10 +364,10 @@ def test_persistentstorage_inheritance():
 def test_persistentstorage_instantiation():
     """Ensure that PersistentStorage behaves like a singleton"""
 
-    with pytest.raises(error.SingletonInstantiation):
+    with pytest.raises(error.SingletonInstantiationError):
         storage._PersistentStorage()
 
-    with pytest.raises(error.SingletonInstantiation):
+    with pytest.raises(error.SingletonInstantiationError):
         storage._PersistentStorage()
 
 def test_persistentstorage_valuetype():
@@ -398,7 +397,7 @@ def test_persistentstorage_load_file():
     PersistentStorage = storage._PersistentStorage.__new__(storage._PersistentStorage)
     PersistentStorage._store = {}
 
-    filepath = str(pathlib.Path(os.path.dirname(__file__), "..", "..", "..", "test_run", "storage.json").resolve())
+    filepath = storage.VolatileStorage["storage_file"]
 
     with open(filepath, "w", encoding="utf8") as f:
         json.dump({
@@ -411,7 +410,7 @@ def test_persistentstorage_load_file():
             "key3": 10
         }, f)
 
-    PersistentStorage._load_from_disk()
+    PersistentStorage.load_from_disk()
 
     assert PersistentStorage["key1"] == "value"
     assert PersistentStorage["key2"] == ["value21", "value22", "value23"]
@@ -425,13 +424,13 @@ def test_persistentstorage_save_file():
     PersistentStorage = storage._PersistentStorage.__new__(storage._PersistentStorage)
     PersistentStorage._store = {}
 
-    filepath = str(pathlib.Path(os.path.dirname(__file__), "..", "..", "..", "test_run", "storage.json").resolve())
+    filepath = storage.VolatileStorage["storage_file"]
 
     PersistentStorage["key1"] = "value"
     PersistentStorage["key2"] = ["value21", "value22", "value23"]
     PersistentStorage["key4"] = 10
 
-    PersistentStorage._save_to_disk()
+    PersistentStorage.save_to_disk()
 
     assert os.path.isfile(filepath)
     with open(filepath, "r", encoding="utf8") as f:
@@ -451,14 +450,14 @@ def test_persistentstorage_save_file_empty():
     PersistentStorage = storage._PersistentStorage.__new__(storage._PersistentStorage)
     PersistentStorage._store = {}
 
-    filepath = str(pathlib.Path(os.path.dirname(__file__), "..", "..", "..", "test_run", "storage.json").resolve())
+    filepath = storage.VolatileStorage["storage_file"]
 
     with open(filepath, "w", encoding="utf8") as f:
         json.dump({
             "key1": "newvalue"
         }, f)
 
-    PersistentStorage._save_to_disk()
+    PersistentStorage.save_to_disk()
 
     with open(filepath, "r", encoding="utf8") as f:
         assert json.load(f)["key1"] == "newvalue"
@@ -479,12 +478,12 @@ def test_storageview_instantiation():
     class FakeStorage():
         pass
 
-    with pytest.raises(error.MissingInheritance):
+    with pytest.raises(error.MissingInheritanceError):
         storage._StorageView([
             FakeStorage
         ])
 
-    with pytest.raises(error.MissingInheritance):
+    with pytest.raises(error.MissingInheritanceError):
         storage._StorageView([
             PersistentStorage,
             VolatileStorage,

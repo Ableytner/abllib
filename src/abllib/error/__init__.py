@@ -1,3 +1,5 @@
+"""A module contraining custom errors"""
+
 from .custom_exception import CustomException
 from .general import DirNotFoundError, \
                      KeyNotFoundError, \

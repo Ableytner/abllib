@@ -8,6 +8,8 @@ from typing import Literal
 DEFAULT_LOG_LEVEL = logging.INFO
 
 class LogLevel(Enum):
+    """An enum holding log levels"""
+
     CRITICAL = logging.CRITICAL
     FATAL = logging.FATAL
     ERROR = logging.ERROR
@@ -37,7 +39,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
 
     if not isinstance(log_level, (int, LogLevel)):
         raise TypeError(f"Expected log_level to be of type {int | LogLevel}, but got {type(log_level)}")
-    
+
     if isinstance(log_level, LogLevel):
         log_level = log_level.value
 

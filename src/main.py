@@ -1,3 +1,5 @@
+"""The main module, used for dev testing"""
+
 from abllib import log
 
 if __name__ == "__main__":

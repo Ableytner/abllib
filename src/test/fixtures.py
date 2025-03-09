@@ -13,7 +13,7 @@ from abllib import log, storage
 
 logger = log.get_logger("test")
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def setup_storages():
     """Setup the PersistentStorage, VolatileStorage and StorageView for test usage"""
 
@@ -25,3 +25,16 @@ def setup_storages():
     yield None
 
     os.remove("test.json")
+
+@pytest.fixture(scope="function", autouse=True)
+def clean_storages():
+    """Clean up the PersistentStorage, VolatileStorage and StorageView, removing all keys"""
+
+    yield None
+
+    for key in storage.PersistentStorage._store.keys():
+        del storage.PersistentStorage[key]
+
+    for key in storage.VolatileStorage._store.keys():
+        if key not in ["storage_file"]:
+            del storage.VolatileStorage[key]

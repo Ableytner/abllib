@@ -26,9 +26,11 @@ def initialize(filename: str = "storage.json"):
     if not os.path.isdir(os.path.dirname(full_filepath)):
         raise general.DirNotFoundError()
 
+    # pylint: disable=global-statement
     global VolatileStorage
     global PersistentStorage
     global StorageView
+    # pylint: enable=global-statement
 
     VolatileStorage = _VolatileStorage()
     PersistentStorage = _PersistentStorage()
@@ -207,6 +209,8 @@ class _PersistentStorage(_BaseStorage):
         return super().__setitem__(key, item)
 
     def load_from_disk(self) -> None:
+        """Load the data from the storage file"""
+
         if "storage_file" not in StorageView:
             raise general.KeyNotFoundError()
 
@@ -218,6 +222,8 @@ class _PersistentStorage(_BaseStorage):
             self._store = json.load(f)
 
     def save_to_disk(self) -> None:
+        """Save the data to the storage file"""
+
         if "storage_file" not in StorageView:
             raise general.KeyNotFoundError()
 
