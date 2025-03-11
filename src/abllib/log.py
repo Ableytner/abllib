@@ -5,6 +5,8 @@ import sys
 from enum import Enum
 from typing import Literal
 
+from . import fs, wrapper
+
 DEFAULT_LOG_LEVEL = logging.INFO
 
 class LogLevel(Enum):
@@ -19,6 +21,7 @@ class LogLevel(Enum):
     DEBUG = logging.DEBUG
     NOTSET = logging.NOTSET
 
+@wrapper.singleuse
 def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.ERROR]
                           | Literal[LogLevel.WARNING]
@@ -29,6 +32,8 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     Initialize the custom logging module.
 
     This disables all log output. Use the add_<*>_handler functions to complete the setup.
+
+    This function can only be called once.
     """
 
     logging.disable()
@@ -78,7 +83,7 @@ def add_file_handler(filename: str = "latest.log"):
 
     logging.disable(0)
 
-    file_handler = logging.FileHandler(filename=filename, encoding="utf-8", mode="w")
+    file_handler = logging.FileHandler(filename=fs.absolute(filename), encoding="utf-8", mode="w")
 
     file_handler.setLevel(DEFAULT_LOG_LEVEL)
 

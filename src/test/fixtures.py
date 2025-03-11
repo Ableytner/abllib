@@ -9,7 +9,7 @@ import os
 
 import pytest
 
-from abllib import log, storage
+from abllib import fs, log, storage
 
 logger = log.get_logger("test")
 
@@ -17,14 +17,17 @@ logger = log.get_logger("test")
 def setup_storages():
     """Setup the PersistentStorage, VolatileStorage and StorageView for test usage"""
 
-    storage.initialize("test.json")
+    STORAGE_FILE = fs.absolute(os.path.dirname(__file__), "..", "..", "test_run", "test.json")
+
+    if os.path.isfile(STORAGE_FILE):
+        os.remove(STORAGE_FILE)
+
+    storage.initialize(STORAGE_FILE)
 
     # disable atexit storage saving
     atexit.unregister(storage.PersistentStorage.save_to_disk)
 
     yield None
-
-    os.remove("test.json")
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_storages():

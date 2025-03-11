@@ -4,7 +4,11 @@ from abllib import log
 
 # TODO:
 # add abllib.type module with verify function, which compares a value to a given type hint
-# prefix internal modules with underscore
+# add lock for threaded Storage access
+# add Overview section in README
+# add tests for fs module
+# prefix internal module files with underscore
+# add async module
 
 if __name__ == "__main__":
     log.initialize()

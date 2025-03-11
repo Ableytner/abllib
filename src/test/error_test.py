@@ -1,6 +1,6 @@
 """Module containing tests for the different types of errors"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
+# pylint: disable=missing-class-docstring
 
 import pytest
 
