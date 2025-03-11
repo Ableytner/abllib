@@ -14,21 +14,7 @@ sys.path.append(f"{pathlib.Path(__file__).parent.parent}")
 sys.path.append(f"{pathlib.Path(__file__).parent}")
 # pylint: enable=wrong-import-position, wrong-import-order
 
-import shutil
-
-from abllib import log, fs
-
 os.environ["DEBUG"] = "True"
 
-# setup testing dirs
-STORAGE_DIR = fs.absolute(os.path.dirname(__file__), "..", "..", "test_run")
-shutil.rmtree(STORAGE_DIR, ignore_errors=True)
-os.makedirs(STORAGE_DIR, exist_ok=True)
-
-#  setup logging
-log.initialize(log.LogLevel.DEBUG)
-log.add_console_handler()
-log.add_file_handler(os.path.join(STORAGE_DIR, "test.log"))
-
 # pylint: disable-next=unused-import
-from .fixtures import setup_storages
+from .fixtures import setup, clean_after_function

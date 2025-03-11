@@ -1,5 +1,6 @@
 """A module containing the logger creation"""
 
+import atexit
 import logging
 import sys
 from enum import Enum
@@ -90,6 +91,8 @@ def add_file_handler(filename: str = "latest.log"):
     file_handler.setFormatter(_get_formatter())
 
     get_logger().addHandler(file_handler)
+
+    atexit.register(file_handler.close)
 
 def get_logger(name: str = None) -> logging.Logger:
     """
