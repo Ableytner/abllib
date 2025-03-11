@@ -5,6 +5,8 @@ import sys
 from enum import Enum
 from typing import Literal
 
+from . import fs
+
 DEFAULT_LOG_LEVEL = logging.INFO
 
 class LogLevel(Enum):
@@ -78,7 +80,7 @@ def add_file_handler(filename: str = "latest.log"):
 
     logging.disable(0)
 
-    file_handler = logging.FileHandler(filename=filename, encoding="utf-8", mode="w")
+    file_handler = logging.FileHandler(filename=fs.absolute(filename), encoding="utf-8", mode="w")
 
     file_handler.setLevel(DEFAULT_LOG_LEVEL)
 
