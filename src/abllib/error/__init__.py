@@ -6,6 +6,7 @@ from .general import DirNotFoundError, \
                      MissingInheritanceError, \
                      NoneTypeError, \
                      SingletonInstantiationError
+from .wrong_type_error import WrongTypeError
 
 __exports__ = [
     CustomException,
@@ -13,5 +14,6 @@ __exports__ = [
     KeyNotFoundError,
     MissingInheritanceError,
     NoneTypeError,
-    SingletonInstantiationError
+    SingletonInstantiationError,
+    WrongTypeError
 ]
