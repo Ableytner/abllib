@@ -5,7 +5,11 @@ import functools
 from ..error import CalledMultipleTimesError
 
 def singleuse(func):
-    """The decorator, which is called at program start"""
+    """
+    Make a function single-use only
+
+    Calling the function twice raises an error.CalledMultipleTimesError
+    """
 
     was_called = [False]
 

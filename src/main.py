@@ -7,6 +7,7 @@ from abllib import log
 # add Overview section in README
 # add tests for fs module
 # prefix internal module files with an underscore
+# add async module
 
 if __name__ == "__main__":
     log.initialize()
