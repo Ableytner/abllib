@@ -9,14 +9,15 @@ import json
 import os
 from typing import Any
 
-from . import fs
+from . import fs, wrapper
 from .error import general
 
+@wrapper.singleuse
 def initialize(filename: str = "storage.json"):
     """
     Initialize the storage module.
 
-    This disables all log output. Use the add_<*>_handler functions to complete the setup.
+    This function can only be called once.
     """
 
     full_filepath = fs.absolute(filename)
