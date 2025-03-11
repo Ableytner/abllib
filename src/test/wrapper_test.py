@@ -1,7 +1,5 @@
 """Module containing tests for the abllib.wrapper module"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
-
 import pytest
 
 from abllib import error, wrapper
