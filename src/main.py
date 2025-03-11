@@ -5,6 +5,8 @@ from abllib import log
 # TODO:
 # add lock for threaded Storage access
 # add Overview section in README
+# add tests for fs module
+# prefix internal module files with an underscore
 
 if __name__ == "__main__":
     log.initialize()

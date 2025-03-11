@@ -2,6 +2,11 @@
 
 from .custom_exception import CustomException
 
+class CalledMultipleTimesError(CustomException):
+    """Exception raised when a single-use function is called twice"""
+
+    default_message = "The function can only be called once"
+
 class DirNotFoundError(CustomException):
     """Exception raised when an expected directory doesn't exist"""
 
