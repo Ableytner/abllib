@@ -56,3 +56,9 @@ def test_match():
     assert fuzzy.match(target, inputs, 1) == (None, 0.0)
     assert fuzzy.match(target, inputs, 2) == (None, 0.0)
     assert fuzzy.match(target, inputs, 3) == (2, 0.3)
+
+def test_similarity():
+    similarity = fuzzy._similarity.similarity
+    assert callable(similarity)
+
+    assert similarity("fox", "the quick fox", 5) == (1 / 3)
