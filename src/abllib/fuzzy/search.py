@@ -1,6 +1,6 @@
-"""A module containing the fuzzy search functionality"""
+"""A module containing the fuzzy search function"""
 
-from ._matches import matches
+from ._similarity import similarity
 
 def search(target: str | tuple[str], candidates: list[str] | list[tuple[str]], threshold: int = 5) -> list[int]:
     """
@@ -34,10 +34,10 @@ def search(target: str | tuple[str], candidates: list[str] | list[tuple[str]], t
 
 def _matches_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> bool:
     if isinstance(candidate, str):
-        return matches(target, candidate, threshold)
+        return similarity(target, candidate, threshold)
 
     for inner_candidate in candidate:
-        if matches(target, inner_candidate, threshold):
+        if similarity(target, inner_candidate, threshold):
             return True
 
     return False
