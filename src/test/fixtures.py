@@ -40,6 +40,8 @@ def setup():
 
     yield None
 
+    storage.PersistentStorage.save_to_disk()
+
 @pytest.fixture(scope="function", autouse=True)
 def clean_after_function():
     """Clean up the PersistentStorage, VolatileStorage and StorageView, removing all keys"""

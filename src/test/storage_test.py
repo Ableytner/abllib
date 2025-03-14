@@ -320,7 +320,7 @@ def test_basestorage_contains_item_valuetype():
     assert BaseStorage.contains_item("key1", ["1", 2, None])
 
 def test_volatilestorage_inheritance():
-    """Ensure the VolatileStorages' inheritance from _BaseStorage"""
+    """Ensure the VolatileStorage inherits from _BaseStorage"""
 
     VolatileStorage = storage._volatile_storage._VolatileStorage()
     VolatileStorage._store = {}
@@ -353,7 +353,7 @@ def test_volatilestorage_valuetype():
     assert VolatileStorage["key1"] == custom_item
 
 def test_persistentstorage_inheritance():
-    """Ensure the PersistentStorages' inheritance from _BaseStorage"""
+    """Ensure the PersistentStorage inherits from _BaseStorage"""
 
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
@@ -571,3 +571,17 @@ def test_storageview_contains_item():
     PersistentStorage["key2.key3.key4.key5.key6.key7"] = "value2"
     assert StorageView.contains_item("key1.key2.key3", "value")
     assert StorageView.contains_item("key2.key3.key4.key5.key6.key7", "value2")
+
+def test_internalstorage_inheritance():
+    """Ensure the InternalStorage inherits from _BaseStorage"""
+
+    assert isinstance(storage._internal_storage.InternalStorage, storage._base_storage._BaseStorage)
+
+def test_internalstorage_instantiation():
+    """Ensure that InternalStorage behaves like a singleton"""
+
+    with pytest.raises(error.SingletonInstantiationError):
+        storage._internal_storage._InternalStorage()._init()
+
+    with pytest.raises(error.SingletonInstantiationError):
+        storage._internal_storage._InternalStorage()._init()
