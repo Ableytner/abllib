@@ -10,7 +10,7 @@ jobs:
   pylint:
     strategy:
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.13"]
     uses: ./.github/workflows/define-pylint.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -20,7 +20,7 @@ jobs:
     needs: pylint
     strategy:
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "3.13"]
     if: |
       (github.event_name == 'push' && github.ref_name == 'master') ||
       (github.event_name == 'pull_request' && github.base_ref == 'master') ||
