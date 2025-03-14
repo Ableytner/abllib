@@ -16,7 +16,7 @@ def levenshtein_distance(token1: str, token2: str) -> int:
     if not isinstance(token2, str):
         raise WrongTypeError((token2, str))
 
-    distances = numpy.zeros((len(token1) + 1, len(token2) + 1))
+    distances = numpy.zeros((len(token1) + 1, len(token2) + 1), dtype=int)
 
     for t1 in range(len(token1) + 1):
         distances[t1][0] = t1
@@ -44,4 +44,6 @@ def levenshtein_distance(token1: str, token2: str) -> int:
                 else:
                     distances[t1][t2] = c + 1
 
-    return distances[len(token1)][len(token2)]
+    final_dist = distances[len(token1)][len(token2)]
+    # cast np.int64 to int
+    return final_dist.item()
