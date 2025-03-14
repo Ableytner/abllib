@@ -7,7 +7,6 @@ from abllib import log
 # add lock for threaded Storage access
 # add Overview section in README
 # add tests for fs module
-# prefix internal module files with underscore
 # add async module
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ import os
 from typing import Any
 
 from . import fs, wrapper
-from .error import general
+from .error import _general
 
 @wrapper.singleuse
 def initialize(filename: str = "storage.json"):
@@ -22,7 +22,7 @@ def initialize(filename: str = "storage.json"):
 
     full_filepath = fs.absolute(filename)
     if not os.path.isdir(os.path.dirname(full_filepath)):
-        raise general.DirNotFoundError()
+        raise _general.DirNotFoundError()
 
     VolatileStorage._init()
     PersistentStorage._init()
@@ -89,7 +89,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
+                raise _general.KeyNotFoundError(f"Key '{key}' not found in storage")
             return self._store[key]
 
         parts = key.split(".")
@@ -101,7 +101,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
+                raise _general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
             # if it isn't the last part
             if c < len(parts) - 1:
                 curr_dict = curr_dict[part]
@@ -143,7 +143,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
+                raise _general.KeyNotFoundError(f"Key '{key}' not found in storage")
             del self._store[key]
             return
 
@@ -156,7 +156,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
+                raise _general.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
 
             # if it isn't the last part
             if c < len(parts) - 1:
@@ -182,7 +182,7 @@ class _VolatileStorage(_BaseStorage):
 
     def _init(self):
         if _VolatileStorage._instance is not None:
-            raise general.SingletonInstantiationError()
+            raise _general.SingletonInstantiationError()
 
         _VolatileStorage._store = self._store = {}
         _VolatileStorage._instance = self
@@ -195,7 +195,7 @@ class _PersistentStorage(_BaseStorage):
 
     def _init(self):
         if _PersistentStorage._instance is not None:
-            raise general.SingletonInstantiationError()
+            raise _general.SingletonInstantiationError()
 
         _PersistentStorage._store = self._store = {}
         _PersistentStorage._instance = self
@@ -210,7 +210,7 @@ class _PersistentStorage(_BaseStorage):
         """Load the data from the storage file"""
 
         if "storage_file" not in StorageView:
-            raise general.KeyNotFoundError()
+            raise _general.KeyNotFoundError()
 
         path = StorageView["storage_file"]
         if not os.path.isfile(path):
@@ -223,7 +223,7 @@ class _PersistentStorage(_BaseStorage):
         """Save the data to the storage file"""
 
         if "storage_file" not in StorageView:
-            raise general.KeyNotFoundError()
+            raise _general.KeyNotFoundError()
 
         path = StorageView["storage_file"]
         if len(self._store) == 0 and os.path.isfile(path):
@@ -241,7 +241,7 @@ class _StorageView():
     def _init(self, storages: list[_BaseStorage]):
         for storage in storages:
             if not isinstance(storage, _BaseStorage):
-                raise general.MissingInheritanceError(f"Storage {type(storage)} does not inherit from _BaseStorage")
+                raise _general.MissingInheritanceError(f"Storage {type(storage)} does not inherit from _BaseStorage")
             self._storages.append(storage)
 
     _storages = []
@@ -272,7 +272,7 @@ class _StorageView():
         for storage in self._storages:
             if key in storage:
                 return storage[key]
-        raise general.KeyNotFoundError(f"Key '{key}' not found in storage")
+        raise _general.KeyNotFoundError(f"Key '{key}' not found in storage")
 
     def __contains__(self, key: str) -> bool:
         return self.contains(key)

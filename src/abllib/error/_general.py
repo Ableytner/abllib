@@ -1,6 +1,6 @@
 """Module containing custom exceptions for general usage"""
 
-from .custom_exception import CustomException
+from ._custom_exception import CustomException
 
 class CalledMultipleTimesError(CustomException):
     """Exception raised when a single-use function is called twice"""

@@ -1,6 +1,6 @@
 """Module containing the WrongTypeError class"""
 
-from .custom_exception import CustomException
+from ._custom_exception import CustomException
 
 class WrongTypeError(CustomException):
     """Exception raised when a value wasn't of an expected type"""
