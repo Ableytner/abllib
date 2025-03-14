@@ -3,10 +3,11 @@
 from abllib import log
 
 # TODO:
+# add abllib.type module with verify function, which compares a value to a given type hint
 # add lock for threaded Storage access
 # add Overview section in README
 # add tests for fs module
-# prefix internal module files with an underscore
+# prefix internal module files with underscore
 # add async module
 
 if __name__ == "__main__":

@@ -36,3 +36,27 @@ def test_customexception_default_message():
         assert str(e) == "This exception is used in tests"
     else:
         pytest.fail("Expected an exception")
+
+def test_wrongtypeerror():
+    """Ensure that WrongTypeError handles optional args correctly"""
+
+    try:
+        raise error.WrongTypeError()
+    except error.WrongTypeError as e:
+        assert str(e) == "Received an unexpected type"
+    else:
+        pytest.fail("Expected an exception")
+
+    try:
+        raise error.WrongTypeError("This is a custom error message")
+    except error.WrongTypeError as e:
+        assert str(e) == "This is a custom error message"
+    else:
+        pytest.fail("Expected an exception")
+
+    try:
+        raise error.WrongTypeError(("20", int))
+    except error.WrongTypeError as e:
+        assert str(e) == "Expected <class 'int'>, received <class 'str'>"
+    else:
+        pytest.fail("Expected an exception")
