@@ -4,7 +4,6 @@ import numpy
 
 from ..alg import levenshtein_distance
 
-# pylint: disable-next=too-many-return-statements
 def similarity(target: str, candidate: str, threshold: int) -> float:
     """
     Checks how closely two strings match.

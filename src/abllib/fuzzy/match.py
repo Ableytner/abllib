@@ -14,14 +14,10 @@ def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], th
     After that, it chooses the closest-matching candidate
 
     Returns a tuple[int, float], which represents the index in candidates that matched the closest,
-    and the similarity, which is between 0.0 and 1.0
+    and the similarity score, which is between 0.0 and 1.0
     """
 
     # TODO: type checking with abllib.type module
-
-    # if there are no candidates, the search fails
-    if len(candidates) == 0:
-        raise ValueError("Expected at least one candidate")
 
     if threshold < 0:
         raise ValueError("Threshold needs to be >= 0")

@@ -1,6 +1,6 @@
 """Module containing tests for the abllib.fuzzy module"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
+# pylint: disable=protected-access
 
 from abllib import fuzzy
 

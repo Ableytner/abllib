@@ -18,10 +18,6 @@ def search(target: str | tuple[str], candidates: list[str] | list[tuple[str]], t
 
     # TODO: type checking with abllib.type module
 
-    # if there are no candidates, the search fails
-    if len(candidates) == 0:
-        return []
-
     if threshold < 0:
         raise ValueError("Threshold needs to be >= 0")
 

@@ -1,7 +1,5 @@
 """Module containing tests for the abllib.alg module"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
-
 import pytest
 
 from abllib import alg, error
