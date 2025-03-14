@@ -1,17 +1,17 @@
 """A module containing the fuzzy search function"""
 
 from ._similarity import similarity
+from .. import log
+
+logger = log.get_logger("test")
 
 def search(target: str | tuple[str], candidates: list[str] | list[tuple[str]], threshold: int = 5) -> list[int]:
     """
     Search for candidates matching the target. Applies fuzzy logic when comparing.
 
-    The behaviour for different thresholds is as follows:
-    * 0: the candidate has to contain the exact target
-    * 1: subwords in candidate or target need to match exactly
-    * 2: the candidate adn target need to have an edit distance of at most >threshold<
-    * 3: the subwords need to have an edit distance of at most min( >threshold< or len(>subword<) // 3 )
-    * 4+: unchanged behaviour
+    In order to successfully find a candidate, at least one of two conditions need to be true:
+    * the edit distance (levenshtein distance) needs to be smaller than >threshold<
+    * a single word (>target< split at ' ') needs to have an edit distance smaller than len(>word<) / 3
 
     Returns a list of ints which represent the indexes in candidates that matched the search.
     """
@@ -33,11 +33,16 @@ def search(target: str | tuple[str], candidates: list[str] | list[tuple[str]], t
     return matched_candidates
 
 def _matches_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> bool:
+    score = _calculate_single_candidate(target, candidate, threshold)
+    return score > 0.0
+
+def _calculate_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> bool:
     if isinstance(candidate, str):
         return similarity(target, candidate, threshold)
 
+    max_score = 0.0
     for inner_candidate in candidate:
-        if similarity(target, inner_candidate, threshold):
-            return True
+        score = similarity(target, inner_candidate, threshold)
+        max_score = max(score, max_score)
 
-    return False
+    return max_score

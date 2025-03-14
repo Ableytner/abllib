@@ -1,7 +1,5 @@
 """A module containing the fuzzy match function"""
 
-import numpy
-
 from ._similarity import similarity
 
 def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], threshold: int = 5) \
@@ -9,12 +7,11 @@ def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], th
     """
     Match the target to the most similar candidate. Applies fuzzy logic when comparing.
 
-    The behaviour for different thresholds is as follows:
-    * 0: the candidate has to contain the exact target
-    * 1: subwords in candidate or target need to match exactly
-    * 2: the candidate adn target need to have an edit distance of at most >threshold<
-    * 3: the subwords need to have an edit distance of at most min( >threshold< or len(>subword<) // 3 )
-    * 4+: unchanged behaviour
+    In order to successfully match a candidate, at least one of two conditions need to be true:
+    * the edit distance (levenshtein distance) needs to be smaller than >threshold<
+    * a single word (>target< split at ' ') needs to have an edit distance smaller than len(>word<) / 3
+
+    After that, it chooses the closest-matching candidate
 
     Returns a tuple[int, float], which represents the index in candidates that matched the closest,
     and the similarity, which is between 0.0 and 1.0
@@ -33,7 +30,7 @@ def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], th
     for i, candidate in enumerate(candidates):
         curr_similarity = _matches_single_candidate(target, candidate, threshold)
         if curr_similarity > closest_match[1]:
-            closest_match = (i, numpy.round(curr_similarity, 2))
+            closest_match = (i, curr_similarity)
 
     return closest_match
 
