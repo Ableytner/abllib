@@ -1,0 +1,56 @@
+"""Module containing the _PersistentStorage class"""
+
+# pylint: disable=protected-access
+
+import json
+import os
+from typing import Any
+
+from ._base_storage import _BaseStorage
+from ._volatile_storage import _VolatileStorage
+from .. import error
+
+class _PersistentStorage(_BaseStorage):
+    """Storage that is persistent across restarts"""
+
+    def __init__(self) -> None:
+        pass
+
+    def _init(self):
+        if _PersistentStorage._instance is not None:
+            raise error.SingletonInstantiationError()
+
+        _PersistentStorage._store = self._store = {}
+        _PersistentStorage._instance = self
+
+    def __setitem__(self, key: str, item: Any) -> None:
+        if not isinstance(item, (str, int, list, dict)):
+            raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
+
+        return super().__setitem__(key, item)
+
+    def load_from_disk(self) -> None:
+        """Load the data from the storage file"""
+
+        if "storage_file" not in _VolatileStorage._instance:
+            raise error.KeyNotFoundError()
+
+        path = _VolatileStorage._instance["storage_file"]
+        if not os.path.isfile(path):
+            return
+
+        with open(path, "r", encoding="utf8") as f:
+            self._store = json.load(f)
+
+    def save_to_disk(self) -> None:
+        """Save the data to the storage file"""
+
+        if "storage_file" not in _VolatileStorage._instance:
+            raise error.KeyNotFoundError()
+
+        path = _VolatileStorage._instance["storage_file"]
+        if len(self._store) == 0 and os.path.isfile(path):
+            return
+
+        with open(path, "w", encoding="utf8") as f:
+            json.dump(self._store, f)
