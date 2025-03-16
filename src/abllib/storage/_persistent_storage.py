@@ -8,7 +8,7 @@ from typing import Any
 
 from .._storage._base_storage import _BaseStorage
 from ._volatile_storage import _VolatileStorage
-from .. import error
+from .. import error, wrapper
 
 class _PersistentStorage(_BaseStorage):
     """Storage that is persistent across restarts"""
@@ -23,11 +23,34 @@ class _PersistentStorage(_BaseStorage):
         _PersistentStorage._store = self._store = {}
         _PersistentStorage._instance = self
 
+    _LOCK_NAME = "_PersistentStorage"
+
+    @wrapper.ReadLock(_LOCK_NAME)
+    def contains_item(self, key, item):
+        return super().contains_item(key, item)
+
+    @wrapper.ReadLock(_LOCK_NAME)
+    def contains(self, key):
+        return super().contains(key)
+
+    @wrapper.ReadLock(_LOCK_NAME)
+    def __getitem__(self, key):
+        return super().__getitem__(key)
+
+    @wrapper.WriteLock(_LOCK_NAME)
     def __setitem__(self, key: str, item: Any) -> None:
         if not isinstance(item, (str, int, list, dict)):
             raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
+
+    @wrapper.WriteLock(_LOCK_NAME)
+    def __delitem__(self, key):
+        return super().__delitem__(key)
+
+    @wrapper.ReadLock(_LOCK_NAME)
+    def __contains__(self, key):
+        return super().__contains__(key)
 
     def load_from_disk(self) -> None:
         """Load the data from the storage file"""

@@ -69,6 +69,25 @@ def test_locks_combined():
         func()
     wrapper.WriteLock("test3").release()
 
+def test_locks_underscore_names():
+    """Ensure that lock names can start with an underscore"""
+
+    lock = wrapper.ReadLock("_test1")
+    assert not lock.locked()
+    lock.acquire()
+    assert lock.locked()
+    lock.release()
+    assert not lock.locked()
+    assert not wrapper.ReadLock("_test1").locked()
+
+    lock = wrapper.WriteLock("_test2")
+    assert not lock.locked()
+    lock.acquire()
+    assert lock.locked()
+    lock.release()
+    assert not lock.locked()
+    assert not wrapper.WriteLock("_test2").locked()
+
 def test_single_use():
     """Ensure that singleuse cannot be initialized"""
 

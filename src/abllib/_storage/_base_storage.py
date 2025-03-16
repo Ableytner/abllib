@@ -13,9 +13,11 @@ class _BaseStorage():
     _instance: _BaseStorage = None
     _store: dict[str, Any] = None
 
+    _LOCK_NAME = "_BaseStorage"
+
     def contains_item(self, key: str, item: Any) -> bool:
         """
-        Checks whether a key within the storage contains an item
+        Checks whether a key within the storage equals an item
         If 'key' contains a '.', also checks if all sub-dicts exist
         """
 

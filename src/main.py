@@ -4,10 +4,9 @@ from abllib import log
 
 # TODO:
 # add abllib.type module with verify function, which compares a value to a given type hint
-# add wrapper.ReadLock and wrapper.WriteLock classes
-# use lock for threaded Storage access
 # add Overview section in README
 # add tests for fs module
+# add tests for threaded storage access
 # add async module
 
 if __name__ == "__main__":
