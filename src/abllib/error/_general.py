@@ -12,10 +12,20 @@ class DirNotFoundError(CustomException):
 
     default_message = "The expected directory doesn't exist"
 
+class InternalFunctionUsedError(CustomException):
+    """Exception raised when an internal function was used by an external project"""
+
+    default_message = "This function is only for library-internal use"
+
 class KeyNotFoundError(CustomException):
     """Exception raised when the key is not found in the storage"""
 
     default_message = "The requested key could not be found"
+
+class LockAcquisitionTimeoutError(CustomException):
+    """Exception raised when the acquisitgion of a lock timed out"""
+
+    default_message = "The requested lock could not be acquired in time"
 
 class MissingInheritanceError(CustomException):
     """Exception raised when a class is expected to inherit from another class"""

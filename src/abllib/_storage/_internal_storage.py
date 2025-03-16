@@ -1,5 +1,7 @@
 """Module containing the _InternalStorage class"""
 
+from typing import Any
+
 from ._base_storage import _BaseStorage
 from .. import error
 
@@ -16,6 +18,8 @@ class _InternalStorage(_BaseStorage):
         _InternalStorage._store = self._store = {}
         _InternalStorage._instance = self
 
-InternalStorage = _InternalStorage()
-# pylint: disable-next=protected-access
-InternalStorage._init()
+    def __setitem__(self, key: str, item: Any) -> None:
+        if not key.startswith("_"):
+            raise error.InternalFunctionUsedError("Please use storage.VolatileStorage instead")
+
+        return super().__setitem__(key, item)

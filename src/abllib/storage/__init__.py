@@ -5,7 +5,7 @@
 import atexit
 import os
 
-from . import _base_storage, _internal_storage
+from .._storage import _base_storage, _internal_storage
 from ._persistent_storage import _PersistentStorage
 from ._volatile_storage import _VolatileStorage
 from ._storage_view import _StorageView

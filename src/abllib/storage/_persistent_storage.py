@@ -6,7 +6,7 @@ import json
 import os
 from typing import Any
 
-from ._base_storage import _BaseStorage
+from .._storage._base_storage import _BaseStorage
 from ._volatile_storage import _VolatileStorage
 from .. import error
 

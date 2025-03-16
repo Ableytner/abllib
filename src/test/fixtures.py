@@ -10,7 +10,7 @@ import shutil
 
 import pytest
 
-from abllib import fs, log, storage
+from abllib import fs, log, storage, _storage
 
 logger = log.get_logger("test")
 
@@ -48,9 +48,12 @@ def clean_after_function():
 
     yield None
 
-    for key in storage.PersistentStorage._store.keys():
+    for key in list(storage.PersistentStorage._store.keys()):
         del storage.PersistentStorage[key]
 
-    for key in storage.VolatileStorage._store.keys():
+    for key in list(storage.VolatileStorage._store.keys()):
         if key not in ["storage_file"]:
             del storage.VolatileStorage[key]
+
+    for key in list(_storage.InternalStorage._store.keys()):
+        del _storage.InternalStorage[key]

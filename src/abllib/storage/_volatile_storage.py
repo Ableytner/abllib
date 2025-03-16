@@ -1,6 +1,6 @@
 """Module containing the _VolatileStorage class"""
 
-from ._base_storage import _BaseStorage
+from .._storage._base_storage import _BaseStorage
 from .. import error
 
 class _VolatileStorage(_BaseStorage):
