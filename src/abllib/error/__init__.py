@@ -3,7 +3,9 @@
 from ._custom_exception import CustomException
 from ._general import CalledMultipleTimesError, \
                      DirNotFoundError, \
+                     InternalFunctionUsedError, \
                      KeyNotFoundError, \
+                     LockAcquisitionTimeoutError, \
                      MissingInheritanceError, \
                      NoneTypeError, \
                      SingletonInstantiationError
@@ -13,7 +15,9 @@ __exports__ = [
     CustomException,
     CalledMultipleTimesError,
     DirNotFoundError,
+    InternalFunctionUsedError,
     KeyNotFoundError,
+    LockAcquisitionTimeoutError,
     MissingInheritanceError,
     NoneTypeError,
     SingletonInstantiationError,
