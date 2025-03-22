@@ -4,6 +4,7 @@ from abllib import log
 
 # TODO:
 # add abllib.type module with verify function, which compares a value to a given type hint
+# add a wrapper function for ensuring function parameter types, which uses abllib.type
 # add Overview section in README
 # add tests for fs module
 # add tests for threaded storage access
@@ -17,6 +18,9 @@ from abllib import log
 # also check content type of lists / dicts on PersistentStorage __setitem__
 # add tests for fuzzy for a tuple of targets
 # rename ThreadWithReturnValue to WorkerThread and add documentation / tests
+# add async module with function to run async func in sync context
+# show all commits in release body.md
+# add instructions for versioning in requirements.txt
 
 if __name__ == "__main__":
     log.initialize()

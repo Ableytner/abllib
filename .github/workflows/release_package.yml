@@ -98,9 +98,15 @@ jobs:
         pattern: build-dist-*
         path: dist/
         merge-multiple: true
-    - name: Add body.md
+    - name: Create body.md
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         touch body.md
+        gh api --method POST -H "Accept: application/vnd.github+json" \
+          "/repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+          -f tag_name="${{ env.CURRENT_VERSION }}" \
+          --jq ".body" > "body.md"
     - name: Echo tag
       run: |
         echo "${{ needs.tag.outputs.release-tag }}"
