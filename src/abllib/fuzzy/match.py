@@ -2,7 +2,7 @@
 
 from ._similarity import similarity
 
-def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], threshold: int = 5) \
+def match(target: str | tuple[str], candidates: list[str | tuple[str]], threshold: int = 5) \
     -> tuple[int | None, float]:
     """
     Match the target to the most similar candidate. Applies fuzzy logic when comparing.
@@ -30,7 +30,7 @@ def match(target: str | tuple[str], candidates: list[str] | list[tuple[str]], th
 
     return closest_match
 
-def _matches_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> float:
+def _matches_single_candidate(target: str | tuple[str], candidate: str | tuple[str], threshold: int) -> float:
     if isinstance(candidate, str):
         return similarity(target, candidate, threshold)
 

@@ -9,7 +9,13 @@ class _VolatileStorage(_BaseStorage):
     def __init__(self) -> None:
         pass
 
-    def _init(self):
+    def initialize(self):
+        """
+        Initialize only the VolatileStorage. Useful if you don't need the PersistentStorage.
+
+        Not needed if you already called abllib.storage.initialize().
+        """
+
         if _VolatileStorage._instance is not None:
             raise error.SingletonInstantiationError()
 

@@ -23,9 +23,9 @@ def initialize(filename: str = "storage.json"):
     if not os.path.isdir(os.path.dirname(full_filepath)):
         raise error.DirNotFoundError()
 
-    VolatileStorage._init()
+    VolatileStorage.initialize()
     PersistentStorage._init()
-    StorageView._init([VolatileStorage, PersistentStorage])
+    StorageView._init([PersistentStorage, VolatileStorage])
 
     VolatileStorage["storage_file"] = full_filepath
 

@@ -22,10 +22,10 @@ def test_volatilestorage_instantiation():
     """Ensure that VolatileStorage behaves like a singleton"""
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._volatile_storage._VolatileStorage()._init()
+        storage._volatile_storage._VolatileStorage().initialize()
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._volatile_storage._VolatileStorage()._init()
+        storage._volatile_storage._VolatileStorage().initialize()
 
 def test_volatilestorage_valuetype():
     """Test the VolatileStorages' support for different value types"""
