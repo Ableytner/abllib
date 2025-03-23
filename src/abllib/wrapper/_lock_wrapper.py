@@ -78,7 +78,7 @@ class _BaseLock():
                     raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
 
         try:
-            self._lock.acquire()
+            self._lock.acquire(timeout=self._timeout)
         finally:
             self._allocation_lock.release()
 

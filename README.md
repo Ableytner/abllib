@@ -58,6 +58,7 @@ This module also contains some premade general-purpose error types, which all de
 * LockAcquisitionTimeoutError
 * MissingInheritanceError
 * NoneTypeError
+* NotInitializedError
 * SingletonInstantiationError
 
 ### File system (`abllib.fs`)
@@ -162,6 +163,7 @@ Items can be deleted in multiple ways:
 >> del VolatileStorage["toplevelkey"]["sublevelkey"]
 >> del VolatileStorage["toplevelkey.sublevelkey"] # TODO: implement properly
 ```
+Trying to delete non-existent items raises an KeyNotFoundError.
 
 #### PersistentStorage (`abllib.PersistentStorage`)
 
@@ -219,6 +221,7 @@ Items can be deleted in multiple ways:
 >> del PersistentStorage["toplevelkey"]["sublevelkey"]
 >> del PersistentStorage["toplevelkey.sublevelkey"] # TODO: implement properly
 ```
+Trying to delete non-existent items raises an KeyNotFoundError.
 
 All storage data can be loaded and saved manually:
 ```py
@@ -284,6 +287,33 @@ There are two wrappers which help with multi-threading:
 * ReadLock
 * WriteLock
 
+WriteLock works like a normal [lock](https://en.wikipedia.org/wiki/Lock_(computer_science)), while ReadLock works like a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
+
+These wrappers can be given a name, and all wrappers with the same name function as the same instance.
+If a wrapper is applied to a function, the lock is acquired before the function executes and is released afterwards.
+
+Example usage:
+```py
+>> from time import sleep
+>> from abllib.wrapper import WriteLock
+>> @WriteLock("MyLockName")
+.. def do_something(duration):
+..     sleep(duration)
+>> do_something(10) #this holds the "MyLockName"-lock for ten seconds
+```
+
+The default behaviour is to wait until the lock can be acquired. If a timeout parameter is provided, an LockAcquisitionTimeoutError is raised if the acquisition takes too long. The timeout is specified in seconds.
+```py
+>> from time import sleep
+>> from abllib.wrapper import WriteLock
+>> @WriteLock("MyLockName", timeout=5)
+.. def do_something(duration):
+..     sleep(duration)
+>> WriteLock("MyLockName").acquire() #this holds the "MyLockName"-lock
+>> do_something(10)
+
+```
+
 TODO: usage and global nature of lcok names
 
 TODO: log module
@@ -302,3 +332,11 @@ pip install git+https://github.com/Ableytner/abllib.git
 ```
 
 This will automatically install all other dependencies.
+
+### requirements.txt
+
+If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
+```text
+abllib @ git+https://github.com/Ableytner/abllib@1.1.0
+```
+whereas 1.1.0 is the version that you want to install.

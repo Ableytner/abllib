@@ -17,6 +17,12 @@ def test_readlock():
     assert func1()
     assert not wrapper.ReadLock("test1").locked()
 
+    wrapper.ReadLock("test1").acquire()
+    assert wrapper.ReadLock("test1").locked()
+    assert wrapper.ReadLock("test1", timeout=1).locked()
+    with pytest.raises(error.LockAcquisitionTimeoutError):
+        wrapper.ReadLock("test1", timeout=1).acquire()
+
 def test_writelock():
     """Ensure that WriteLock works as expected"""
 
