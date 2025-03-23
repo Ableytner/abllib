@@ -8,6 +8,7 @@ from ._general import CalledMultipleTimesError, \
                      LockAcquisitionTimeoutError, \
                      MissingInheritanceError, \
                      NoneTypeError, \
+                     NotInitializedError, \
                      SingletonInstantiationError
 from ._wrong_type_error import WrongTypeError
 
@@ -20,6 +21,7 @@ __exports__ = [
     LockAcquisitionTimeoutError,
     MissingInheritanceError,
     NoneTypeError,
+    NotInitializedError,
     SingletonInstantiationError,
     WrongTypeError
 ]

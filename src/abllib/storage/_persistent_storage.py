@@ -77,3 +77,11 @@ class _PersistentStorage(_BaseStorage):
 
         with open(path, "w", encoding="utf8") as f:
             json.dump(self._store, f)
+
+    def _ensure_initialized(self):
+        try:
+            super()._ensure_initialized()
+        except error.NotInitializedError as exc:
+            raise error.NotInitializedError("PersistentStorage is not yet initialized, "
+                                            + "are you sure you called storage.initialize()?") \
+                                           from exc

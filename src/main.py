@@ -13,14 +13,12 @@ from abllib import log
 # change fuzzy module to return a search object containing all relevant data
 # document and understand levenshtein_distance
 # add pop() function to storages
-# fix del VolatileStorage["key1.key2"] only deleting key2 (also check that key1 is empty before deleting)
-# add NotInitializedError and use it in storages
 # also check content type of lists / dicts on PersistentStorage __setitem__
 # add tests for fuzzy for a tuple of targets
 # rename ThreadWithReturnValue to WorkerThread and add documentation / tests
 # add async module with function to run async func in sync context
-# show all commits in release body.md
-# add instructions for versioning in requirements.txt
+# add function to _BaseStorage which deletes item and all empty subdicts (del VolatileStorage["key1.key2"])
+# change wrapper.AnyLock timeout to be milliseconds as an integer
 
 if __name__ == "__main__":
     log.initialize()

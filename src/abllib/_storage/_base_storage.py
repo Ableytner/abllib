@@ -21,6 +21,8 @@ class _BaseStorage():
         If 'key' contains a '.', also checks if all sub-dicts exist
         """
 
+        self._ensure_initialized()
+
         if not isinstance(key, str):
             raise TypeError()
 
@@ -35,6 +37,8 @@ class _BaseStorage():
         """
         # allows checking multi-layer dicts with the following format:
         # util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
+
+        self._ensure_initialized()
 
         if not isinstance(key, str):
             raise TypeError()
@@ -56,6 +60,8 @@ class _BaseStorage():
     def __getitem__(self, key: str) -> Any:
         # allows getting multi-layer dicts with the following format:
         # util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
+
+        self._ensure_initialized()
 
         if not isinstance(key, str):
             raise TypeError()
@@ -85,6 +91,8 @@ class _BaseStorage():
         # allows adding multi-layer dicts with the following format:
         # util.PersistentStorage["some_module.some_subdict.another_subdict.key"] = "value"
 
+        self._ensure_initialized()
+
         if not isinstance(key, str):
             raise TypeError()
 
@@ -111,6 +119,8 @@ class _BaseStorage():
         # or
         # del util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
 
+        self._ensure_initialized()
+
         if not isinstance(key, str):
             raise TypeError()
 
@@ -133,12 +143,9 @@ class _BaseStorage():
 
             # if it isn't the last part
             if c < len(parts) - 1:
-                # if a directory is missing, the key definitly doesn't exist
-                if part not in curr_dict:
-                    return
                 curr_dict = curr_dict[part]
             else:
-                # delete the actual key
+                # delete the actual item
                 del curr_dict[part]
 
     def __contains__(self, key: str) -> bool:
@@ -146,3 +153,7 @@ class _BaseStorage():
 
     def __str__(self) -> str:
         return str(self._store)
+
+    def _ensure_initialized(self) -> None:
+        if self._store is None:
+            raise error.NotInitializedError()

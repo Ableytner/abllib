@@ -47,3 +47,12 @@ class _VolatileStorage(_BaseStorage):
     @wrapper.ReadLock(_LOCK_NAME)
     def __contains__(self, key):
         return super().__contains__(key)
+
+    def _ensure_initialized(self):
+        try:
+            super()._ensure_initialized()
+        except error.NotInitializedError as exc:
+            raise error.NotInitializedError("VolatileStorage is not yet initialized, "
+                                            + "are you sure you called storage.initialize() "
+                                            + "or VolatileStorage.initialize()?") \
+                                           from exc

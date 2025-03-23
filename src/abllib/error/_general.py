@@ -35,7 +35,12 @@ class MissingInheritanceError(CustomException):
 class NoneTypeError(CustomException):
     """Exception raised when a value is unexpectedly None"""
 
-    default_message = "DIdn't expect None as a value here"
+    default_message = "Didn't expect None as a value here"
+
+class NotInitializedError(CustomException):
+    """Exception raised when an instance is used before it is correctly initialized"""
+
+    default_message = "The instance is not yet initialized correctly"
 
 class SingletonInstantiationError(CustomException):
     """Exception raised when a singleton class is instantiated twice"""
