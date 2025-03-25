@@ -94,7 +94,7 @@ class _BaseLock():
     _other_lock: CustomLock | CustomSemaphore
 
     def acquire(self) -> None:
-        """Acquire the lock, optionally throwing an LockAcquisitionTimeoutError"""
+        """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
 
         if self._timeout is None:
             self._allocation_lock.acquire()
@@ -102,25 +102,33 @@ class _BaseLock():
             # ensure the other lock is not held
             while self._other_lock.locked():
                 sleep(0.025)
-        else:
-            initial_time = datetime.now()
-            if not self._allocation_lock.acquire(timeout=self._timeout):
+
+            if not self._lock.acquire():
+                self._allocation_lock.release()
                 raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
 
-            elapsed_time = (datetime.now() - initial_time).total_seconds() * 1000
-
-            # ensure the writelock is not held
-            while self._other_lock.locked() > 0:
-                sleep(0.025)
-                elapsed_time += 0.025
-                if elapsed_time > self._timeout:
-                    self._allocation_lock.release()
-                    raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
-
-        try:
-            self._lock.acquire(timeout=self._timeout)
-        finally:
             self._allocation_lock.release()
+            return
+
+        initial_time = datetime.now()
+        if not self._allocation_lock.acquire(timeout=self._timeout):
+            raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+
+        elapsed_time = (datetime.now() - initial_time).total_seconds()
+
+        # ensure the other lock is not held
+        while self._other_lock.locked():
+            sleep(0.025)
+            elapsed_time += 0.025
+            if elapsed_time > self._timeout:
+                self._allocation_lock.release()
+                raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+
+        if not self._lock.acquire(timeout=self._timeout - elapsed_time):
+            self._allocation_lock.release()
+            raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+
+        self._allocation_lock.release()
 
     def __enter__(self):
         self.acquire()
@@ -182,5 +190,4 @@ class WriteLock(_BaseLock):
         super().__init__(lock_name, timeout)
 
         self._lock = InternalStorage[f"_locks.{lock_name}.w"]
-        print(self._lock)
         self._other_lock = InternalStorage[f"_locks.{lock_name}.r"]

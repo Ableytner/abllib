@@ -2,9 +2,12 @@
 
 # pylint: disable=function-redefined
 
+from datetime import datetime
+
 import pytest
 
 from abllib import error, wrapper
+from abllib.thread import TestableThread
 
 def test_readlock():
     """Ensure that ReadLock works as expected"""
@@ -17,11 +20,9 @@ def test_readlock():
     assert func1()
     assert not wrapper.ReadLock("test1").locked()
 
-    wrapper.ReadLock("test1").acquire()
-    assert wrapper.ReadLock("test1").locked()
-    assert wrapper.ReadLock("test1", timeout=1).locked()
-    with pytest.raises(error.LockAcquisitionTimeoutError):
-        wrapper.ReadLock("test1", timeout=1).acquire()
+    wrapper.ReadLock("test2").acquire()
+    assert wrapper.ReadLock("test2").locked()
+    assert wrapper.ReadLock("test2", timeout=1).locked()
 
 def test_writelock():
     """Ensure that WriteLock works as expected"""
@@ -33,6 +34,26 @@ def test_writelock():
     assert not wrapper.WriteLock("test1").locked()
     assert func1()
     assert not wrapper.WriteLock("test1").locked()
+
+    print(wrapper.ReadLock("test2").locked())
+    wrapper.ReadLock("test2").acquire()
+    assert wrapper.ReadLock("test2").locked()
+    assert wrapper.ReadLock("test2", timeout=1).locked()
+
+    wrapper.WriteLock("test3").acquire()
+    def func2():
+        assert wrapper.WriteLock("test3").locked()
+        wrapper.WriteLock("test3", timeout=4).acquire()
+
+    start_time = datetime.now()
+    thread = TestableThread(target=func2)
+    thread.start()
+    with pytest.raises(error.LockAcquisitionTimeoutError):
+        thread.join()
+
+    duration = datetime.now() - start_time
+    assert duration.total_seconds() > 3.5
+    assert duration.total_seconds() < 4.5
 
 def test_locks_combined():
     """Ensure that ReadLock and WriteLock work together correctly"""
