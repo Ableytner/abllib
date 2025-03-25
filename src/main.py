@@ -15,10 +15,8 @@ from abllib import log
 # add pop() function to storages
 # also check content type of lists / dicts on PersistentStorage __setitem__
 # add tests for fuzzy for a tuple of targets
-# rename ThreadWithReturnValue to WorkerThread and add documentation / tests
 # add async module with function to run async func in sync context
 # add function to _BaseStorage which deletes item and all empty subdicts (del VolatileStorage["key1.key2"])
-# change wrapper.AnyLock timeout to be milliseconds as an integer
 
 if __name__ == "__main__":
     log.initialize()

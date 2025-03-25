@@ -1,15 +1,22 @@
-"""Code from https://gist.github.com/sbrugman/59b3535ebcd5aa0e2598293cfa58b6ab"""
+"""A module containing the TestableThread class"""
 
-import threading
+from threading import Thread
 
-class TestableThread(threading.Thread):
+# original code from https://gist.github.com/sbrugman/59b3535ebcd5aa0e2598293cfa58b6ab
+class TestableThread(Thread):
     """Wrapper around `threading.Thread` that propagates exceptions."""
 
-    def __init__(self, *args, daemon: bool = True, **kwargs):
-        super().__init__(*args, **kwargs, daemon=daemon)
+    def __init__(self,
+                 group=None,
+                 target=None,
+                 name=None,
+                 args=(),
+                 kwargs=None,
+                 daemon=None):
+        super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.exc = None
 
-    def run(self):
+    def run(self) -> None:
         """Invoke the callable object."""
 
         try:
@@ -18,7 +25,7 @@ class TestableThread(threading.Thread):
         except BaseException as e:
             self.exc = e
 
-    def join(self, timeout=None):
+    def join(self, timeout: float | None = None) -> None:
         """Wait until the thread terminates."""
 
         super().join(timeout)
