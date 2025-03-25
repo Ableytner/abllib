@@ -8,6 +8,46 @@ from threading import BoundedSemaphore, Lock
 from .. import error
 from .._storage import InternalStorage
 
+class CustomLock():
+    """
+    Extends threading.Lock by allowing timeout to be None.
+
+    threading.Lock cannot be subclassed as it is a factory function.
+    https://stackoverflow.com/a/6781398
+    """
+
+    def __init__(self):
+        self._lock = Lock()
+
+    def acquire(self, blocking: bool = True, timeout: float | None = None):
+        """
+        Try to acquire the Lock.
+        
+        If blocking is disabled, it doesn't wait for the timeout.
+
+        If timeout is set, wait for n seconds before returning.
+        """
+
+        return self._lock.acquire(blocking, -1 if timeout is None else timeout)
+
+    def locked(self) -> bool:
+        """Returns whether the Lock is held"""
+
+        return self._lock.locked()
+
+    def release(self):
+        """Release the lock if it is currently held"""
+
+        self._lock.release()
+
+    def __enter__(self):
+        self.acquire()
+
+    # keep signature the same as threading.Lock
+    # pylint: disable-next=redefined-builtin
+    def __exit__(self, type, value, traceback):
+        self.release()
+
 # we can't use the default threading.Semaphore
 # because we need a semaphore with value == 0 if it isn't held
 # This is the opposite behaviour of threading.Semaphore
@@ -39,19 +79,19 @@ class _BaseLock():
             raise error.WrongTypeError((timeout, (float, None)))
 
         if "_locks" not in InternalStorage:
-            InternalStorage["_locks.global"] = Lock()
+            InternalStorage["_locks.global"] = CustomLock()
 
         if f"_locks.{lock_name}" not in InternalStorage:
             InternalStorage[f"_locks.{lock_name}.r"] = CustomSemaphore(999)
-            InternalStorage[f"_locks.{lock_name}.w"] = Lock()
+            InternalStorage[f"_locks.{lock_name}.w"] = CustomLock()
 
         self._timeout = timeout
-        self._allocation_lock: Lock = InternalStorage["_locks.global"]
+        self._allocation_lock: CustomLock = InternalStorage["_locks.global"]
 
     _timeout: float | None
-    _allocation_lock: type[Lock]
-    _lock: CustomSemaphore | type[Lock]
-    _other_lock: CustomSemaphore | type[Lock]
+    _allocation_lock: CustomLock
+    _lock: CustomLock | CustomSemaphore
+    _other_lock: CustomLock | CustomSemaphore
 
     def acquire(self) -> None:
         """Acquire the lock, optionally throwing an LockAcquisitionTimeoutError"""
@@ -142,4 +182,5 @@ class WriteLock(_BaseLock):
         super().__init__(lock_name, timeout)
 
         self._lock = InternalStorage[f"_locks.{lock_name}.w"]
+        print(self._lock)
         self._other_lock = InternalStorage[f"_locks.{lock_name}.r"]
