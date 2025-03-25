@@ -17,27 +17,56 @@ class _BaseStorage():
 
     def contains_item(self, key: str, item: Any) -> bool:
         """
-        Checks whether a key within the storage equals an item
-        If 'key' contains a '.', also checks if all sub-dicts exist
-        """
+        Check whether a key within the storage equals an item.
 
-        self._ensure_initialized()
+        If 'key' contains a '.', also checks if all sub-dicts exist.
+        """
 
         if not isinstance(key, str):
             raise TypeError()
 
-        if not self.contains(key):
+        if not self._contains(key):
             return False
         return item == self[key]
 
     def contains(self, key: str) -> bool:
         """
-        Checks whether a key exists within the storage
-        If 'key' contains a '.', also checks if all sub-dicts exist
-        """
-        # allows checking multi-layer dicts with the following format:
-        # util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
+        Check whether a key exists within the storage.
 
+        If 'key' contains a '.', also checks if all sub-dicts exist.
+        """
+
+        return self._contains(key)
+
+    def pop(self, key: str) -> Any:
+        """
+        Return the value of an key if it exists in the storage.
+        """
+
+        val = self._get(key)
+        self._del(key)
+        return val
+
+    def __getitem__(self, key: str) -> Any:
+        return self._get(key)
+
+    def __setitem__(self, key: str, item: Any) -> None:
+        return self._set(key, item)
+
+    def __delitem__(self, key: str) -> None:
+        return self._del(key)
+
+    def __contains__(self, key: str) -> bool:
+        return self._contains(key)
+
+    def __str__(self) -> str:
+        return str(self._store)
+
+    def _ensure_initialized(self) -> None:
+        if self._store is None:
+            raise error.NotInitializedError()
+
+    def _contains(self, key: str) -> bool:
         self._ensure_initialized()
 
         if not isinstance(key, str):
@@ -57,10 +86,7 @@ class _BaseStorage():
 
         return parts[-1] in curr_dict
 
-    def __getitem__(self, key: str) -> Any:
-        # allows getting multi-layer dicts with the following format:
-        # util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
-
+    def _get(self, key: str) -> Any:
         self._ensure_initialized()
 
         if not isinstance(key, str):
@@ -87,10 +113,7 @@ class _BaseStorage():
 
         return curr_dict[parts[-1]]
 
-    def __setitem__(self, key: str, item: Any) -> None:
-        # allows adding multi-layer dicts with the following format:
-        # util.PersistentStorage["some_module.some_subdict.another_subdict.key"] = "value"
-
+    def _set(self, key: str, item: Any) -> None:
         self._ensure_initialized()
 
         if not isinstance(key, str):
@@ -110,15 +133,10 @@ class _BaseStorage():
                     curr_dict[part] = {}
                 curr_dict = curr_dict[part]
             else:
-                # add the actual value
+                # add the actual item
                 curr_dict[part] = item
 
-    def __delitem__(self, key: str) -> None:
-        # items can be removed using:
-        # del util.PersistentStorage["some_module"]["some_subdict"]["another_subdict"]["key"]
-        # or
-        # del util.PersistentStorage["some_module.some_subdict.another_subdict.key"]
-
+    def _del(self, key: str) -> None:
         self._ensure_initialized()
 
         if not isinstance(key, str):
@@ -147,13 +165,3 @@ class _BaseStorage():
             else:
                 # delete the actual item
                 del curr_dict[part]
-
-    def __contains__(self, key: str) -> bool:
-        return self.contains(key)
-
-    def __str__(self) -> str:
-        return str(self._store)
-
-    def _ensure_initialized(self) -> None:
-        if self._store is None:
-            raise error.NotInitializedError()

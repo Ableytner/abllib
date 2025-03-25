@@ -33,6 +33,10 @@ class _PersistentStorage(_BaseStorage):
     def contains(self, key):
         return super().contains(key)
 
+    @wrapper.WriteLock(_LOCK_NAME)
+    def pop(self, key) -> Any:
+        return super().pop(key)
+
     @wrapper.ReadLock(_LOCK_NAME)
     def __getitem__(self, key):
         return super().__getitem__(key)

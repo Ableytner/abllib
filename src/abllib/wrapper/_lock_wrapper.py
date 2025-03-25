@@ -149,7 +149,6 @@ class _BaseLock():
     def __call__(self, func):
         """Called when instance is used as a decorator"""
 
-        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             """The wrapped function that is called on function execution"""
 
@@ -157,6 +156,9 @@ class _BaseLock():
                 ret = func(*args, **kwargs)
 
             return ret
+
+        # https://stackoverflow.com/a/17705456/15436169
+        functools.update_wrapper(wrapper, func)
 
         return wrapper
 

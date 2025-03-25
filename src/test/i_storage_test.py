@@ -215,6 +215,71 @@ def test_basestorage_delitem_wrong_key():
     with pytest.raises(error.KeyNotFoundError):
         del BaseStorage["key1.key2.key3.key4.key5.key6"]
 
+def test_basestorage_pop():
+    """Test the Storage.pop() method"""
+
+    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage._store = {}
+
+    BaseStorage._store["key1"] = "value"
+    val = BaseStorage.pop("key1")
+    assert val == "value"
+    assert "key1" not in BaseStorage._store
+
+def test_basestorage_pop_multi():
+    """Test the Storage.pop() method with subdicts specified in the key"""
+
+    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage._store = {}
+
+    BaseStorage._store["key1"] = {}
+    BaseStorage._store["key1"]["key2"] = "value2"
+    val = BaseStorage.pop("key1.key2")
+    assert val == "value2"
+    assert isinstance(BaseStorage._store["key1"], dict)
+    assert "key2" not in BaseStorage._store["key1"]
+
+    BaseStorage._store["key1"] = {}
+    BaseStorage._store["key1"]["key2"] = {}
+    BaseStorage._store["key1"]["key2"]["key3"] = {}
+    BaseStorage._store["key1"]["key2"]["key3"]["key4"] = {}
+    BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"] = {}
+    BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]["key6"] = "values"
+    val = BaseStorage.pop("key1.key2.key3.key4.key5.key6")
+    assert val == "values"
+    assert isinstance(BaseStorage._store["key1"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"], dict)
+    assert "key2" not in BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]
+
+def test_basestorage_pop_keytype():
+    """Test the Storage.pop() methods' protection against incorrect key types"""
+
+    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(TypeError):
+        BaseStorage.pop(None)
+    with pytest.raises(TypeError):
+        BaseStorage.pop(10)
+    with pytest.raises(TypeError):
+        BaseStorage.pop(list(("1",)))
+
+def test_basestorage_pop_wrong_key():
+    """Test the Storage.pop() methods' protection against nonexistent keys"""
+
+    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(error.KeyNotFoundError):
+        BaseStorage.pop("key1")
+    with pytest.raises(error.KeyNotFoundError):
+        BaseStorage.pop("key1.key2")
+    with pytest.raises(error.KeyNotFoundError):
+        BaseStorage.pop("key1.key2.key3.key4.key5.key6")
+
 def test_basestorage_contains():
     """Test the Storage.contains() method"""
 

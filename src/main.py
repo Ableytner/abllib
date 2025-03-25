@@ -12,11 +12,11 @@ from abllib import log
 # improve CustomException system by introducing a Msg() class and enabling message substitution
 # change fuzzy module to return a search object containing all relevant data
 # document and understand levenshtein_distance
-# add pop() function to storages
 # also check content type of lists / dicts on PersistentStorage __setitem__
 # add tests for fuzzy for a tuple of targets
 # add async module with function to run async func in sync context
-# add function to _BaseStorage which deletes item and all empty subdicts (del VolatileStorage["key1.key2"])
+# add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2"))
+# document thread module in readme
 
 if __name__ == "__main__":
     log.initialize()
