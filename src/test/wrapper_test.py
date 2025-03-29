@@ -7,7 +7,7 @@ from datetime import datetime
 import pytest
 
 from abllib import error, wrapper
-from abllib.thread import TestableThread
+from abllib.pproc import TestableThread
 
 def test_readlock():
     """Ensure that ReadLock works as expected"""

@@ -273,9 +273,9 @@ True
 True
 ```
 
-### Threading (`abllib.thread`)
+### Parallel processing (`abllib.pproc`)
 
-This module contains multithreading-related functions.
+This module contains parallel processing-related functions, both thread-based and process-based.
 
 ### Function wrappers (`abllib.wrapper`)
 

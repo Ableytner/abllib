@@ -8,7 +8,7 @@ from time import sleep
 
 import pytest
 
-from abllib.thread import TestableThread, WorkerProcess, WorkerThread
+from abllib.pproc import TestableThread, WorkerProcess, WorkerThread
 
 def test_testablethread_inheritance():
     """Ensure that TestableThread inherits from Thread"""

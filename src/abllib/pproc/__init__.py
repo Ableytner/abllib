@@ -1,4 +1,4 @@
-"""A module containing threading-related functionality"""
+"""A module containing parallel processing-related functionality, both with threads and processes"""
 
 from ._testable_thread import TestableThread
 from ._worker_process import WorkerProcess
