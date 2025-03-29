@@ -12,6 +12,11 @@ class DirNotFoundError(CustomException):
 
     default_message = "The expected directory doesn't exist"
 
+class InternalCalculationError(CustomException):
+    """Exception raised when an internal calculation resulted in an unacceptable value"""
+
+    default_message = "Internal calculation resulted in an unacceptable value"
+
 class InternalFunctionUsedError(CustomException):
     """Exception raised when an internal function was used by an external project"""
 
