@@ -32,10 +32,10 @@ class WorkerProcess(Process):
             try:
                 target = dill.loads(self._target)
                 return_value = target(*self._args, **self._kwargs)
-                self._return_queue.put(dill.dumps(return_value))
+                self._return_queue.put(return_value)
             # pylint: disable-next=broad-exception-caught
             except BaseException as e:
-                self._return_queue.put(dill.dumps(e))
+                self._return_queue.put(e)
                 self._failed_queue.put(None)
 
         else:
@@ -47,11 +47,7 @@ class WorkerProcess(Process):
         super().join(timeout)
 
         return_value = self._return_queue.get(block=False)
-
-        if return_value is None:
-            return return_value
-
-        return dill.loads(return_value)
+        return return_value
 
     def failed(self) -> bool:
         """Return whether target execution raised an exception."""
