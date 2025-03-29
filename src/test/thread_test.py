@@ -2,12 +2,13 @@
 
 # pylint: disable=missing-class-docstring
 
+from multiprocessing import Process
 from threading import Thread
 from time import sleep
 
 import pytest
 
-from abllib.thread import TestableThread, WorkerThread
+from abllib.thread import TestableThread, WorkerProcess, WorkerThread
 
 def test_testablethread_inheritance():
     """Ensure that TestableThread inherits from Thread"""
@@ -108,5 +109,48 @@ def test_workerthread_exception_return():
 
     r = t.join()
     assert t.failed()
+    assert isinstance(r, BaseException)
+    assert str(r) == "This is a test message"
+
+def test_workerprocess_inheritance():
+    """Ensure that WorkerProcess inherits from Process"""
+
+    assert issubclass(WorkerProcess, Process)
+
+def test_workerprocess_value_return():
+    """Ensure that WorkerProcess returns values"""
+
+    def func1():
+        return None
+
+    p = WorkerProcess(target=func1)
+    p.start()
+
+    r = p.join()
+    assert r is None
+
+    def func2():
+        return ("val1", 25)
+
+    p = WorkerProcess(target=func2)
+    p.start()
+
+    r = p.join()
+    assert not p.failed()
+    assert r == ("val1", 25)
+    assert isinstance(r[0], str)
+    assert isinstance(r[1], int)
+
+def test_workerprocess_exception_return():
+    """Ensure that WorkerProcess returns exceptions"""
+
+    def func1():
+        raise AssertionError("This is a test message")
+
+    p = WorkerProcess(target=func1)
+    p.start()
+
+    r = p.join()
+    assert p.failed()
     assert isinstance(r, BaseException)
     assert str(r) == "This is a test message"

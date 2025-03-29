@@ -5,7 +5,7 @@ from typing import Any
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
-    """Wrapper around `threading.Thread` that propagates exceptions."""
+    """Wrapper around `threading.Thread` that stores and returns resulting values and exceptions."""
 
     def __init__(self,
                  group=None,
