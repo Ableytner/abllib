@@ -5,7 +5,6 @@ from abllib import log
 # TODO:
 # add abllib.type module with verify function, which compares a value to a given type hint
 # add a wrapper function for ensuring function parameter types, which uses abllib.type
-# add Overview section in README
 # add tests for fs module
 # add tests for threaded storage access
 # add async module
@@ -16,7 +15,6 @@ from abllib import log
 # add tests for fuzzy for a tuple of targets
 # add async module with function to run async func in sync context
 # add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2"))
-# document pproc module in README
 
 if __name__ == "__main__":
     log.initialize()

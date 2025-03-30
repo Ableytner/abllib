@@ -17,6 +17,9 @@ class TestableThread(WorkerThread):
                  daemon=None):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
 
+    # disable pytest discovery
+    __test__ = False
+
     def join(self, timeout: float | None = None) -> Any:
         """Wait until the thread terminates and raise any caught exceptions."""
 

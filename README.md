@@ -8,7 +8,19 @@ Supports Python versions 3.10 - 3.13.
 
 This project contains many submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
 
-### Algorithms (`abllib.alg`)
+The following submodules are available:
+1. Algorithms (`abllib.alg`)
+2. Errors (`abllib.error`)
+3. File system (`abllib.fs`)
+4. Fuzzy matching (`abllib.fuzzy`)
+5. Logging (`abllib.log`)
+6. Storages (`abllib.storage`)
+7. Parallel processing (`abllib.pproc`)
+8. Function wrappers (`abllib.wrapper`)
+
+## Submodules
+
+### 1. Algorithms (`abllib.alg`)
 
 This module contains general-purpose algorithms.
 
@@ -27,7 +39,7 @@ Example usage:
 5
 ```
 
-### Errors (`abllib.error`)
+### 2. Errors (`abllib.error`)
 
 This module contains a custom exception system, which supports default messages for different errors.
 
@@ -61,7 +73,7 @@ This module also contains some premade general-purpose error types, which all de
 * NotInitializedError
 * SingletonInstantiationError
 
-### File system (`abllib.fs`)
+### 3. File system (`abllib.fs`)
 
 This module contains various file system-related functionality. All provided functions are tested and work correctly on Linux and Windows systems.
 
@@ -80,11 +92,15 @@ Example usage:
 'C:\\MyUser\\Some\\image.png'
 ```
 
-### Fuzzy search and match (`abllib.fuzzy`)
+### 4. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
-### Storages (`abllib.storage`)
+### 5. Logging (`abllib.log`)
+
+This module contains functions to easily log to the console or specified log files.
+
+### 6. Storages (`abllib.storage`)
 
 This module contains multiple storage types. All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern). Multithreaded access is also allowed.
 
@@ -273,11 +289,101 @@ True
 True
 ```
 
-### Parallel processing (`abllib.pproc`)
+### 7. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functions, both thread-based and process-based.
 
-### Function wrappers (`abllib.wrapper`)
+#### Thread vs Process
+
+The parallel processing module contains both thread-based and process-based methods with overlapping functionality.
+To help decide which solution to use, the key differences are outlined below:
+
+You should use thread-based processing if the parallel task:
+* is not CPU-intensive
+* modifies local variables
+* doesn't need to be killable
+
+Alternatively, you should use process-based processing if the parallel task:
+* is doing a lot of CPU-intensive calculations
+* needs to be killable
+
+The reason as to why CPU-intensive tasks in python should run in different processes is due to the [GIL](https://realpython.com/python-gil/) (global interpreter lock), which is further explained in the linked article. This effectively makes multiple threads run as fast as one thread if the bottleneck is the CPU.
+
+Another thing to consider is that thread-based processing is simple and straightforward, whereas process-based functionality can be pretty complex.
+Arguments passed to another process, for example, lose the reference to its original object.
+This means that passing a list to a different process and adding an element in that process doesn't add anything in the original list.
+
+TLDR: If you are not sure what to use, use thread-based processing.
+
+#### WorkerThread (`abllib.pproc.WorkerThread`)
+
+This class represents a seperate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occured exception is returned.
+
+Example usage:
+
+```py
+>> from abllib.pproc import WorkerThread
+>> def the_answer():
+..     return 42
+>> wt = WorkerThread(target=the_answer)
+>> wt.start()
+>> wt.join()
+42
+```
+
+Exceptions that occur are caught and returned. The exception object can be reraised manually.
+```py
+>> from abllib.pproc import WorkerThread
+>> def not_the_answer():
+..     raise ValueError("The answer is not yet calculated!")
+>> wt = WorkerThread(target=not_the_answer)
+>> wt.start()
+>> wt.join()
+ValueError('The answer is not yet calculated!')
+>> isinstance(wt.join(), BaseException)
+True
+>> raise wt.join()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+```
+Note that the caught exception is NOT automatically reraised. If this behaviour is desired, take a look at `abllib.pproc.TestableThread`.
+
+#### TestableThread (`abllib.pproc.TestableThread`)
+
+This class represents a seperate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occured exception is returned.
+
+Example usage:
+
+```py
+>> from abllib.pproc import TestableThread
+>> def the_answer():
+..     return 42
+>> tt = TestableThread(target=the_answer)
+>> tt.start()
+>> tt.join()
+42
+```
+
+Exceptions that occur are caught during function execution and automatically reraised when calling .join(),
+as if they occured in the main thread.
+```py
+>> from abllib.pproc import TestableThread
+>> def not_the_answer():
+..     raise ValueError("The answer is not yet calculated!")
+>> tt = TestableThread(target=not_the_answer)
+>> tt.start()
+>> tt.join()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+```
+
+
+
+### 8. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/) for functions.
 
@@ -314,9 +420,7 @@ The default behaviour is to wait until the lock can be acquired. If a timeout pa
 
 ```
 
-TODO: usage and global nature of lcok names
-
-TODO: log module
+TODO: usage and global nature of lock names
 
 ## Installation
 

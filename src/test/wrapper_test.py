@@ -35,7 +35,6 @@ def test_writelock():
     assert func1()
     assert not wrapper.WriteLock("test1").locked()
 
-    print(wrapper.ReadLock("test2").locked())
     wrapper.ReadLock("test2").acquire()
     assert wrapper.ReadLock("test2").locked()
     assert wrapper.ReadLock("test2", timeout=1).locked()
