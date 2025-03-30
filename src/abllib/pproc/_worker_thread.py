@@ -5,7 +5,7 @@ from typing import Any
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
-    """Wrapper around `threading.Thread` that stores and returns resulting values and exceptions."""
+    """Wrapper around `threading.Thread` that stores and returns resulting values and exceptions on join."""
 
     def __init__(self,
                  group=None,
@@ -29,7 +29,7 @@ class WorkerThread(Thread):
                 self._return = e
 
     def join(self, timeout: float | None = None) -> Any | BaseException:
-        """Wait until the thread terminates."""
+        """Wait until the thread terminates and return any stored values."""
 
         super().join(timeout)
 

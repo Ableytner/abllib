@@ -16,7 +16,7 @@ from abllib import log
 # add tests for fuzzy for a tuple of targets
 # add async module with function to run async func in sync context
 # add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2"))
-# document thread module in readme
+# document pproc module in README
 
 if __name__ == "__main__":
     log.initialize()
