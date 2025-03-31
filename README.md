@@ -291,7 +291,7 @@ True
 
 ### 7. Parallel processing (`abllib.pproc`)
 
-This module contains parallel processing-related functions, both thread-based and process-based.
+This module contains parallel processing-related functionality, both thread-based and process-based.
 
 #### Thread vs Process
 
@@ -304,7 +304,7 @@ You should use thread-based processing if the parallel task:
 * doesn't need to be killable
 
 Alternatively, you should use process-based processing if the parallel task:
-* is doing a lot of CPU-intensive calculations
+* is doing CPU-intensive calculations
 * needs to be killable
 
 The reason as to why CPU-intensive tasks in python should run in different processes is due to the [GIL](https://realpython.com/python-gil/) (global interpreter lock), which is further explained in the linked article. This effectively makes multiple threads run as fast as one thread if the bottleneck is the CPU.

@@ -3,18 +3,23 @@
 from abllib import log
 
 # TODO:
+# UP NEXT
+# add tests for fs module
+# improve CustomException system by introducing a .with static method which does message substitution
+# change fuzzy module to return a search object containing all relevant data
+# add tests for fuzzy for a tuple of targets or remove tuple as valid target
+
+# IMPORTANT BUT ANNOYING
+# add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2")),
+# or make it the default behaviour
+# add tests for threaded storage access
+# document and understand levenshtein_distance
+
+# TAKE A LOT OF TIME / NEEDED IN THE FUTURE
 # add abllib.type module with verify function, which compares a value to a given type hint
 # add a wrapper function for ensuring function parameter types, which uses abllib.type
-# add tests for fs module
-# add tests for threaded storage access
-# add async module
-# improve CustomException system by introducing a Msg() class and enabling message substitution
-# change fuzzy module to return a search object containing all relevant data
-# document and understand levenshtein_distance
 # also check content type of lists / dicts on PersistentStorage __setitem__
-# add tests for fuzzy for a tuple of targets
 # add async module with function to run async func in sync context
-# add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2"))
 
 if __name__ == "__main__":
     log.initialize()
