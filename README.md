@@ -455,6 +455,6 @@ This will automatically install all other dependencies.
 
 If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
 ```text
-abllib @ git+https://github.com/Ableytner/abllib@1.1.0
+abllib @ git+https://github.com/Ableytner/abllib@1.2.0
 ```
-whereas 1.1.0 is the version that you want to install.
+whereas 1.2.0 is the version that you want to install.
