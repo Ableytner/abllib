@@ -28,10 +28,13 @@ class WorkerThread(Thread):
             except BaseException as e:
                 self._return = e
 
-    def join(self, timeout: float | None = None) -> Any | BaseException:
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException:
         """Wait until the thread terminates and return any stored values."""
 
         super().join(timeout)
+
+        if reraise and isinstance(self._return, BaseException):
+            raise self._return
 
         return self._return
 

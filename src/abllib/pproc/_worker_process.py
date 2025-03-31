@@ -41,12 +41,19 @@ class WorkerProcess(Process):
         else:
             self._return_queue.put(None)
 
-    def join(self, timeout: float | None = None) -> Any | BaseException:
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException:
         """Wait until the child process terminates."""
 
         super().join(timeout)
 
         return_value = self._return_queue.get(block=False)
+
+        # put return_value back to allow multiple .join() calls
+        self._return_queue.put(return_value)
+
+        if reraise and isinstance(return_value, BaseException):
+            raise return_value
+
         return return_value
 
     def failed(self) -> bool:

@@ -7,7 +7,7 @@ from datetime import datetime
 import pytest
 
 from abllib import error, wrapper
-from abllib.pproc import TestableThread
+from abllib.pproc import WorkerThread
 
 def test_readlock():
     """Ensure that ReadLock works as expected"""
@@ -45,10 +45,10 @@ def test_writelock():
         wrapper.WriteLock("test3", timeout=4).acquire()
 
     start_time = datetime.now()
-    thread = TestableThread(target=func2)
+    thread = WorkerThread(target=func2)
     thread.start()
     with pytest.raises(error.LockAcquisitionTimeoutError):
-        thread.join()
+        thread.join(reraise=True)
 
     duration = datetime.now() - start_time
     assert duration.total_seconds() > 3.5

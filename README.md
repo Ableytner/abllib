@@ -333,6 +333,8 @@ Example usage:
 ```
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
+
+Optionally, if reraise is provided, any caught excpetion will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerThread
 >> def not_the_answer():
@@ -347,35 +349,7 @@ True
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ValueError: The answer is not yet calculated!
-```
-Note that the caught exception is NOT automatically reraised. If this behaviour is desired, take a look at `abllib.pproc.TestableThread`.
-
-#### TestableThread (`abllib.pproc.TestableThread`)
-
-This class represents a seperate thread that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
-
-Example usage:
-
-```py
->> from abllib.pproc import TestableThread
->> def the_answer():
-..     return 42
->> tt = TestableThread(target=the_answer)
->> tt.start()
->> tt.join()
-42
-```
-
-Exceptions that occur are caught during function execution and automatically reraised when calling .join(),
-as if they occured in the main thread.
-```py
->> from abllib.pproc import TestableThread
->> def not_the_answer():
-..     raise ValueError("The answer is not yet calculated!")
->> tt = TestableThread(target=not_the_answer)
->> tt.start()
->> tt.join()
+>> wt.join(reraise=True)
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ValueError: The answer is not yet calculated!
