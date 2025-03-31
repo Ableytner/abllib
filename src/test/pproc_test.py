@@ -32,6 +32,9 @@ def test_workerthread_func_execution():
 
     if c >= 10:
         pytest.fail("thread did not complete in time")
+
+    assert not t.is_alive()
+
     assert out[0]
 
 def test_workerthread_value_return():
@@ -45,6 +48,8 @@ def test_workerthread_value_return():
 
     r = t.join()
     assert r is None
+    r = t.join(reraise=True)
+    assert r is None
 
     def func2():
         return ("val1", 25)
@@ -53,12 +58,14 @@ def test_workerthread_value_return():
     t.start()
 
     r = t.join()
+    assert not t.is_alive()
     assert not t.failed()
     assert r == ("val1", 25)
     assert isinstance(r[0], str)
     assert isinstance(r[1], int)
 
     r = t.join(reraise=True)
+    assert not t.is_alive()
     assert not t.failed()
     assert r == ("val1", 25)
     assert isinstance(r[0], str)
@@ -110,6 +117,8 @@ def test_workerprocess_value_return():
     p.start()
 
     r = p.join()
+    assert r is None
+    r = p.join(reraise=True)
     assert r is None
 
     def func2():

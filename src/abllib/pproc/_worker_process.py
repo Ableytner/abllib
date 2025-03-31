@@ -3,9 +3,12 @@
 # pylint: disable=dangerous-default-value
 
 from multiprocessing import Process, Queue
+from time import sleep
 from typing import Any
 
 import dill
+
+from abllib.log import get_logger
 
 class WorkerProcess(Process):
     """Wrapper around `multiprocessing.Process` that stores and returns resulting values and exceptions."""
@@ -50,6 +53,20 @@ class WorkerProcess(Process):
 
         # put return_value back to allow multiple .join() calls
         self._return_queue.put(return_value)
+
+        # wait until the value is actually in the queue again
+        # https://stackoverflow.com/a/63355643/15436169
+        c = 0
+        while self._return_queue.empty():
+            c += 1
+
+            sleep(0.001 * c)
+
+            if c == 10:
+                # after testing, sleeping for 1 ms takes ~1.9 ms real-time
+                # so the overhead of time.sleep is ~0.9 ms
+                get_logger("abllib").debug(f"queue.put not complete after ~{sum(range(c + 1)) + (0.9 * c)} ms")
+                break
 
         if reraise and isinstance(return_value, BaseException):
             raise return_value
