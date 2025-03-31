@@ -319,6 +319,7 @@ TLDR: If you are not sure what to use, use thread-based processing.
 
 This class represents a seperate thread that runs a given function until completion.
 If .join() is called, the functions return value or any occured exception is returned.
+If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
 
@@ -355,7 +356,46 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
+#### WorkerProcess (`abllib.pproc.WorkerProcess`)
 
+This class represents a seperate process that runs a given function until completion.
+If .join() is called, the functions return value or any occured exception is returned.
+If .join() is called with reraise=True, any caught exception will be reraised.
+
+Example usage:
+
+```py
+>> from abllib.pproc import WorkerProcess
+>> def the_answer():
+..     return 42
+>> wp = WorkerProcess(target=the_answer)
+>> wp.start()
+>> wp.join()
+42
+```
+
+Exceptions that occur are caught and returned. The exception object can be reraised manually.
+
+Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+```py
+>> from abllib.pproc import WorkerProcess
+>> def not_the_answer():
+..     raise ValueError("The answer is not yet calculated!")
+>> wp = WorkerProcess(target=not_the_answer)
+>> wp.start()
+>> wp.join()
+ValueError('The answer is not yet calculated!')
+>> isinstance(wp.join(), BaseException)
+True
+>> raise wp.join()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+>> wp.join(reraise=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+```
 
 ### 8. Function wrappers (`abllib.wrapper`)
 
