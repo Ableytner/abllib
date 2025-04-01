@@ -13,6 +13,7 @@ from abllib import log
 # or make it the default behaviour
 # add tests for threaded storage access
 # document and understand levenshtein_distance
+# make output of pylint test humanly readable
 
 # TAKE A LOT OF TIME / NEEDED IN THE FUTURE
 # add abllib.type module with verify function, which compares a value to a given type hint
