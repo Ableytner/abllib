@@ -4,7 +4,6 @@ from abllib import log
 
 # TODO:
 # UP NEXT
-# add tests for fs module
 # improve CustomException system by introducing a .with static method which does message substitution
 # change fuzzy module to return a search object containing all relevant data
 # add tests for fuzzy for a tuple of targets or remove tuple as valid target
