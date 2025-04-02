@@ -72,3 +72,17 @@ def test_wrongtypeerror():
         assert str(e) == "Expected <class 'int'>, not <class 'str'>"
     else:
         pytest.fail("Expected an exception")
+
+    try:
+        raise error.WrongTypeError.with_values("20", 20)
+    except error.WrongTypeError as e:
+        assert str(e) == "Expected <class 'int'>, not <class 'str'>"
+    else:
+        pytest.fail("Expected an exception")
+
+    try:
+        raise error.WrongTypeError.with_values(str, int)
+    except error.WrongTypeError as e:
+        assert str(e) == "Expected <class 'int'>, not <class 'str'>"
+    else:
+        pytest.fail("Expected an exception")
