@@ -9,47 +9,14 @@ from ..alg import levenshtein_distance
 
 def similarity(target: str, candidate: str, threshold: int) -> float:
     """
-    Checks how closely two strings match.
-    
-    Returns a float value between 0.0 and 1.0 (inclusive).
-    """
-
-    edit_dist = levenshtein_distance(target, candidate)
-    if edit_dist <= threshold:
-        return np.round(1.0 / (edit_dist + 1), 2)
-
-    score = 0.0
-    candidates_len = len(candidate.split(" "))
-    for inner_target in target.split(" "):
-        min_edit_dist = 1000
-
-        for inner_candidate in candidate.split(" "):
-            edit_dist = levenshtein_distance(inner_target, inner_candidate)
-
-            if edit_dist <= min(len(inner_target) // 3, len(inner_candidate) // 3, threshold):
-                min_edit_dist = min(edit_dist, min_edit_dist)
-
-        if min_edit_dist < 1000:
-            score += _calc_score(min_edit_dist) / candidates_len
-
-    if score > 0.0:
-        return np.round(score, 2)
-
-    return 0.0
-
-def _calc_score(edit_dist: int) -> float:
-    return 1 / (0.05 * (edit_dist ** 2) + 1)
-
-def similarity_v2(target: str, candidate: str, threshold: int) -> float:
-    """
     Checks how closely two strings match. (Version 2)
     
     Returns a float value between 0.0 and 1.0 (inclusive), where 1.0 is a perfect match.
     """
 
     score = max(
-        _similarity_v2_simple(target, candidate, threshold),
-        _similarity_v2_with_inner(target, candidate, threshold)
+        _similarity_simple(target, candidate, threshold),
+        _similarity_with_inner(target, candidate, threshold)
     )
     score = np.round(score, 2)
 
@@ -58,7 +25,7 @@ def similarity_v2(target: str, candidate: str, threshold: int) -> float:
 
     return score
 
-def _similarity_v2_simple(target: str, candidate: str, threshold: int) -> float:
+def _similarity_simple(target: str, candidate: str, threshold: int) -> float:
     edit_dist = levenshtein_distance(target, candidate)
 
     if edit_dist > threshold:
@@ -67,7 +34,7 @@ def _similarity_v2_simple(target: str, candidate: str, threshold: int) -> float:
     similar_chars = len(candidate) - edit_dist
     return similar_chars / len(candidate)
 
-def _similarity_v2_with_inner(target: str, candidate: str, threshold: int) -> float:
+def _similarity_with_inner(target: str, candidate: str, threshold: int) -> float:
     scores_array = _construct_scores_array(target, candidate, threshold)
 
     original_size = scores_array.shape[1]

@@ -7,6 +7,7 @@ from abllib import log
 # make output of pylint test humanly readable
 
 # IMPORTANT BUT ANNOYING
+# convert similarity algorithm to be non-recursive / more performant
 # add function to _BaseStorage which deletes item and all empty subdicts (VolatileStorage.purge("key1.key2")),
 # or make it the default behaviour
 # add tests for threaded storage access

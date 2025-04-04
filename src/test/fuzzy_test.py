@@ -145,7 +145,7 @@ def test_closest_matchresult():
 def test_similarity():
     """Ensure that the similarity calculation works as expected"""
 
-    similarity = fuzzy._similarity.similarity_v2
+    similarity = fuzzy._similarity.similarity
     assert callable(similarity)
 
     assert similarity("fox", "the quick fox", 5) == 0.33
