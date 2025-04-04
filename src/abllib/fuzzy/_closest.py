@@ -35,10 +35,10 @@ def _matches_single_candidate(target: str, candidate: str | tuple[str], threshol
         score = similarity(target, candidate, threshold)
         return MatchResult(score, candidate)
 
-    max_result = MatchResult(0.0)
-    for inner_candidate in candidate:
+    result = MatchResult(0.0)
+    for i, inner_candidate in enumerate(candidate):
         score = similarity(target, inner_candidate, threshold)
-        if score > max_result.score:
-            max_result = MatchResult(score, candidate)
+        if score > result.score:
+            result = MatchResult(score, candidate, inner_index=i)
 
-    return max_result
+    return result

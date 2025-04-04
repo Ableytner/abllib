@@ -39,6 +39,41 @@ def test_all_fuzzy():
     assert len(fuzzy.match_all(target, inputs, 1)) == 1
     assert len(fuzzy.match_all(target, inputs, 8)) == 1
 
+def test_all_tuple():
+    """Ensure that fuzzy.match_all handles tuple candidates correctly"""
+
+    target = "diferent"
+    inputs = [
+        ("the slow white rat", "this sentence is diferent"),
+        ("the quick brown fox", "something else"),
+        "different saying with many words"
+    ]
+
+    m = fuzzy.match_all(target, inputs)
+
+    # pylint: disable-next=use-implicit-booleaness-not-comparison
+    assert len(m) == 2
+    assert m[0].value == ("the slow white rat", "this sentence is diferent")
+    assert m[1].value == "different saying with many words"
+
+def test_all_matchresult():
+    """Ensure that fuzzy.match_all asigns correct values to MatchResult"""
+
+    target = "diferent"
+    inputs = [
+        ("the slow white rat", "this sentence is diferent"),
+        ("the quick brown fox", "something else"),
+        "different saying with many words"
+    ]
+
+    m = fuzzy.match_all(target, inputs)
+
+    # pylint: disable-next=use-implicit-booleaness-not-comparison
+    assert len(m) == 2
+    assert m[0].index == 0
+    assert m[0].value == ("the slow white rat", "this sentence is diferent")
+    assert m[0].inner_index == 1
+
 def test_closest():
     """Ensure that fuzzy.match_closest works at all"""
 
@@ -74,6 +109,38 @@ def test_closest_fuzzy():
     assert fuzzy.match_closest(target, inputs, 0).value is None
     assert fuzzy.match_closest(target, inputs, 1).value == "different saying with many words"
     assert fuzzy.match_closest(target, inputs, 8).value == "different saying with many words"
+
+def test_closest_tuple():
+    """Ensure that fuzzy.match_closest handles candidate tuples correctly"""
+
+    target = "diferent"
+    inputs = [
+        ("the slow white rat", "this sentence is diferent"),
+        ("the quick brown fox", "something else"),
+        "different saying with many words"
+    ]
+
+    m = fuzzy.match_closest(target, inputs)
+
+    assert m.value == ("the slow white rat", "this sentence is diferent")
+    assert m.score == 0.25
+
+def test_closest_matchresult():
+    """Ensure that fuzzy.match_closest asigns correct values to MatchResult"""
+
+    target = "diferent"
+    inputs = [
+        ("the slow white rat", "this sentence is diferent"),
+        ("the quick brown fox", "something else"),
+        "different saying with many words"
+    ]
+
+    m = fuzzy.match_closest(target, inputs)
+
+    # pylint: disable-next=use-implicit-booleaness-not-comparison
+    assert m.index == 0
+    assert m.value == ("the slow white rat", "this sentence is diferent")
+    assert m.inner_index == 1
 
 def test_similarity():
     """Ensure that the similarity calculation works as expected"""
