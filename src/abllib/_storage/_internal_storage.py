@@ -13,7 +13,7 @@ class _InternalStorage(_BaseStorage):
 
     def _init(self):
         if _InternalStorage._instance is not None:
-            raise error.SingletonInstantiationError()
+            raise error.SingletonInstantiationError.with_values(_InternalStorage)
 
         _InternalStorage._store = self._store = {}
         _InternalStorage._instance = self
