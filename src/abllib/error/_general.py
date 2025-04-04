@@ -32,7 +32,10 @@ class DirNotFoundError(CustomException):
 class InternalCalculationError(CustomException):
     """Exception raised when an internal calculation resulted in an unacceptable value"""
 
-    default_message = "Internal calculation resulted in an unacceptable value"
+    default_messages = {
+        0: "Internal calculation resulted in an unacceptable value",
+        1: "Internal calculation resulted in an unacceptable value {0}"
+    }
 
 class InternalFunctionUsedError(CustomException):
     """Exception raised when an internal function was used by an external project"""
