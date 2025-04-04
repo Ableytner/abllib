@@ -18,7 +18,7 @@ class _PersistentStorage(_BaseStorage):
 
     def _init(self):
         if _PersistentStorage._instance is not None:
-            raise error.SingletonInstantiationError()
+            raise error.SingletonInstantiationError.with_values(_PersistentStorage)
 
         _PersistentStorage._store = self._store = {}
         _PersistentStorage._instance = self

@@ -1,27 +1,34 @@
-"""A module contraining custom errors"""
+"""A module containing custom errors"""
 
 from ._custom_exception import CustomException
 from ._general import CalledMultipleTimesError, \
-                     DirNotFoundError, \
-                     InternalFunctionUsedError, \
-                     KeyNotFoundError, \
-                     LockAcquisitionTimeoutError, \
-                     MissingInheritanceError, \
-                     NoneTypeError, \
-                     NotInitializedError, \
-                     SingletonInstantiationError
-from ._wrong_type_error import WrongTypeError
+                      DeprecatedError, \
+                      DirNotFoundError, \
+                      InternalFunctionUsedError, \
+                      KeyNotFoundError, \
+                      LockAcquisitionTimeoutError, \
+                      MissingDefaultMessageError, \
+                      MissingInheritanceError, \
+                      NoneTypeError, \
+                      NotInitializedError, \
+                      SingletonInstantiationError, \
+                      WrongTypeError
+
+INTERNAL =  "Internal error, please report it on github!"
 
 __exports__ = [
     CustomException,
     CalledMultipleTimesError,
+    DeprecatedError,
     DirNotFoundError,
     InternalFunctionUsedError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,
+    MissingDefaultMessageError,
     MissingInheritanceError,
     NoneTypeError,
     NotInitializedError,
     SingletonInstantiationError,
-    WrongTypeError
+    WrongTypeError,
+    INTERNAL
 ]

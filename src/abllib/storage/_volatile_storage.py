@@ -17,7 +17,7 @@ class _VolatileStorage(_BaseStorage):
         """
 
         if _VolatileStorage._instance is not None:
-            raise error.SingletonInstantiationError()
+            raise error.SingletonInstantiationError.with_values(_VolatileStorage)
 
         _VolatileStorage._store = self._store = {}
         _VolatileStorage._instance = self
