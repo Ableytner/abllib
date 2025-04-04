@@ -1,6 +1,9 @@
 """The main module, used for dev testing"""
 
+from time import perf_counter_ns
+
 from abllib import log
+from abllib.fuzzy._similarity import similarity
 
 # TODO:
 # UP NEXT
@@ -19,11 +22,41 @@ from abllib import log
 # also check content type of lists / dicts on PersistentStorage.__setitem__
 # add async module with function to run async func in sync context
 
+# old:
+# 2x2   ->     0.94 ms
+# 3x3   ->     1.18 ms
+# 10x10 -> 41563.12 ms
+
+# new v1:
+# 2x2   ->     1.16 ms
+# 3x3   ->     1.45 ms
+# 10x10 -> 27174.57 ms
+
 if __name__ == "__main__":
     log.initialize()
     log.add_console_handler()
-#    log.add_file_handler()
-
     logger = log.get_logger()
-    logger.info("this is a test")
-    logger.warning("this is a warning!")
+
+    start = perf_counter_ns()
+    sim = similarity("sentence sentence", "sentence candidate", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.5
+
+    start = perf_counter_ns()
+    sim = similarity("sentence sentence sentence", "sentence candidate candidate", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.33
+
+    start = perf_counter_ns()
+    sim = similarity("fox", "the quick fox", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.33
+
+    start = perf_counter_ns()
+    sim = similarity("sentence sen ntence", "sentence sentence candidate", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.58 # TODO: fix in V2
+
+    start = perf_counter_ns()
+    sim = similarity("this is a pretty pretty long target", "a long pretty sentence is given as", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.57 # TODO: fix in V2
+
+    start = perf_counter_ns()
+    sim = similarity("this is a pretty pretty long target sentence sentence sentence", "a long pretty sentence is given as a candidate candidate", 5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.5 # TODO: fix in V2
