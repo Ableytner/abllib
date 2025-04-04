@@ -74,9 +74,9 @@ class _BaseLock():
 
         # TODO: add type validation
         if not isinstance(lock_name, str):
-            raise error.WrongTypeError((lock_name, str))
+            raise error.WrongTypeError.with_values(lock_name, str)
         if not isinstance(timeout, float) and timeout is not None:
-            raise error.WrongTypeError((timeout, (float, None)))
+            raise error.WrongTypeError.with_values(timeout, float, None)
 
         if "_locks" not in InternalStorage:
             InternalStorage["_locks.global"] = CustomLock()
@@ -105,14 +105,14 @@ class _BaseLock():
 
             if not self._lock.acquire():
                 self._allocation_lock.release()
-                raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+                raise error.LockAcquisitionTimeoutError(error.INTERNAL)
 
             self._allocation_lock.release()
             return
 
         initial_time = datetime.now()
         if not self._allocation_lock.acquire(timeout=self._timeout):
-            raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+            raise error.LockAcquisitionTimeoutError(error.INTERNAL)
 
         elapsed_time = (datetime.now() - initial_time).total_seconds()
 
@@ -122,11 +122,11 @@ class _BaseLock():
             elapsed_time += 0.025
             if elapsed_time > self._timeout:
                 self._allocation_lock.release()
-                raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+                raise error.LockAcquisitionTimeoutError(error.INTERNAL)
 
         if not self._lock.acquire(timeout=self._timeout - elapsed_time):
             self._allocation_lock.release()
-            raise error.LockAcquisitionTimeoutError("Internal error, please report it on github!")
+            raise error.LockAcquisitionTimeoutError(error.INTERNAL)
 
         self._allocation_lock.release()
 

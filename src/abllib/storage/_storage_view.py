@@ -39,7 +39,7 @@ class _StorageView():
     def _init(self, storages: list[_BaseStorage]):
         for storage in storages:
             if not isinstance(storage, _BaseStorage):
-                raise error.MissingInheritanceError(f"Storage {type(storage)} does not inherit from _BaseStorage")
+                raise error.MissingInheritanceError.with_values(storage, _BaseStorage)
             self._storages.append(storage)
 
     _storages: list[_BaseStorage] = []
@@ -73,7 +73,7 @@ class _StorageView():
         for storage in self._storages:
             if key in storage:
                 return storage[key]
-        raise error.KeyNotFoundError(f"Key '{key}' not found in storage")
+        raise error.KeyNotFoundError.with_values(key)
 
     @_locking
     def __contains__(self, key: str) -> bool:

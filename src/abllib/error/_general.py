@@ -64,9 +64,18 @@ class MissingInheritanceError(CustomException):
 
     default_messages = {
         0: "The class is missing an inheritance from another class",
-        1: "The class is missing an inheritance from '{0}'",
-        2: "The class '{0}' is missing an inheritance from '{1}'"
+        1: "The class is missing an inheritance from {0}",
+        2: "The class {1} is missing an inheritance from {0}"
     }
+
+    @classmethod
+    def with_values(cls, class_name: Any | type, base_class_name: Any | type):
+        if not isinstance(class_name, type):
+            class_name = type(class_name)
+        if not isinstance(base_class_name, type):
+            base_class_name = type(base_class_name)
+
+        return super().with_values(base_class_name, class_name)
 
 class NoneTypeError(CustomException):
     """Exception raised when a value is unexpectedly None"""
@@ -87,22 +96,35 @@ class SingletonInstantiationError(CustomException):
 
     default_messages = {
         0: "The singleton class can only be instantiated once",
-        1: "The singleton class '{0}' can only be instantiated once"
+        1: "The singleton class {0} can only be instantiated once"
     }
+
+    @classmethod
+    def with_values(cls, class_name: Any | type):
+        if not isinstance(class_name, type):
+            class_name = type(class_name)
+
+        return super().with_values(class_name)
 
 class WrongTypeError(CustomException):
     """Exception raised when a value wasn't of an expected type"""
 
     default_messages = {
         0: "Received an unexpected type",
-        2: "Expected {1}, not {0}"
+        2: "Expected {1}, not {0}",
+        3: "Expected {1} or {2}, not {0}",
+        4: "Expected {1}, {2} or {3}, not {0}",
+        5: "Expected {1}, {2}, {3} or {4}, not {0}",
+        6: "Expected {1}, {2}, {3}, {4} or {5}, not {0}",
     }
 
     @classmethod
-    def with_values(cls, received: Any | type, expected: Any | type):
+    def with_values(cls, received: Any | type, *expected: Any | type):
         if not isinstance(received, type):
             received = type(received)
-        if not isinstance(expected, type):
-            expected = type(expected)
+        expected = list(expected)
+        for c, item in enumerate(expected):
+            if not isinstance(item, type):
+                expected[c] = type(item)
 
-        return super().with_values(received, expected)
+        return super().with_values(received, *expected)

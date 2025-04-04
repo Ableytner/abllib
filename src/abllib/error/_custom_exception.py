@@ -6,7 +6,8 @@ class CustomException(Exception):
     """
     The base class for all custom exceptions
     
-    If no arguments are provided at instantiation, the default error message is used
+    If no arguments are provided at instantiation, the default error message is used.
+    Otherwise, the provided argument is used as the error message.
     """
 
     def __init__(self, *args, **kwargs):
@@ -14,6 +15,11 @@ class CustomException(Exception):
             raise NotImplementedError()
 
         if args:
+            if not isinstance(args[0], str):
+                # needs to be imported here to prevent circular import
+                # pylint: disable-next=cyclic-import, import-outside-toplevel
+                from abllib.error._general import WrongTypeError
+                raise WrongTypeError("Expected error message to be of type str")
             super().__init__(*args, **kwargs)
         else:
             # exception was raised without args
@@ -41,7 +47,7 @@ class CustomException(Exception):
             # needs to be imported here to prevent circular import
             # pylint: disable-next=cyclic-import, import-outside-toplevel
             from abllib.error._general import MissingDefaultMessageError
-            raise MissingDefaultMessageError()
+            raise MissingDefaultMessageError.with_values(cls)
 
         for key in cls.default_messages.keys():
             if not isinstance(key, int):

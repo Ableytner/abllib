@@ -94,7 +94,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise error.KeyNotFoundError(f"Key '{key}' not found in storage")
+                raise error.KeyNotFoundError.with_values(key)
             return self._store[key]
 
         parts = key.split(".")
@@ -106,7 +106,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise error.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
+                raise error.KeyNotFoundError.with_values(invalid_key)
             # if it isn't the last part
             if c < len(parts) - 1:
                 curr_dict = curr_dict[part]
@@ -144,7 +144,7 @@ class _BaseStorage():
 
         if "." not in key:
             if key not in self._store:
-                raise error.KeyNotFoundError(f"Key '{key}' not found in storage")
+                raise error.KeyNotFoundError.with_values(key)
             del self._store[key]
             return
 
@@ -157,7 +157,7 @@ class _BaseStorage():
                     invalid_key += f"{item}" if invalid_key == "" else f".{item}"
                     if item == part:
                         break
-                raise error.KeyNotFoundError(f"Key '{invalid_key}' not found in storage")
+                raise error.KeyNotFoundError.with_values(invalid_key)
 
             # if it isn't the last part
             if c < len(parts) - 1:

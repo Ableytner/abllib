@@ -14,6 +14,8 @@ from ._general import CalledMultipleTimesError, \
                       SingletonInstantiationError, \
                       WrongTypeError
 
+INTERNAL =  "Internal error, please report it on github!"
+
 __exports__ = [
     CustomException,
     CalledMultipleTimesError,
@@ -27,5 +29,6 @@ __exports__ = [
     NoneTypeError,
     NotInitializedError,
     SingletonInstantiationError,
-    WrongTypeError
+    WrongTypeError,
+    INTERNAL
 ]
