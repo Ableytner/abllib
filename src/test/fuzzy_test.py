@@ -154,3 +154,22 @@ def test_similarity():
     # only allow for an edit_distance of up to (len(word) // 3) + 1
     assert similarity("hoy", "the quick fox", 5) == 0.11
     assert similarity("hay", "the quick fox", 5) == 0.0
+
+    assert similarity("sentence sentence",
+                      "sentence candidate",
+                      5) == 0.5
+    assert similarity("sentence sentence sentence",
+                      "sentence candidate candidate",
+                      5) == 0.33
+    assert similarity("fox",
+                      "the quick fox",
+                      5) == 0.33
+    assert similarity("sentence sen ntence",
+                      "sentence sentence candidate",
+                      5) == 0.58
+    assert similarity("this is a pretty pretty long target",
+                      "a long pretty sentence is given as",
+                      5) == 0.57
+    assert similarity("this is a pretty pretty long target sentence sentence sentence",
+                     "a long pretty sentence is given as a candidate candidate",
+                     5) == 0.5
