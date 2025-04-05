@@ -37,6 +37,7 @@ def _similarity_simple(target: str, candidate: str, threshold: int) -> float:
 
 def _similarity_with_inner(target: str, candidate: str, threshold: int) -> float:
     scores_array = _construct_scores_array(target, candidate, threshold)
+#    scores_array = _construct_debug_scores_array(3)
 
     original_size = scores_array.shape[1]
 
@@ -48,9 +49,18 @@ def _similarity_with_inner(target: str, candidate: str, threshold: int) -> float
 #                                             + "combinations is too expensive")
         print(f"Calculating {math.factorial(scores_array.shape[0])} combinations")
 
-    score = _alg_v2(scores_array, 0.0) / original_size
+    score = _alg(scores_array, 0.0) / original_size
 
     return score
+
+def _construct_debug_scores_array(size: int) -> np.ndarray:
+    scores_array = np.empty((size, size))
+
+    for row in range(size):
+        for column in range(size):
+            scores_array[row][column] = float(f"{row + 1}.{column + 1}")
+
+    return scores_array
 
 def _construct_scores_array(target: str, candidate: str, threshold: int) -> np.ndarray:
     targets = target.split(" ")
@@ -124,7 +134,7 @@ def _alg(data: np.ndarray, combined_score: float) -> float:
     max_score = 0.0
 
     while row_index < data.shape[0]:
-        reduced_data = _reduce(data, row_index, col_index)
+        reduced_data = _reduce_v2(data, row_index, col_index)
 
         score = _alg(reduced_data, combined_score + data[row_index][col_index])
         max_score = max(score, max_score)
@@ -138,6 +148,23 @@ def _reduce(data: np.ndarray, r_index: int, c_index: int) -> np.ndarray:
     data = np.delete(data, r_index, 0)
     # delete a column
     return np.delete(data, c_index, 1)
+
+def _reduce_v2(data: np.ndarray, r_index: int, c_index: int) -> np.ndarray:
+    new_size = data.shape[0] - 1
+    new_array = np.empty((new_size, new_size))
+
+    row_i = 0
+    col_i = 0
+    for orig_row_i in range(data.shape[0]):
+        if orig_row_i != r_index:
+            for orig_col_i in range(data[orig_row_i].shape[0]):
+                if orig_col_i != c_index:
+                    new_array[row_i][col_i] = data[orig_row_i][orig_col_i]
+                    col_i += 1
+            row_i += 1
+            col_i = 0
+
+    return new_array
 
 def _alg_v2(data: np.ndarray, combined_score: float) -> float:
     """
@@ -189,6 +216,8 @@ def _alg_v2(data: np.ndarray, combined_score: float) -> float:
             shrinking = False
             completed_combinations += 1
             total_score = score.sum() + curr_score
+            if total_score > max_score:
+                print(score, curr_score)
             max_score = max(total_score, max_score)
 
         if shrinking:
@@ -204,6 +233,8 @@ def _alg_v2(data: np.ndarray, combined_score: float) -> float:
 
             # this is the first time this valid_indexes occured
             if curr_index[curr_size] == valid_indexes[curr_size][0]:
+                print(f"setting score {curr_score} from {row_index}.{col_index} with curr_size {curr_size}")
+                print(f"valid_indexes: {valid_indexes[curr_size]} curr_index: {curr_index}")
                 score[curr_size] = curr_score
 
             if valid_indexes_i + 1 < len(valid_indexes[curr_size]):
@@ -215,6 +246,7 @@ def _alg_v2(data: np.ndarray, combined_score: float) -> float:
             curr_size -= 1
         else:
             curr_size += 1
+            # TODO: remove if all calculations work correctly
             if curr_size > max_size:
                 return max_score
 
