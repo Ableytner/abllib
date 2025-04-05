@@ -51,12 +51,14 @@ if __name__ == "__main__":
 
     start = perf_counter_ns()
     sim = similarity("sentence sen ntence", "sentence sentence candidate", 5)
-    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.58 # TODO: fix in V2
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.58
 
     start = perf_counter_ns()
     sim = similarity("this is a pretty pretty long target", "a long pretty sentence is given as", 5)
-    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.57 # TODO: fix in V2
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.57
 
     start = perf_counter_ns()
-    sim = similarity("this is a pretty pretty long target sentence sentence sentence", "a long pretty sentence is given as a candidate candidate", 5)
-    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.5 # TODO: fix in V2
+    sim = similarity("this is a pretty pretty long target sentence sentence sentence",
+                     "a long pretty sentence is given as a candidate candidate",
+                     5)
+    logger.info(f"result {sim} completed in {(perf_counter_ns() - start) // 1000 / 1000} ms") # score should be 0.5

@@ -126,43 +126,32 @@ def _alg(data: np.ndarray, combined_score: float) -> float:
     """
 
     if data.shape[0] == 1:
-        combined_score += data[0][0]
-        return combined_score
+        return combined_score + data[0][0]
 
-    row_index = 0
-    col_index = 0
     max_score = 0.0
 
-    while row_index < data.shape[0]:
-        reduced_data = _reduce_v2(data, row_index, col_index)
+    for row_index in range(data.shape[0]):
+        reduced_data = _reduce(data, row_index)
 
-        score = _alg(reduced_data, combined_score + data[row_index][col_index])
-        max_score = max(score, max_score)
-
-        row_index += 1
+        score = _alg(reduced_data, combined_score + data[row_index][0])
+        # branching with if is much faster than max, because max_score only rarely changes
+        # pylint: disable-next=consider-using-max-builtin
+        if score > max_score:
+            max_score = score
 
     return max_score
 
-def _reduce(data: np.ndarray, r_index: int, c_index: int) -> np.ndarray:
-    # delete a row
-    data = np.delete(data, r_index, 0)
-    # delete a column
-    return np.delete(data, c_index, 1)
-
-def _reduce_v2(data: np.ndarray, r_index: int, c_index: int) -> np.ndarray:
+def _reduce(data: np.ndarray, r_index: int) -> np.ndarray:
     new_size = data.shape[0] - 1
     new_array = np.empty((new_size, new_size))
 
     row_i = 0
-    col_i = 0
     for orig_row_i in range(data.shape[0]):
         if orig_row_i != r_index:
-            for orig_col_i in range(data[orig_row_i].shape[0]):
-                if orig_col_i != c_index:
-                    new_array[row_i][col_i] = data[orig_row_i][orig_col_i]
-                    col_i += 1
+            # we can copy the whole row, excluding the first element
+            orig_row = data[orig_row_i][1:]
+            new_array[row_i] = orig_row
             row_i += 1
-            col_i = 0
 
     return new_array
 
