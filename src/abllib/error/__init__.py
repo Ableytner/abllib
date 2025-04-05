@@ -4,6 +4,7 @@ from ._custom_exception import CustomException
 from ._general import CalledMultipleTimesError, \
                       DeprecatedError, \
                       DirNotFoundError, \
+                      InternalCalculationError, \
                       InternalFunctionUsedError, \
                       KeyNotFoundError, \
                       LockAcquisitionTimeoutError, \
@@ -21,6 +22,7 @@ __exports__ = [
     CalledMultipleTimesError,
     DeprecatedError,
     DirNotFoundError,
+    InternalCalculationError,
     InternalFunctionUsedError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,

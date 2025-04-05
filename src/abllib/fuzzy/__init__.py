@@ -1,9 +1,11 @@
-"""A module containing fuzzy search / fuzzy matching-related functionality"""
+"""A module containing fuzzy matching-related functionality"""
 
-from .match import match
-from .search import search
+from ._all import match_all
+from ._closest import match_closest
+from ._matchresult import MatchResult
 
 __exports__ = [
-    match,
-    search
+    match_all,
+    match_closest,
+    MatchResult
 ]
