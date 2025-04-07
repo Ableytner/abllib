@@ -4,6 +4,7 @@ from abllib import log
 
 # TODO:
 # UP NEXT
+# document new fuzzy module changes
 # make output of pylint test humanly readable
 
 # IMPORTANT BUT ANNOYING

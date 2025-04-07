@@ -145,31 +145,35 @@ def test_closest_matchresult():
 def test_similarity():
     """Ensure that the similarity calculation works as expected"""
 
-    similarity = fuzzy._similarity.similarity
+    similarity = fuzzy.similarity
     assert callable(similarity)
 
-    assert similarity("fox", "the quick fox", 5) == 0.33
-    assert similarity("foy", "the quick fox", 5) == 0.22
+    assert similarity("fox", "the quick fox") == 0.33
+    assert similarity("foy", "the quick fox") == 0.22
 
     # only allow for an edit_distance of up to (len(word) // 3) + 1
-    assert similarity("hoy", "the quick fox", 5) == 0.11
-    assert similarity("hay", "the quick fox", 5) == 0.0
+    assert similarity("hoy", "the quick fox") == 0.11
+    assert similarity("hay", "the quick fox") == 0.0
 
     assert similarity("sentence sentence",
-                      "sentence candidate",
-                      5) == 0.5
+                      "sentence candidate") == 0.5
     assert similarity("sentence sentence sentence",
-                      "sentence candidate candidate",
-                      5) == 0.33
+                      "sentence candidate candidate") == 0.33
     assert similarity("fox",
-                      "the quick fox",
-                      5) == 0.33
+                      "the quick fox") == 0.33
     assert similarity("sentence sen ntence",
-                      "sentence sentence candidate",
-                      5) == 0.58
+                      "sentence sentence candidate") == 0.58
     assert similarity("this is a pretty pretty long target",
-                      "a long pretty sentence is given as",
-                      5) == 0.57
+                      "a long pretty sentence is given as") == 0.57
     assert similarity("this is a pretty pretty long target sentence sentence sentence",
-                     "a long pretty sentence is given as a candidate candidate",
-                     5) == 0.5
+                     "a long pretty sentence is given as a candidate candidate") == 0.5
+    assert similarity("first first second",
+                      "first secon") == 0.61
+
+def test_similarity_swappable():
+    """Ensure that swapping the arguments for similarity calculation returns the same score"""
+
+    similarity = fuzzy.similarity
+    assert similarity("hoy", "the quick fox") == similarity("the quick fox", "hoy")
+    assert similarity("sentence sen ntence", "sentence sentence candidate") \
+           == similarity("sentence sentence candidate", "sentence sen ntence")

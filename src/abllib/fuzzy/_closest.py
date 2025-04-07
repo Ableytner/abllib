@@ -1,7 +1,7 @@
 """A module containing the fuzzy match function"""
 
 from ._matchresult import MatchResult
-from ._similarity import similarity
+from ._similarity import Similarity
 
 def match_closest(target: str, candidates: list[str | tuple[str]], threshold: int = 5) -> MatchResult:
     """
@@ -32,12 +32,12 @@ def match_closest(target: str, candidates: list[str | tuple[str]], threshold: in
 
 def _matches_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> MatchResult:
     if isinstance(candidate, str):
-        score = similarity(target, candidate, threshold)
+        score = Similarity(target, candidate, threshold).calculate()
         return MatchResult(score, candidate)
 
     result = MatchResult(0.0)
     for i, inner_candidate in enumerate(candidate):
-        score = similarity(target, inner_candidate, threshold)
+        score = Similarity(target, inner_candidate, threshold).calculate()
         if score > result.score:
             result = MatchResult(score, candidate, inner_index=i)
 

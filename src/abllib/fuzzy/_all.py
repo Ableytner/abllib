@@ -1,7 +1,7 @@
 """A module containing the fuzzy search function"""
 
 from ._matchresult import MatchResult
-from ._similarity import similarity
+from ._similarity import Similarity
 from .. import log
 
 logger = log.get_logger("test")
@@ -32,12 +32,12 @@ def match_all(target: str, candidates: list[str | tuple[str]], threshold: int = 
 
 def _match_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> MatchResult | None:
     if isinstance(candidate, str):
-        score = similarity(target, candidate, threshold)
+        score = Similarity(target, candidate, threshold).calculate()
         return MatchResult(score, candidate) if score > 0.0 else None
 
     result = MatchResult(0.0)
     for i, inner_candidate in enumerate(candidate):
-        score = similarity(target, inner_candidate, threshold)
+        score = Similarity(target, inner_candidate, threshold).calculate()
         if score > result.score:
             result = MatchResult(score, candidate, inner_index=i)
 
