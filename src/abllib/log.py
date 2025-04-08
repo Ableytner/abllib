@@ -6,7 +6,8 @@ import sys
 from enum import Enum
 from typing import Literal
 
-from . import fs, wrapper
+from . import fs
+from ._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
 
@@ -22,7 +23,6 @@ class LogLevel(Enum):
     DEBUG = logging.DEBUG
     NOTSET = logging.NOTSET
 
-@wrapper.singleuse
 def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.ERROR]
                           | Literal[LogLevel.WARNING]
@@ -34,10 +34,20 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
 
     This disables all log output. Use the add_<*>_handler functions to complete the setup.
 
-    This function can only be called once.
+    This function removes any previous logging setup, also overwriting the root logger formatter.
     """
 
     logging.disable()
+
+    # remove existing handlers
+    if "_log.handlers" in InternalStorage:
+        for handler in InternalStorage["_log.handlers"]:
+            get_logger().removeHandler(handler)
+
+            # remove atexit function
+            if isinstance(handler, logging.FileHandler):
+                atexit.unregister(handler.close)
+                handler.close()
 
     if log_level is None:
         get_logger().setLevel(DEFAULT_LOG_LEVEL)
@@ -75,6 +85,11 @@ def add_console_handler():
 
     get_logger().addHandler(stream_handler)
 
+    # add logger to storage
+    if "_log.handlers" not in InternalStorage:
+        InternalStorage["_log.handlers"] = []
+    InternalStorage["_log.handlers"].append(stream_handler)
+
 def add_file_handler(filename: str = "latest.log"):
     """
     Add a file handler to the root logger.
@@ -93,6 +108,11 @@ def add_file_handler(filename: str = "latest.log"):
     get_logger().addHandler(file_handler)
 
     atexit.register(file_handler.close)
+
+    # add logger to storage
+    if "_log.handlers" not in InternalStorage:
+        InternalStorage["_log.handlers"] = []
+    InternalStorage["_log.handlers"].append(file_handler)
 
 def get_logger(name: str = None) -> logging.Logger:
     """
