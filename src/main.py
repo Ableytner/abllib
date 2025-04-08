@@ -1,7 +1,5 @@
 """The main module, used for dev testing"""
 
-from abllib import log
-
 # TODO:
 # UP NEXT
 # make output of pylint test humanly readable
@@ -21,6 +19,4 @@ from abllib import log
 # add async module with function to run async func in sync context
 
 if __name__ == "__main__":
-    log.initialize()
-    log.add_console_handler()
-    logger = log.get_logger()
+    pass
