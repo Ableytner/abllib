@@ -54,8 +54,12 @@ class Similarity():
 
                 # check if edit distance is within bounds
                 if edit_dist <= max_allowed_dist:
-                    similar_chars = len(inner_candidate) - edit_dist
-                    score = similar_chars / len(inner_candidate)
+                    # we take either inner_target or inner_candidate, depending on which has more characters
+                    # this ensures that swapping target and candidate results in the same score
+                    max_inner_len = max(len(inner_target), len(inner_candidate))
+                    similar_chars = max_inner_len - edit_dist
+                    divisor = max_inner_len
+                    score = similar_chars / divisor
                     scores_array[i_target][i_candidate] = score
 
         return scores_array
