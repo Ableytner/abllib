@@ -206,10 +206,80 @@ Example usage:
 ### 5. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
+It can be used without initialization, or customized.
+If it isn't initialized, the currently set `logging` modules setttings are used.
+
+Example usage without setup:
+```py
+>> from abllib import log
+>> logger = log.get_logger()
+>> logger.info("this is a test log")
+this is a test log
+```
+
+The module can be customized as follows:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.add_console_handler()
+>> logger = log.get_logger()
+>> logger.debug("this call will do nothing")
+>> logger.info("this is a test log")
+[2025-04-08 23:03:08] [INFO    ] root: this is a test log
+>> logger = log.get_logger("mymodule")
+>> logger.info("we can set custom logger names")
+[2025-04-08 23:04:13] [INFO    ] mymodule: we can set custom logger names
+```
+
+Logging to a file is supported as follows:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.add_file_handler("mylogfile.txt")
+>> logger = log.get_logger()
+>> logger.info("this is written to the file")
+```
+The logfile will automatically be closed on program exit.
+
+Multiple handlers can also be added simultaneously.
+In this case, the logged message is sent to all of them.
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.add_console_handler()
+>> log.add_file_handler("mylogfile.txt")
+>> log.add_file_handler("/logs/anotherfile.txt")
+>> logger = log.get_logger()
+>> logger.info("this is written to both files")
+[2025-04-08 23:09:31] [INFO    ] root: this is written to both files
+```
+
+#### Using the logging module in another library
+
+This module can also be used in other libraries without having to worry about the final applications.
+Calling `log.initialize` resets all previous configurations, so the application simply needs to do that.
+
+Code in the library:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.add_console_handler()
+```
+
+Code in the application which runs later:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.WARNING)
+>> log.add_file_handler("mylogfile.txt")
+```
+
+This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
 ### 6. Storages (`abllib.storage`)
 
-This module contains multiple storage types. All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern). Multithreaded access is also allowed.
+This module contains multiple storage types.
+All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+Multithreaded access is also allowed.
 
 The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
 
