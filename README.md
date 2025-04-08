@@ -96,6 +96,113 @@ Example usage:
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
+The source code and documentation use a few words which might be confusing, so they are explained here:
+* target: the word that we want to find.
+* candidate: a word that could match with target.
+* score: the similarity score, which is a float value between 0 and 1, rounded down to two digits.
+
+Note that target and candidate can be a single word, multiple words seperated by ' ', or a sentence.
+
+Furthermore, it is possible to pass an [iterable](https://docs.python.org/3/glossary.html#term-iterable) as the candidate.
+This will try to match the target against all of its items.
+
+#### Results packaged in MatchResult (`abllib.fuzzy.MatchResult`)
+
+Using the primary matching functions will return MatchResult objects, which encapsulate the functions results.
+
+MatchResult is a simple dataclass with the following fields:
+* value: the candidate that was the closest match.
+* index: the index of the candidate that was the closest match.
+This index corresponds to the original candidates list.
+* inner_index: None if candidate is a string, or the index of the matching sub-candidate.
+This index corresponds to the sub-candidate within the matching iterable candidate.
+* score: the 'similarity' between the target and closest matching candidate.
+
+Example usage, assuming that result was received from a match function:
+```py
+>> result
+MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+>> result.score
+np.float64(1.0)
+>> result.value
+['book', 'libro', 'Buch']
+```
+
+Example for using the inner_index:
+```py
+>> from abllib.fuzzy import match_closest
+>> candidates = [["house", "casa", "Haus"], ["book", "libro", "Buch"]]
+>> result = match_closest("Buch", candidates)
+>> result
+MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+>> result.value[result.inner_index]
+Buch
+>> candidates[result.index][result.inner_index]
+Buch
+```
+This means that 'Buch' was the closest-matching candidate.
+
+#### Find closest-matching candidate (`abllib.fuzzy.match_closest`)
+
+A function which returns the closest-matching candidate out of a list of candidates.
+
+To achieve this, two different strategies are used:
+* calculate the edit distance between the whole target and candidate.
+* split target / candidate at ' ' and calculate the edit distance between each word.
+
+After that, a MatchResult with the closest-matching candidate will be returned.
+
+Example usage:
+```py
+>> from abllib.fuzzy import match_closest
+>> match_closest("cat", ["dog", "car"])
+MatchResult(score=np.float64(0.67), value='car', index=1, inner_index=None)
+>> match_closest("Buch", [["house", "casa", "Haus"], ["book", "libro", "Buch"]])
+MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+```
+
+#### Find all matching candidates (`abllib.fuzzy.match_all`)
+
+A function which returns all matching candidates out of a list of candidates.
+
+To achieve this, two different strategies are used:
+* calculate the edit distance between the whole target and candidate.
+* split target / candidate at ' ' and calculate the edit distance between each word.
+
+After that, a list of MatchResults which are withing a certain threshold are returned.
+
+Example usage:
+```py
+>> from abllib.fuzzy import match_all
+>> results = match_all("cat", ["dog", "car", "card", "horse", "mouse", "cat"])
+>> results
+[MatchResult(score=np.float64(0.67), value='car', index=1, inner_index=None), MatchResult(score=np.float64(0.5), value='card', index=2, inner_index=None), MatchResult(score=np.float64(1.0), value='cat', index=5, inner_index=None)]
+>> len(results)
+3
+```
+
+#### Calculate the similartity score between two targets (`abllib.fuzzy.similarity`)
+
+A function which returns the similarity score between two targets.
+The targets can be a single word or a whole sentence.
+
+To achieve this, two different strategies are used:
+* calculate the edit distance between the whole target and candidate.
+* split target / candidate at ' ' and calculate the edit distance between each word.
+
+The score is returned as a simple float value, rounded down to two digits.
+
+Example usage:
+```py
+>> from abllib.fuzzy import similarity
+>> similarity("cat", "dog")
+0.0
+>> similarity("cat", "car")
+0.67
+>> similarity("cat", "cat")
+1.0
+```
+
 ### 5. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
