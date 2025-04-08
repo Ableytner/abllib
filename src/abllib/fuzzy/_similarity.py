@@ -88,8 +88,11 @@ class Similarity():
         if edit_dist > self._threshold:
             return 0.0
 
-        similar_chars = len(self._candidate) - edit_dist
-        return similar_chars / len(self._candidate)
+        max_len = max(len(self._target), len(self._candidate))
+        similar_chars = max_len - edit_dist
+        divisor = max_len
+        score = similar_chars / divisor
+        return score
 
     def _calculate_complex(self) -> float:
         score_divisor = len(self._candidates)

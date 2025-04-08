@@ -4,7 +4,6 @@ from abllib import log
 
 # TODO:
 # UP NEXT
-# document new fuzzy module changes
 # make output of pylint test humanly readable
 
 # IMPORTANT BUT ANNOYING
@@ -13,6 +12,7 @@ from abllib import log
 # or make it the default behaviour
 # add tests for threaded storage access
 # document and understand levenshtein_distance
+# document fuzzy score calculation
 
 # TAKES A LOT OF TIME / NEEDED IN THE FUTURE
 # add abllib.type module with verify function, which compares a value to a given type hint
@@ -24,7 +24,3 @@ if __name__ == "__main__":
     log.initialize()
     log.add_console_handler()
     logger = log.get_logger()
-
-    from abllib.fuzzy import match_closest
-    print(match_closest("cat", ["dog", "car"]))
-    print(match_closest("Buch", [["house", "casa", "Haus"], ["book", "libro", "Buch"]]))
