@@ -151,6 +151,10 @@ def test_similarity():
     assert similarity("fox", "the quick fox") == 0.33
     assert similarity("foy", "the quick fox") == 0.22
 
+    # ensure single words also work
+    assert similarity("fox", "fox") == 1
+    assert similarity("dog", "dawg") == 0.5
+
     # only allow for an edit_distance of up to (len(word) // 3) + 1
     assert similarity("hoy", "the quick fox") == 0.11
     assert similarity("hay", "the quick fox") == 0.0
