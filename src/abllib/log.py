@@ -6,7 +6,7 @@ import sys
 from enum import Enum
 from typing import Literal
 
-from . import fs
+from . import error, fs
 from ._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
@@ -50,6 +50,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
                 handler.close()
 
     if log_level is None:
+        InternalStorage["_log.level"] = DEFAULT_LOG_LEVEL
         get_logger().setLevel(DEFAULT_LOG_LEVEL)
         return
 
@@ -66,6 +67,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if log_level == LogLevel.FATAL:
         raise ValueError("Loglevel.FATAL should not be used, use LogLevel.CRITICAL instead.")
 
+    InternalStorage["_log.level"] = log_level
     get_logger().setLevel(log_level)
 
 def add_console_handler():
@@ -75,11 +77,14 @@ def add_console_handler():
     This configures all loggers to also print to sys.stdout.
     """
 
+    if "_log.level" not in InternalStorage:
+        raise error.NotInitializedError("log.initialize() needs to be called first")
+
     logging.disable(0)
 
     stream_handler = logging.StreamHandler(sys.stdout)
 
-    stream_handler.setLevel(DEFAULT_LOG_LEVEL)
+    stream_handler.setLevel(InternalStorage["_log.level"])
 
     stream_handler.setFormatter(_get_formatter())
 
@@ -97,11 +102,14 @@ def add_file_handler(filename: str = "latest.log"):
     This configures all loggers to also print to a given file, or 'latest.log' if not provided.
     """
 
+    if "_log.level" not in InternalStorage:
+        raise error.NotInitializedError("log.initialize() needs to be called first")
+
     logging.disable(0)
 
     file_handler = logging.FileHandler(filename=fs.absolute(filename), encoding="utf-8", mode="w")
 
-    file_handler.setLevel(DEFAULT_LOG_LEVEL)
+    file_handler.setLevel(InternalStorage["_log.level"])
 
     file_handler.setFormatter(_get_formatter())
 
