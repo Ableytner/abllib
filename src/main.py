@@ -2,7 +2,7 @@
 
 # TODO:
 # UP NEXT
-# tests / documentation for abllib.wrapper.Lock / abllib.wrapper.Semaphore
+# documentation for abllib.wrapper.deprecated
 # make output of pylint test humanly readable
 
 # IMPORTANT BUT ANNOYING
