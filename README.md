@@ -576,24 +576,42 @@ ValueError: The answer is not yet calculated!
 
 ### 8. Function wrappers (`abllib.wrapper`)
 
-This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/) for functions.
+This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
-#### Locking wrappers
+#### Custom lock (`abllib.wrapper.Lock`)
 
-There are two wrappers which help with multi-threading:
-* ReadLock
-* WriteLock
+The wrapper module contains a modified version of threading.Lock.
+The .acquire method now accepts None for a timeout.
 
-WriteLock works like a normal [lock](https://en.wikipedia.org/wiki/Lock_(computer_science)), while ReadLock works like a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
+#### Custom Semaphore (`abllib.wrapper.Semaphore`)
 
-These wrappers can be given a name, and all wrappers with the same name function as the same instance.
-If a wrapper is applied to a function, the lock is acquired before the function executes and is released afterwards.
+The wrapper module also contains a custom Semaphore class based on threading.BoundedSemaphore.
+It now contains a .locked method which returns whether it is held at least once.
+
+The semaphore is initialized with the number of times it can be acquired simultaneously.
+After that, future acquisitions result in an LockAcquisitionTimeoutError.
+
+#### Lock wrappers
+
+There are two classes which help with multi-threading:
+* NamedLock
+* namedSemaphore
+
+NamedLock works like a normal [lock](https://en.wikipedia.org/wiki/Lock_(computer_science)), while NamedSemaphore works like a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
+
+Constructing a NamedLock and NamedSemaphore with the same name links them.
+If the NamedLock is acquired and after that the NamedSemaphore gets acquired, it has to wait until the NamedLock is released.
+
+Multiple NamedLock or NamedSemaphore can also be constructed with the same name.
+This lets them share the same global state, so if one of them is acquired, all the others are acquired too.
+
+If a NamedLock or NamedSemaphore is applied to a function, its lock is acquired before the function executes and is released afterwards.
 
 Example usage:
 ```py
 >> from time import sleep
->> from abllib.wrapper import WriteLock
->> @WriteLock("MyLockName")
+>> from abllib.wrapper import NamedLock
+>> @NamedLock("MyLockName")
 .. def do_something(duration):
 ..     sleep(duration)
 >> do_something(10) #this holds the "MyLockName"-lock for ten seconds
@@ -602,16 +620,16 @@ Example usage:
 The default behaviour is to wait until the lock can be acquired. If a timeout parameter is provided, an LockAcquisitionTimeoutError is raised if the acquisition takes too long. The timeout is specified in seconds.
 ```py
 >> from time import sleep
->> from abllib.wrapper import WriteLock
->> @WriteLock("MyLockName", timeout=5)
+>> from abllib.wrapper import NamedLock
+>> @NamedLock("MyLockName", timeout=5)
 .. def do_something(duration):
 ..     sleep(duration)
->> WriteLock("MyLockName").acquire() #this holds the "MyLockName"-lock
->> do_something(10)
-
+>> NamedLock("MyLockName").acquire() #this holds the "MyLockName"-lock
+>> do_something(10) #the "MyLockName"-lock is already held
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.LockAcquisitionTimeoutError: The requested lock could not be acquired in time
 ```
-
-TODO: usage and global nature of lock names
 
 ## Installation
 

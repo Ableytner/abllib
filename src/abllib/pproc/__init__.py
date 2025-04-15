@@ -2,8 +2,11 @@
 
 from ._worker_process import WorkerProcess
 from ._worker_thread import WorkerThread
+from ..wrapper import Lock, Semaphore
 
 __exports__ = [
     WorkerProcess,
-    WorkerThread
+    WorkerThread,
+    Lock,
+    Semaphore
 ]

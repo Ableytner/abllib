@@ -1,6 +1,6 @@
 """Module containing tests for the abllib.wrapper module"""
 
-# pylint: disable=function-redefined
+# pylint: disable=function-redefined, consider-using-with
 
 from datetime import datetime
 
@@ -9,23 +9,54 @@ import pytest
 from abllib import error, wrapper
 from abllib.pproc import WorkerThread
 
-def test_readlock():
-    """Ensure that ReadLock works as expected"""
+def test_lock():
+    """Ensure that Lock works as expected"""
 
-    @wrapper.NamedSemaphore("test1", timeout=0.1)
-    def func1():
-        return True
+    assert hasattr(wrapper, "Lock")
+    assert callable(wrapper.Lock)
 
-    assert not wrapper.NamedSemaphore("test1").locked()
-    assert func1()
-    assert not wrapper.NamedSemaphore("test1").locked()
+    lock = wrapper.Lock()
 
-    wrapper.NamedSemaphore("test2").acquire()
-    assert wrapper.NamedSemaphore("test2").locked()
-    assert wrapper.NamedSemaphore("test2", timeout=1).locked()
+    assert not lock.locked()
+    assert lock.acquire(blocking=True, timeout=1)
+    assert lock.locked()
 
-def test_writelock():
-    """Ensure that WriteLock works as expected"""
+    assert not lock.acquire(blocking=True, timeout=1)
+
+    lock.release()
+    assert not lock.locked()
+
+def test_semaphore():
+    """Ensure that Semaphore works as expected"""
+
+    assert hasattr(wrapper, "Semaphore")
+    assert callable(wrapper.Semaphore)
+
+    sem = wrapper.Semaphore(3)
+
+    assert not sem.locked()
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.locked()
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.locked()
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.locked()
+
+    # the semaphore is full
+    assert not sem.acquire(blocking=True, timeout=1)
+
+    sem.release()
+    assert sem.locked()
+    sem.release()
+    assert sem.locked()
+    sem.release()
+    assert not sem.locked()
+
+def test_namedlock():
+    """Ensure that NamedLock works as expected"""
+
+    assert hasattr(wrapper, "NamedLock")
+    assert callable(wrapper.NamedLock)
 
     @wrapper.NamedLock("test1", timeout=0.1)
     def func1():
@@ -35,9 +66,9 @@ def test_writelock():
     assert func1()
     assert not wrapper.NamedLock("test1").locked()
 
-    wrapper.NamedSemaphore("test2").acquire()
-    assert wrapper.NamedSemaphore("test2").locked()
-    assert wrapper.NamedSemaphore("test2", timeout=1).locked()
+    wrapper.NamedLock("test2").acquire()
+    assert wrapper.NamedLock("test2").locked()
+    assert wrapper.NamedLock("test2", timeout=1).locked()
 
     wrapper.NamedLock("test3").acquire()
     def func2():
@@ -54,8 +85,41 @@ def test_writelock():
     assert duration.total_seconds() > 3.5
     assert duration.total_seconds() < 4.5
 
-def test_locks_combined():
-    """Ensure that ReadLock and WriteLock work together correctly"""
+def test_namedsemaphore():
+    """Ensure that NamedSemaphore works as expected"""
+
+    assert hasattr(wrapper, "NamedSemaphore")
+    assert callable(wrapper.NamedSemaphore)
+
+    @wrapper.NamedSemaphore("test1", timeout=0.1)
+    def func1():
+        return True
+
+    assert not wrapper.NamedSemaphore("test1").locked()
+    assert func1()
+    assert not wrapper.NamedSemaphore("test1").locked()
+
+    wrapper.NamedSemaphore("test2").acquire()
+    assert wrapper.NamedSemaphore("test2").locked()
+    assert wrapper.NamedSemaphore("test2", timeout=1).locked()
+
+    wrapper.NamedLock("test3").acquire()
+    def func2():
+        assert not wrapper.NamedSemaphore("test3").locked()
+        wrapper.NamedSemaphore("test3", timeout=4).acquire()
+
+    start_time = datetime.now()
+    thread = WorkerThread(target=func2)
+    thread.start()
+    with pytest.raises(error.LockAcquisitionTimeoutError):
+        thread.join(reraise=True)
+
+    duration = datetime.now() - start_time
+    assert duration.total_seconds() > 3.5
+    assert duration.total_seconds() < 4.5
+
+def test_namedlocks_combined():
+    """Ensure that NamedLock and NamedSemaphore work together correctly"""
 
     @wrapper.NamedLock("test1", timeout=0.1)
     def func():
@@ -96,7 +160,7 @@ def test_locks_combined():
     wrapper.NamedLock("test3").release()
 
 def test_locks_underscore_names():
-    """Ensure that lock names can start with an underscore"""
+    """Ensure that named lock names can start with an underscore"""
 
     lock = wrapper.NamedSemaphore("_test1")
     assert not lock.locked()
@@ -116,7 +180,7 @@ def test_locks_underscore_names():
     assert not lock.locked()
     assert not wrapper.NamedLock("_test2").locked()
 
-def test_single_use():
+def test_singleuse():
     """Ensure that singleuse cannot be initialized"""
 
     @wrapper.singleuse

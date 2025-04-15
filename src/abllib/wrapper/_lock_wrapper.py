@@ -12,7 +12,7 @@ from .._storage import InternalStorage
 
 class _BaseNamedLock():
     """
-    The base class for the ReadLock and WriteLock classes.
+    The base class for the NamedLock and NamedSemaphore classes.
     """
 
     def __init__(self, lock_name: str, timeout: int | float | None = None):
@@ -39,6 +39,8 @@ class _BaseNamedLock():
 
     @property
     def name(self) -> str:
+        """Return the lock's name"""
+
         return self._name
 
     def acquire(self) -> None:
@@ -121,7 +123,7 @@ class NamedLock(_BaseNamedLock):
     """
     Make a function require a lock to be held during execution.
 
-    Only a single WriteLock can hold the lock, but only if the ReadLock is not currently held.
+    Only a single NamedLock can hold the lock, but only if the NamedSemaphore is not currently held.
 
     Optionally provide a timeout in seconds,
     after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
@@ -144,7 +146,7 @@ class NamedSemaphore(_BaseNamedLock):
     """
     Make a function require a lock to be held during execution.
 
-    Multiple ReadLocks can hold the same lock concurrently, but only if the WriteLock is not currently held.
+    Multiple NamedSemaphores can hold the same lock concurrently, but only if the NamedLock is not currently held.
 
     Optionally provide a timeout in seconds,
     after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).

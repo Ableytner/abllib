@@ -49,7 +49,7 @@ class Semaphore(threading.BoundedSemaphore):
     """
     Extends threading.BoundedSemaphore by adding a locked() function.
 
-    This makes it equivalent to threading.Lock usage-wise.
+    This makes it equivalent to threading.Lock method signature-wise.
     """
 
     def locked(self) -> bool:
