@@ -8,12 +8,13 @@ from time import sleep
 
 import pytest
 
-from abllib.pproc import WorkerProcess, WorkerThread
+from abllib import pproc, wrapper
 
 def test_workerthread_inheritance():
     """Ensure that WorkerThread inherits from Thread"""
 
-    assert issubclass(WorkerThread, Thread)
+    assert hasattr(pproc, "WorkerThread")
+    assert issubclass(pproc.WorkerThread, Thread)
 
 def test_workerthread_func_execution():
     """Ensure that WorkerThread executes its target and then exits"""
@@ -22,7 +23,7 @@ def test_workerthread_func_execution():
     def func1():
         out[0] = True
 
-    t = WorkerThread(target=func1)
+    t = pproc.WorkerThread(target=func1)
     t.start()
 
     c = 0
@@ -43,7 +44,7 @@ def test_workerthread_value_return():
     def func1():
         return None
 
-    t = WorkerThread(target=func1)
+    t = pproc.WorkerThread(target=func1)
     t.start()
 
     r = t.join()
@@ -54,7 +55,7 @@ def test_workerthread_value_return():
     def func2():
         return ("val1", 25)
 
-    t = WorkerThread(target=func2)
+    t = pproc.WorkerThread(target=func2)
     t.start()
 
     r = t.join()
@@ -78,7 +79,7 @@ def test_workerthread_exception_return():
     def func1():
         raise AssertionError("This is a test message")
 
-    t = WorkerThread(target=func1)
+    t = pproc.WorkerThread(target=func1)
     t.start()
 
     r = t.join()
@@ -92,7 +93,7 @@ def test_workerthread_exception_reraise():
     def func1():
         raise AssertionError("This is a test message")
 
-    t = WorkerThread(target=func1)
+    t = pproc.WorkerThread(target=func1)
     t.start()
 
     try:
@@ -105,7 +106,8 @@ def test_workerthread_exception_reraise():
 def test_workerprocess_inheritance():
     """Ensure that WorkerProcess inherits from Process"""
 
-    assert issubclass(WorkerProcess, Process)
+    assert hasattr(pproc, "WorkerProcess")
+    assert issubclass(pproc.WorkerProcess, Process)
 
 def test_workerprocess_value_return():
     """Ensure that WorkerProcess returns values"""
@@ -113,7 +115,7 @@ def test_workerprocess_value_return():
     def func1():
         return None
 
-    p = WorkerProcess(target=func1)
+    p = pproc.WorkerProcess(target=func1)
     p.start()
 
     r = p.join()
@@ -124,7 +126,7 @@ def test_workerprocess_value_return():
     def func2():
         return ("val1", 25)
 
-    p = WorkerProcess(target=func2)
+    p = pproc.WorkerProcess(target=func2)
     p.start()
 
     r = p.join()
@@ -145,7 +147,7 @@ def test_workerprocess_exception_return():
     def func1():
         raise AssertionError("This is a test message")
 
-    p = WorkerProcess(target=func1)
+    p = pproc.WorkerProcess(target=func1)
     p.start()
 
     r = p.join()
@@ -159,7 +161,7 @@ def test_workerprocess_exception_reraise():
     def func1():
         raise AssertionError("This is a test message")
 
-    t = WorkerProcess(target=func1)
+    t = pproc.WorkerProcess(target=func1)
     t.start()
 
     try:
@@ -168,3 +170,15 @@ def test_workerprocess_exception_reraise():
         assert str(e) == "This is a test message"
     else:
         pytest.fail("no exception raised")
+
+def test_lock():
+    """Ensure that Lock is imported correctly"""
+
+    assert hasattr(wrapper, "Lock")
+    assert pproc.Lock == wrapper.Lock
+
+def test_semaphore():
+    """Ensure that Semaphore is imported correctly"""
+
+    assert hasattr(wrapper, "Semaphore")
+    assert pproc.Semaphore == wrapper.Semaphore

@@ -18,14 +18,14 @@ def _locking(func):
         self: _StorageView = args[0]
 
         for storage in self._storages:
-            lock = wrapper.ReadLock(storage._LOCK_NAME)
+            lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
             lock.acquire()
 
         try:
             return func(*args, **kwargs)
         finally:
             for storage in self._storages:
-                lock = wrapper.ReadLock(storage._LOCK_NAME)
+                lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
                 lock.release()
 
     return inner

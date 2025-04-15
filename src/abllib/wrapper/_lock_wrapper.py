@@ -1,71 +1,18 @@
-"""Module containing the ReadLock and WriteLock wrapper Classes"""
+"""Module containing the NamedLock and NamedSemaphore classes"""
+
+from __future__ import annotations
 
 import functools
 from datetime import datetime
 from time import sleep
-from threading import BoundedSemaphore, Lock
 
+from ._lock import Lock, Semaphore
 from .. import error
 from .._storage import InternalStorage
 
-class CustomLock():
+class _BaseNamedLock():
     """
-    Extends threading.Lock by allowing timeout to be None.
-
-    threading.Lock cannot be subclassed as it is a factory function.
-    https://stackoverflow.com/a/6781398
-    """
-
-    def __init__(self):
-        self._lock = Lock()
-
-    def acquire(self, blocking: bool = True, timeout: float | None = None):
-        """
-        Try to acquire the Lock.
-        
-        If blocking is disabled, it doesn't wait for the timeout.
-
-        If timeout is set, wait for n seconds before returning.
-        """
-
-        return self._lock.acquire(blocking, -1 if timeout is None else timeout)
-
-    def locked(self) -> bool:
-        """Returns whether the Lock is held"""
-
-        return self._lock.locked()
-
-    def release(self):
-        """Release the lock if it is currently held"""
-
-        self._lock.release()
-
-    def __enter__(self):
-        self.acquire()
-
-    # keep signature the same as threading.Lock
-    # pylint: disable-next=redefined-builtin
-    def __exit__(self, type, value, traceback):
-        self.release()
-
-# we can't use the default threading.Semaphore
-# because we need a semaphore with value == 0 if it isn't held
-# This is the opposite behaviour of threading.Semaphore
-class CustomSemaphore(BoundedSemaphore):
-    """
-    Extends threading.BoundedSemaphore by adding a locked() function.
-
-    This makes it equivalent to threading.Lock usage-wise.
-    """
-
-    def locked(self) -> bool:
-        """Returns whether the Semaphore is held at least once"""
-
-        return self._value != self._initial_value
-
-class _BaseLock():
-    """
-    The base class for the ReadLock and WriteLock classes.
+    The base class for the NamedLock and NamedSemaphore classes.
     """
 
     def __init__(self, lock_name: str, timeout: int | float | None = None):
@@ -78,20 +25,23 @@ class _BaseLock():
         if not isinstance(timeout, float) and timeout is not None:
             raise error.WrongTypeError.with_values(timeout, float, None)
 
-        if "_locks" not in InternalStorage:
-            InternalStorage["_locks.global"] = CustomLock()
-
-        if f"_locks.{lock_name}" not in InternalStorage:
-            InternalStorage[f"_locks.{lock_name}.r"] = CustomSemaphore(999)
-            InternalStorage[f"_locks.{lock_name}.w"] = CustomLock()
-
+        self._name = lock_name
         self._timeout = timeout
-        self._allocation_lock: CustomLock = InternalStorage["_locks.global"]
 
+        if "_locks" not in InternalStorage:
+            InternalStorage["_locks.global"] = Lock()
+        self._allocation_lock: Lock = InternalStorage["_locks.global"]
+
+    _name: str
+    _lock: Lock | Semaphore
     _timeout: float | None
-    _allocation_lock: CustomLock
-    _lock: CustomLock | CustomSemaphore
-    _other_lock: CustomLock | CustomSemaphore
+    _allocation_lock: Lock
+
+    @property
+    def name(self) -> str:
+        """Return the lock's name"""
+
+        return self._name
 
     def acquire(self) -> None:
         """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
@@ -100,12 +50,14 @@ class _BaseLock():
             self._allocation_lock.acquire()
 
             # ensure the other lock is not held
-            while self._other_lock.locked():
-                sleep(0.025)
+            other = self._get_other()
+            if other is not None:
+                while other.locked():
+                    sleep(0.025)
 
             if not self._lock.acquire():
                 self._allocation_lock.release()
-                raise error.LockAcquisitionTimeoutError(error.INTERNAL)
+                raise error.LockAcquisitionTimeoutError()
 
             self._allocation_lock.release()
             return
@@ -117,34 +69,36 @@ class _BaseLock():
         elapsed_time = (datetime.now() - initial_time).total_seconds()
 
         # ensure the other lock is not held
-        while self._other_lock.locked():
-            sleep(0.025)
-            elapsed_time += 0.025
-            if elapsed_time > self._timeout:
-                self._allocation_lock.release()
-                raise error.LockAcquisitionTimeoutError(error.INTERNAL)
+        other = self._get_other()
+        if other is not None:
+            while other.locked():
+                sleep(0.025)
+                elapsed_time += 0.025
+                if elapsed_time > self._timeout:
+                    self._allocation_lock.release()
+                    raise error.LockAcquisitionTimeoutError()
 
         if not self._lock.acquire(timeout=self._timeout - elapsed_time):
             self._allocation_lock.release()
-            raise error.LockAcquisitionTimeoutError(error.INTERNAL)
+            raise error.LockAcquisitionTimeoutError()
 
         self._allocation_lock.release()
-
-    def __enter__(self):
-        self.acquire()
 
     def release(self) -> None:
         """Release the lock"""
 
         self._lock.release()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.release()
-
     def locked(self) -> bool:
         """Return whether the lock is currentyl held"""
 
         return self._lock.locked()
+
+    def __enter__(self):
+        self.acquire()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
 
     def __call__(self, func):
         """Called when instance is used as a decorator"""
@@ -162,11 +116,14 @@ class _BaseLock():
 
         return wrapper
 
-class ReadLock(_BaseLock):
+    def _get_other(self) -> _BaseNamedLock | None:
+        raise NotImplementedError()
+
+class NamedLock(_BaseNamedLock):
     """
     Make a function require a lock to be held during execution.
 
-    Multiple ReadLocks can hold the same lock concurrently, but only if the WriteLock is not currently held.
+    Only a single NamedLock can hold the lock, but only if the NamedSemaphore is not currently held.
 
     Optionally provide a timeout in seconds,
     after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
@@ -175,14 +132,21 @@ class ReadLock(_BaseLock):
     def __init__(self, lock_name, timeout = None):
         super().__init__(lock_name, timeout)
 
-        self._lock = InternalStorage[f"_locks.{lock_name}.r"]
-        self._other_lock = InternalStorage[f"_locks.{lock_name}.w"]
+        if f"_locks.{lock_name}.l" not in InternalStorage:
+            InternalStorage[f"_locks.{lock_name}.l"] = Lock()
 
-class WriteLock(_BaseLock):
+        self._lock = InternalStorage[f"_locks.{lock_name}.l"]
+
+    def _get_other(self):
+        if f"_locks.{self.name}.s" in InternalStorage:
+            return InternalStorage[f"_locks.{self.name}.s"]
+        return None
+
+class NamedSemaphore(_BaseNamedLock):
     """
     Make a function require a lock to be held during execution.
 
-    Only a single WriteLock can hold the lock, but only if the ReadLock is not currently held.
+    Multiple NamedSemaphores can hold the same lock concurrently, but only if the NamedLock is not currently held.
 
     Optionally provide a timeout in seconds,
     after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
@@ -191,5 +155,18 @@ class WriteLock(_BaseLock):
     def __init__(self, lock_name, timeout = None):
         super().__init__(lock_name, timeout)
 
-        self._lock = InternalStorage[f"_locks.{lock_name}.w"]
-        self._other_lock = InternalStorage[f"_locks.{lock_name}.r"]
+        if f"_locks.{lock_name}.s" not in InternalStorage:
+            InternalStorage[f"_locks.{lock_name}.s"] = Semaphore(999)
+
+        self._lock = InternalStorage[f"_locks.{lock_name}.s"]
+
+    def _get_other(self):
+        if f"_locks.{self.name}.l" in InternalStorage:
+            return InternalStorage[f"_locks.{self.name}.l"]
+        return None
+
+# deprecated
+ReadLock = NamedSemaphore
+
+# deprecated
+WriteLock = NamedLock
