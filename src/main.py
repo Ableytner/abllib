@@ -15,6 +15,4 @@
 # add async module with function to run async func in sync context
 
 if __name__ == "__main__":
-    def MYFuncINCORRECTName():
-        return
-        print("never")
+    pass
