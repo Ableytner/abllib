@@ -43,6 +43,8 @@ class _PersistentStorage(_BaseStorage):
 
     @wrapper.NamedLock(_LOCK_NAME)
     def __setitem__(self, key: str, item: Any) -> None:
+        # TODO: type check list / dict content types
+
         if not isinstance(item, (str, int, list, dict)):
             raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 

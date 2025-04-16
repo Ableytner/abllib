@@ -2,8 +2,10 @@
 
 import numpy as np
 
-from abllib import error
+from abllib import error, log
 from ..alg import levenshtein_distance
+
+logger = log.get_logger("Similarity")
 
 class Similarity():
     """
@@ -67,9 +69,9 @@ class Similarity():
     def calculate(self) -> float:
         """Calculate the similarity"""
 
-#        combinations = min(self.scores_array.shape) \
-#                       * (abs(self.scores_array.shape[0] - self.scores_array.shape[1]) + 1)
-#        print(f"Calculating {combinations} combinations") # TODO: debug log
+        combinations = min(self.scores_array.shape) \
+                       * (abs(self.scores_array.shape[0] - self.scores_array.shape[1]) + 1)
+        logger.debug(f"Calculating at maximum {combinations} combinations")
 
         score = max(
             self._calculate_simple(),
@@ -99,7 +101,7 @@ class Similarity():
 
         if not _contains_duplicates(self._construct_primitive_indexes()):
             # the target words don't interfere with each other, so we can use the best score for each
-#            print("we are good to fast-exit") # TODO: debug log
+            logger.debug("we are good to fast-exit")
 
             total_score = 0.0
             for row in self.scores_array:
@@ -199,16 +201,6 @@ class Similarity():
                 return i
 
         raise RuntimeError()
-
-# TODO: remove
-def _construct_debug_scores_array(size: int) -> np.ndarray:
-    scores_array = np.empty((size, size))
-
-    for row in range(size):
-        for column in range(size):
-            scores_array[row][column] = float(f"{row + 1}.{column + 1}")
-
-    return scores_array
 
 def _contains_duplicates(arr: np.ndarray) -> bool:
     seen = set()

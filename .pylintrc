@@ -22,17 +22,11 @@ confidence=
 disable=too-many-arguments,
         invalid-name,
         fixme,
-        bare-except,
         duplicate-code,
         too-few-public-methods,
         too-many-instance-attributes,
-        no-name-in-module,
-        isinstance-second-argument-not-valid-type,
-        multiple-statements,
-        relative-beyond-top-level,
         too-many-positional-arguments,
         logging-fstring-interpolation,
-        logging-not-lazy,
         too-many-branches,
         too-many-locals
 

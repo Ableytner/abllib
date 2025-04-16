@@ -7,6 +7,7 @@ from datetime import datetime
 from time import sleep
 
 from ._lock import Lock, Semaphore
+from ._deprecated import deprecated
 from .. import error
 from .._storage import InternalStorage
 
@@ -165,8 +166,5 @@ class NamedSemaphore(_BaseNamedLock):
             return InternalStorage[f"_locks.{self.name}.l"]
         return None
 
-# deprecated
-ReadLock = NamedSemaphore
-
-# deprecated
-WriteLock = NamedLock
+WriteLock: type[NamedLock] = deprecated(NamedLock)
+ReadLock: type[NamedSemaphore] = deprecated(NamedSemaphore)

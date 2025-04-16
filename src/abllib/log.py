@@ -63,7 +63,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if log_level == LogLevel.NOTSET:
         raise ValueError("LogLevel.NOTSET is not allowed.")
     if log_level == LogLevel.WARN:
-        raise ValueError("LogLevel.WARN is deprecated, use LogLevel.WARNING instead.")
+        raise error.DeprecatedError("LogLevel.WARN is deprecated, use LogLevel.WARNING instead.")
     if log_level == LogLevel.FATAL:
         raise ValueError("Loglevel.FATAL should not be used, use LogLevel.CRITICAL instead.")
 
