@@ -175,6 +175,8 @@ def test_basestorage_delitem_multi():
     assert isinstance(BaseStorage._store["key1"], dict)
     assert "key2" not in BaseStorage._store["key1"]
 
+    BaseStorage._store = {}
+
     BaseStorage._store["key1"] = {}
     BaseStorage._store["key1"]["key2"] = {}
     BaseStorage._store["key1"]["key2"]["key3"] = {}
@@ -187,7 +189,30 @@ def test_basestorage_delitem_multi():
     assert isinstance(BaseStorage._store["key1"]["key2"]["key3"], dict)
     assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"], dict)
     assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"], dict)
-    assert "key2" not in BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]
+    assert "key6" not in BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]
+
+    BaseStorage._store = {}
+
+    BaseStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    BaseStorage["key1.key2.key3.key4.key5.another"] = "value2"
+    del BaseStorage["key1.key2.key3.key4.key5.key6"]
+    assert isinstance(BaseStorage._store["key1"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"], dict)
+    assert isinstance(BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"], dict)
+    assert "another" in BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]
+    assert "key6" not in BaseStorage._store["key1"]["key2"]["key3"]["key4"]["key5"]
+
+    BaseStorage._store = {}
+
+    BaseStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    del BaseStorage["key1.key2.key3.key4.key5.key6"]
+    assert "key1.key2.key3.key4.key5" not in BaseStorage
+    assert "key1.key2.key3.key4" not in BaseStorage
+    assert "key1.key2.key3" not in BaseStorage
+    assert "key1.key2" not in BaseStorage
+    assert "key1" not in BaseStorage
 
 def test_basestorage_delitem_keytype():
     """Test the Storage.__delitem__() methods' protection against incorrect key types"""
