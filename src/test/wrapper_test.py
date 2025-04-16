@@ -2,6 +2,7 @@
 
 # pylint: disable=function-redefined, consider-using-with
 
+import re
 import os
 from datetime import datetime
 
@@ -213,20 +214,22 @@ def test_deprecated_warning():
         pass
     func1()
     with open("test.log", "r", encoding="utf8") as f:
-        assert "This functionality is deprecated" in f.read()
+        assert re.search(r"The functionality .* is deprecated", f.read())
 
     # reset test.log file
-    with open("test.log", "w", encoding="utf8") as f: pass
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
 
     @wrapper.deprecated.warning
     def func1():
         pass
     func1()
     with open("test.log", "r", encoding="utf8") as f:
-        assert "This functionality is deprecated" in f.read()
+        assert re.search(r"The functionality .* is deprecated", f.read())
 
     # reset test.log file
-    with open("test.log", "w", encoding="utf8") as f: pass
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
 
     @wrapper.deprecated("A custom deprecation message")
     def func1():
@@ -236,7 +239,8 @@ def test_deprecated_warning():
         assert "A custom deprecation message" in f.read()
 
     # reset test.log file
-    with open("test.log", "w", encoding="utf8") as f: pass
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
 
     @wrapper.deprecated.warning("A custom deprecation message")
     def func1():

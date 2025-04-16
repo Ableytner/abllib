@@ -1,6 +1,7 @@
 """Module containing the deprecated wrapper"""
 
 import functools
+import traceback
 from typing import Callable
 
 from .. import log
@@ -67,7 +68,10 @@ class _Deprecated():
 
             # the default message is used
             if self._message is None:
-                message = "This functionality is deprecated"
+                traces = traceback.format_list(traceback.extract_stack())
+                traces.reverse()
+                usage_line = traces[1].split("\n")[0].strip()
+                message = f"The functionality '{func.__name__}' is deprecated but used here: {usage_line}"
             # the message was overwritten
             else:
                 message = str(self._message)
@@ -75,7 +79,7 @@ class _Deprecated():
             if self._raise_exec:
                 raise DeprecatedError(message)
 
-            log.get_logger(func.__name__).warning(message)
+            log.get_logger("deprecated").warning(message)
 
             return func(*args, **kwargs)
 

@@ -11,7 +11,7 @@ This project contains many submodules, which are all optional and not dependent 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
 2. Errors (`abllib.error`)
-3. File system (`abllib.fs`)
+3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
 5. Logging (`abllib.log`)
 6. Storages (`abllib.storage`)
@@ -588,12 +588,12 @@ The .acquire method now accepts None for a timeout.
 The wrapper module also contains a custom Semaphore class based on threading.BoundedSemaphore.
 It now contains a .locked method which returns whether it is held at least once.
 
-The semaphore is initialized with the number of times it can be acquired simultaneously.
+The semaphore is initialized with the maximum number of times it can be acquired simultaneously.
 After that, future acquisitions result in an LockAcquisitionTimeoutError.
 
 #### Lock wrappers
 
-There are two classes which help with multi-threading:
+There are two classes which help with multi-threaded synchronisation:
 * NamedLock
 * namedSemaphore
 
@@ -629,6 +629,59 @@ The default behaviour is to wait until the lock can be acquired. If a timeout pa
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 abllib.error._general.LockAcquisitionTimeoutError: The requested lock could not be acquired in time
+```
+
+#### Deprecated marker (`abllib.wrapper.deprecated`)
+
+The deprecate wrapper marks a function or class as deprecated.
+If a deprecated function is called, a deprecation warning is logged using the current root logger.
+
+```py
+>> from abllib.wrapper import deprecated
+>> @deprecated
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+line 27, in <module>
+hello world
+```
+
+It can also be applied explicitly as a warning or error:
+```py
+>> from abllib.wrapper import deprecated
+>> @deprecated.warning
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+line 27, in <module>
+hello world
+>> @deprecated.error
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.DeprecatedError: The functionality 'my_func' is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", line 27, in <module>
+```
+
+A custom deprecation message can also be supplied:
+```py
+>> from abllib.wrapper import deprecated
+>> @deprecated.warning("my_func is deprecated, use my_other_func instead")
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+my_func is deprecated, use my_other_func instead
+hello world
+>> @deprecated.error("my_func is deprecated, use my_other_func instead")
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func instead
 ```
 
 ## Installation
