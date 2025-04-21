@@ -90,14 +90,22 @@ def test_persistentstorage_valuetype():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
 
-    PersistentStorage["key1"] = "value"
-    assert PersistentStorage["key1"] == "value"
+    PersistentStorage["key1"] = True
+    assert PersistentStorage["key1"] is True
     PersistentStorage["key1"] = 10
     assert PersistentStorage["key1"] == 10
+    PersistentStorage["key1"] = 10.1
+    assert PersistentStorage["key1"] == 10.1
+    PersistentStorage["key1"] = "value"
+    assert PersistentStorage["key1"] == "value"
     PersistentStorage["key1"] = ["1", "2"]
     assert PersistentStorage["key1"] == ["1", "2"]
     PersistentStorage["key1"] = {"key": "item"}
     assert PersistentStorage["key1"] == {"key": "item"}
+    PersistentStorage["key1"] = ("1", "2")
+    assert PersistentStorage["key1"] == ("1", "2")
+    PersistentStorage["key1"] = None
+    assert PersistentStorage["key1"] is None
 
     class CustomType():
         pass

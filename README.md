@@ -362,7 +362,7 @@ Trying to delete non-existent items raises an KeyNotFoundError.
 
 This storage instance automatically loads saved data on program start and saves its data on program exit.
 
-It can only hold values of type str, int, list or dict.
+It can only hold values of type bool, int, float, str, list, dict, tuple or None.
 
 Example usage:
 
