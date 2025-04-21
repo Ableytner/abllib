@@ -14,7 +14,7 @@ def match_all(target: str, candidates: list[str | tuple[str]], threshold: int = 
     * the edit distance (levenshtein distance) needs to be smaller than >threshold<
     * a single word (>target< split at ' ') needs to have an edit distance smaller than (len(>word<) / 3) + 1
 
-    Returns a list of ints which represent the indexes in candidates that matched the search.
+    Returns a list of MatchResults.
     """
 
     # TODO: type checking with abllib.type module
