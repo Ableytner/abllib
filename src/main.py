@@ -15,4 +15,8 @@
 # add async module with function to run async func in sync context
 
 if __name__ == "__main__":
-    pass
+    import traceback
+    traces = traceback.format_list(traceback.extract_stack())
+    traces.reverse()
+    for line in traces:
+        print(line)

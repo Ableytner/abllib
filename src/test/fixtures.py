@@ -57,3 +57,15 @@ def clean_after_function():
 
     for key in list(_storage.InternalStorage._store.keys()):
         del _storage.InternalStorage[key]
+
+@pytest.fixture(scope="function", autouse=False)
+def capture_logs():
+    """Save all log output to a new file test.log in the root dir"""
+
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
+
+    yield None
+
+    log.initialize()
+    os.remove("test.log")

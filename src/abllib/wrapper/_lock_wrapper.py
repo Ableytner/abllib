@@ -166,5 +166,10 @@ class NamedSemaphore(_BaseNamedLock):
             return InternalStorage[f"_locks.{self.name}.l"]
         return None
 
-WriteLock: type[NamedLock] = deprecated(NamedLock)
-ReadLock: type[NamedSemaphore] = deprecated(NamedSemaphore)
+@deprecated
+class WriteLock(NamedLock):
+    """Deprecated alias for NamedLock"""
+
+@deprecated
+class ReadLock(NamedSemaphore):
+    """Deprecated alias for NamedSemaphore"""
