@@ -180,8 +180,8 @@ class _BaseStorage():
                 # if it isn't the last part
                 if c < len(parts) - 1:
                     curr_dict = curr_dict[part]
-                # pylint: disable-next=unidiomatic-typecheck
                 else:
+                    # pylint: disable-next=unidiomatic-typecheck
                     if type(curr_dict[part]) == _AutoremoveDict and len(curr_dict[part]) == 0:
                         # delete the actual item
                         del curr_dict[part]
