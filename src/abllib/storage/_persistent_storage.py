@@ -6,9 +6,10 @@ import json
 import os
 from typing import Any
 
+from .._storage import InternalStorage
 from .._storage._base_storage import _BaseStorage
-from ._volatile_storage import _VolatileStorage
-from .. import error, wrapper
+from ..storage._storage_view import _StorageView
+from .. import error, fs, wrapper
 
 class _PersistentStorage(_BaseStorage):
     """Storage that is persistent across restarts"""
@@ -16,12 +17,27 @@ class _PersistentStorage(_BaseStorage):
     def __init__(self) -> None:
         pass
 
-    def _init(self):
+    def initialize(self, filename: str = "storage.json"):
+        """
+        Initialize only the PersistentStorage.
+
+        Not needed if you already called abllib.storage.initialize().
+        """
+
         if _PersistentStorage._instance is not None:
             raise error.SingletonInstantiationError.with_values(_PersistentStorage)
 
+        full_filepath = fs.absolute(filename)
+        if not os.path.isdir(os.path.dirname(full_filepath)):
+            raise error.DirNotFoundError.with_values(os.path.dirname(full_filepath))
+
         _PersistentStorage._store = self._store = {}
         _PersistentStorage._instance = self
+
+        _StorageView._instance.add_storage(self)
+
+        InternalStorage["_storage_file"] = full_filepath
+        self.load_from_disk()
 
     _LOCK_NAME = "_PersistentStorage"
 
@@ -61,10 +77,10 @@ class _PersistentStorage(_BaseStorage):
     def load_from_disk(self) -> None:
         """Load the data from the storage file"""
 
-        if "storage_file" not in _VolatileStorage._instance:
+        if "_storage_file" not in InternalStorage:
             raise error.KeyNotFoundError()
 
-        path = _VolatileStorage._instance["storage_file"]
+        path = InternalStorage["_storage_file"]
         if not os.path.isfile(path):
             return
 
@@ -74,10 +90,10 @@ class _PersistentStorage(_BaseStorage):
     def save_to_disk(self) -> None:
         """Save the data to the storage file"""
 
-        if "storage_file" not in _VolatileStorage._instance:
+        if "_storage_file" not in InternalStorage:
             raise error.KeyNotFoundError()
 
-        path = _VolatileStorage._instance["storage_file"]
+        path = InternalStorage["_storage_file"]
         if len(self._store) == 0 and os.path.isfile(path):
             return
 

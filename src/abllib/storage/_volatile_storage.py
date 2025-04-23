@@ -1,6 +1,7 @@
 """Module containing the _VolatileStorage class"""
 
 from .._storage._base_storage import _BaseStorage
+from ..storage._storage_view import _StorageView
 from .. import error, wrapper
 
 class _VolatileStorage(_BaseStorage):
@@ -11,7 +12,7 @@ class _VolatileStorage(_BaseStorage):
 
     def initialize(self):
         """
-        Initialize only the VolatileStorage. Useful if you don't need the PersistentStorage.
+        Initialize only the VolatileStorage.
 
         Not needed if you already called abllib.storage.initialize().
         """
@@ -21,6 +22,8 @@ class _VolatileStorage(_BaseStorage):
 
         _VolatileStorage._store = self._store = {}
         _VolatileStorage._instance = self
+
+        _StorageView._instance.add_storage(self)
 
     _LOCK_NAME = "_VolatileStorage"
 

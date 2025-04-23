@@ -45,7 +45,7 @@ def test_volatilestorage_valuetype():
 def test_volatilestorage_noinit_error():
     """Ensure the VolatileStorage methods don't work before initialization is complete"""
 
-    VolatileStorage = storage._persistent_storage._VolatileStorage()
+    VolatileStorage = storage._volatile_storage._VolatileStorage()
     VolatileStorage._store = None
 
     with pytest.raises(error.NotInitializedError):
@@ -93,10 +93,10 @@ def test_persistentstorage_instantiation():
     """Ensure that PersistentStorage behaves like a singleton"""
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._persistent_storage._PersistentStorage()._init()
+        storage._persistent_storage._PersistentStorage().initialize("test.json")
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._persistent_storage._PersistentStorage()._init()
+        storage._persistent_storage._PersistentStorage().initialize("test.json")
 
 def test_persistentstorage_valuetype():
     """Test the PersistentStorages' support for different value types"""
@@ -133,7 +133,7 @@ def test_persistentstorage_load_file():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
 
-    filepath = storage.VolatileStorage["storage_file"]
+    filepath = _storage.InternalStorage["_storage_file"]
 
     with open(filepath, "w", encoding="utf8") as f:
         json.dump({
@@ -160,7 +160,7 @@ def test_persistentstorage_save_file():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
 
-    filepath = storage.VolatileStorage["storage_file"]
+    filepath = _storage.InternalStorage["_storage_file"]
 
     PersistentStorage["key1"] = "value"
     PersistentStorage["key2"] = ["value21", "value22", "value23"]
@@ -186,7 +186,7 @@ def test_persistentstorage_save_file_empty():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
 
-    filepath = storage.VolatileStorage["storage_file"]
+    filepath = _storage.InternalStorage["_storage_file"]
 
     with open(filepath, "w", encoding="utf8") as f:
         json.dump({
@@ -243,26 +243,16 @@ def test_storageview_instantiation():
     VolatileStorage._store = {}
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
-
-    storage._StorageView()._init([
-        PersistentStorage,
-        VolatileStorage
-    ])
+    StorageView = storage._StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
 
     class FakeStorage():
         pass
 
     with pytest.raises(error.MissingInheritanceError):
-        storage._StorageView()._init([
-            FakeStorage
-        ])
-
-    with pytest.raises(error.MissingInheritanceError):
-        storage._StorageView()._init([
-            PersistentStorage,
-            VolatileStorage,
-            FakeStorage
-        ])
+        StorageView.add_storage(FakeStorage)
 
 def test_storageview_getitem():
     """Test the Storage.__getitem__() method"""
@@ -272,10 +262,9 @@ def test_storageview_getitem():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
     StorageView = storage._StorageView()
-    StorageView._init([
-        PersistentStorage,
-        VolatileStorage
-    ])
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
 
     VolatileStorage["key1"] = "value"
     PersistentStorage["key2"] = "value2"
@@ -298,10 +287,9 @@ def test_storageview_contains():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
     StorageView = storage._StorageView()
-    StorageView._init([
-        PersistentStorage,
-        VolatileStorage
-    ])
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
 
     VolatileStorage["key1"] = "value"
     PersistentStorage["key2"] = "value2"
@@ -328,10 +316,9 @@ def test_storageview_contains_item():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = {}
     StorageView = storage._StorageView()
-    StorageView._init([
-        PersistentStorage,
-        VolatileStorage
-    ])
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
 
     VolatileStorage["key1"] = "value"
     PersistentStorage["key2"] = "value2"
@@ -354,10 +341,9 @@ def test_storageview_noinit_error():
     PersistentStorage = storage._persistent_storage._PersistentStorage()
     PersistentStorage._store = None
     StorageView = storage._StorageView()
-    StorageView._init([
-        PersistentStorage,
-        VolatileStorage
-    ])
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
 
     with pytest.raises(error.NotInitializedError):
         StorageView["testkey"]
@@ -370,20 +356,20 @@ def test_storageview_noinit_error():
         StorageView["testkey"]
     except error.NotInitializedError as exc:
         # the first storage should raise an error
-        assert "PersistentStorage is not yet initialized" in str(exc)
+        assert "VolatileStorage is not yet initialized" in str(exc)
     else:
         pytest.fail("expected exception")
 
-    PersistentStorage._store = {}
+    VolatileStorage._store = {}
 
     try:
         StorageView["testkey"]
     except error.NotInitializedError as exc:
         # the second storage should raise an error
-        assert "VolatileStorage is not yet initialized" in str(exc)
+        assert "PersistentStorage is not yet initialized" in str(exc)
     else:
         pytest.fail("expected exception")
 
-    VolatileStorage._store = {"testkey": "testval"}
+    PersistentStorage._store = {"testkey": "testval"}
 
     assert StorageView.contains_item("testkey", "testval")

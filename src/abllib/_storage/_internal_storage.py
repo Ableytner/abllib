@@ -20,6 +20,6 @@ class _InternalStorage(_BaseStorage):
 
     def __setitem__(self, key: str, item: Any) -> None:
         if not key.startswith("_"):
-            raise error.InternalFunctionUsedError("Please use storage.VolatileStorage instead")
+            raise error.InternalFunctionUsedError("Please use storage.VolatileStorage")
 
         return super().__setitem__(key, item)

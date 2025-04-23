@@ -52,11 +52,11 @@ def clean_after_function():
         del storage.PersistentStorage[key]
 
     for key in list(storage.VolatileStorage._store.keys()):
-        if key not in ["storage_file"]:
-            del storage.VolatileStorage[key]
+        del storage.VolatileStorage[key]
 
     for key in list(_storage.InternalStorage._store.keys()):
-        del _storage.InternalStorage[key]
+        if key not in ["_storage_file"]:
+            del _storage.InternalStorage[key]
 
 @pytest.fixture(scope="function", autouse=False)
 def capture_logs():
