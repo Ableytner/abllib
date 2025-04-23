@@ -66,6 +66,20 @@ def test_volatilestorage_noinit_error():
     else:
         pytest.fail("expected exception")
 
+def test_volatilestorage_del_autoremovedict():
+    """Test that AutoremoveDicts are correctly deleted on del"""
+
+    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage._store = {}
+
+    VolatileStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    del VolatileStorage["key1.key2.key3.key4.key5.key6"]
+    assert "key1.key2.key3.key4.key5" not in VolatileStorage
+    assert "key1.key2.key3.key4" not in VolatileStorage
+    assert "key1.key2.key3" not in VolatileStorage
+    assert "key1.key2" not in VolatileStorage
+    assert "key1" not in VolatileStorage
+
 def test_persistentstorage_inheritance():
     """Ensure the PersistentStorage inherits from _BaseStorage"""
 
@@ -207,6 +221,20 @@ def test_persistentstorage_noinit_error():
         assert "PersistentStorage is not yet initialized" in str(exc)
     else:
         pytest.fail("expected exception")
+
+def test_persistentstorage_del_autoremovedict():
+    """Test that AutoremoveDicts are correctly deleted on del"""
+
+    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage._store = {}
+
+    PersistentStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    del PersistentStorage["key1.key2.key3.key4.key5.key6"]
+    assert "key1.key2.key3.key4.key5" not in PersistentStorage
+    assert "key1.key2.key3.key4" not in PersistentStorage
+    assert "key1.key2.key3" not in PersistentStorage
+    assert "key1.key2" not in PersistentStorage
+    assert "key1" not in PersistentStorage
 
 def test_storageview_instantiation():
     """Ensure that instantiating StorageView only works with valid arguments"""
