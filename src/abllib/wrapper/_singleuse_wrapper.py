@@ -6,9 +6,10 @@ from ..error import CalledMultipleTimesError
 
 def singleuse(func):
     """
-    Make a function single-use only
+    Make a function single-use only.
+    If the function raised an exception, it is not seen as called and can be used again.
 
-    Calling the function twice raises an error.CalledMultipleTimesError
+    Calling the function twice raises an error.CalledMultipleTimesError.
     """
 
     was_called = [False]
@@ -20,8 +21,10 @@ def singleuse(func):
         if was_called[0]:
             raise CalledMultipleTimesError()
 
+        res = func(*args, **kwargs)
+
         was_called[0] = True
 
-        return func(*args, **kwargs)
+        return res
 
     return wrapper
