@@ -438,21 +438,23 @@ Enable all storages:
 >> storage.initialize()
 ```
 
-Alternatively, only the VolatileStorage can be enabled:
+Alternatively, only the needed storages can be enabled:
 ```py
->> from abllib import VolatileStorage
+>> from abllib import VolatileStorage, PersistentStorage
 >> VolatileStorage.initialize()
+>> PersistentStorage.initialize()
 ```
 
 #### VolatileStorage (`abllib.VolatileStorage`)
 
-This storage instance can hold any type of value. The stored data is reset after each program restart.
+This storage can hold any type of value. The stored data is reset after each program restart.
 
 Example usage:
 
-First the storage needs to be imported:
+First the storage needs to be imported and initialized:
 ```py
 >> from abllib import VolatileStorage
+>> VolatileStorage.initialize()
 ```
 
 Items can be assigned in multiple ways:
@@ -499,21 +501,31 @@ Items can be deleted in multiple ways:
 ```py
 >> del VolatileStorage["mykey"]
 >> del VolatileStorage["toplevelkey"]["sublevelkey"]
->> del VolatileStorage["toplevelkey.sublevelkey"] # TODO: implement properly
+>> del VolatileStorage["toplevelkey.sublevelkey"]
 ```
-Trying to delete non-existent items raises an KeyNotFoundError.
+Trying to delete non-existent items raises a KeyNotFoundError.
 
 #### PersistentStorage (`abllib.PersistentStorage`)
 
-This storage instance automatically loads saved data on program start and saves its data on program exit.
+This storage automatically loads saved data on program start.
+It can also save its data on program exit, if desired.
 
-It can only hold values of type bool, int, float, str, list, dict, tuple or None.
+It can only hold values of the following types:
+* bool
+* int
+* float
+* str
+* list
+* dict
+* tuple
+* None
 
 Example usage:
 
-First the storage needs to be imported:
+First the storage needs to be imported and initialized:
 ```py
 >> from abllib import PersistentStorage
+>> PersistentStorage.initialize(save_on_exit=True)
 ```
 
 Items can be assigned in multiple ways:
@@ -557,7 +569,7 @@ Items can be deleted in multiple ways:
 ```py
 >> del PersistentStorage["mykey"]
 >> del PersistentStorage["toplevelkey"]["sublevelkey"]
->> del PersistentStorage["toplevelkey.sublevelkey"] # TODO: implement properly
+>> del PersistentStorage["toplevelkey.sublevelkey"]
 ```
 Trying to delete non-existent items raises an KeyNotFoundError.
 
@@ -569,13 +581,13 @@ All storage data can be loaded and saved manually:
 
 #### StorageView (`abllib.StorageView`)
 
-This instance is a read-only view on both VolatileStorage and PersistentStorage. It is useful to check whether a key exists in any of the storages.
+Implements a read-only view on any loaded storage. It is useful to check whether a key exists in any of the storages.
 
-The StorageView first checks PersistentStorage, then VolatileStorage.
+The StorageView checks storages in the order in which they were initialized.
 
 Example usage:
 
-First the storage needs to be imported:
+First the view needs to be imported:
 ```py
 >> from abllib import StorageView
 ```
