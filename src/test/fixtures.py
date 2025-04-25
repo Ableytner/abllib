@@ -10,7 +10,7 @@ import shutil
 
 import pytest
 
-from abllib import fs, log, storage, _storage
+from abllib import fs, log, storage, _storage, onexit
 
 logger = log.get_logger("test")
 
@@ -55,8 +55,10 @@ def clean_after_function():
         del storage.VolatileStorage[key]
 
     for key in list(_storage.InternalStorage._store.keys()):
-        if key not in ["_storage_file"]:
+        if key not in ["_storage_file", "_onexit"]:
             del _storage.InternalStorage[key]
+
+    onexit.reset()
 
 @pytest.fixture(scope="function", autouse=False)
 def capture_logs():

@@ -10,8 +10,10 @@ from ._general import CalledMultipleTimesError, \
                       LockAcquisitionTimeoutError, \
                       MissingDefaultMessageError, \
                       MissingInheritanceError, \
+                      NameNotFoundError, \
                       NoneTypeError, \
                       NotInitializedError, \
+                      RegisteredMultipleTimesError, \
                       SingletonInstantiationError, \
                       WrongTypeError
 
@@ -28,8 +30,10 @@ __exports__ = [
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,
     MissingInheritanceError,
+    NameNotFoundError,
     NoneTypeError,
     NotInitializedError,
+    RegisteredMultipleTimesError,
     SingletonInstantiationError,
     WrongTypeError,
     INTERNAL
