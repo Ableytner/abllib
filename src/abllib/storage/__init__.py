@@ -4,16 +4,12 @@ from .._storage import _base_storage, _internal_storage
 from ._persistent_storage import _PersistentStorage
 from ._volatile_storage import _VolatileStorage
 from ._storage_view import _StorageView
-from .. import wrapper
 
 # pylint: disable=protected-access
 
-@wrapper.singleuse
 def initialize(filename: str = "storage.json", save_on_exit: bool = False):
     """
     Initialize the storage module.
-
-    This function can only be called once.
 
     If save_on_exit is set to True, automatically calls PersistentStorage.save_to_disk on application exit.
     """

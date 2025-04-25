@@ -12,10 +12,13 @@ from ..storage._storage_view import _StorageView
 from .. import error, fs, onexit, wrapper
 
 class _PersistentStorage(_BaseStorage):
-    """Storage that is persistent across restarts"""
+    """Storage that persists across restarts"""
 
     def __init__(self) -> None:
-        pass
+        if _PersistentStorage._instance is not None:
+            raise error.SingletonInstantiationError.with_values(_PersistentStorage)
+
+        _PersistentStorage._instance = self
 
     def initialize(self, filename: str = "storage.json", save_on_exit: bool = False):
         """
@@ -26,15 +29,22 @@ class _PersistentStorage(_BaseStorage):
         If save_on_exit is set to True, automatically calls save_to_disk on application exit.
         """
 
-        if _PersistentStorage._instance is not None:
-            raise error.SingletonInstantiationError.with_values(_PersistentStorage)
-
         full_filepath = fs.absolute(filename)
         if not os.path.isdir(os.path.dirname(full_filepath)):
             raise error.DirNotFoundError.with_values(os.path.dirname(full_filepath))
 
+        if _PersistentStorage._store is not None:
+            if InternalStorage.contains_item("_storage_file", full_filepath):
+                # the storage file didn't change
+                return
+            
+            # save current store to old file
+            self.save_to_disk()
+
+            InternalStorage["_storage_file"] = full_filepath
+            self.load_from_disk()
+
         _PersistentStorage._store = self._store = {}
-        _PersistentStorage._instance = self
 
         _StorageView._instance.add_storage(self)
 
