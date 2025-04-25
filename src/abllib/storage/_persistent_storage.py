@@ -9,7 +9,7 @@ from typing import Any
 from .._storage import InternalStorage
 from .._storage._base_storage import _BaseStorage
 from ..storage._storage_view import _StorageView
-from .. import error, fs, wrapper
+from .. import error, fs, onexit, wrapper
 
 class _PersistentStorage(_BaseStorage):
     """Storage that is persistent across restarts"""
@@ -17,11 +17,13 @@ class _PersistentStorage(_BaseStorage):
     def __init__(self) -> None:
         pass
 
-    def initialize(self, filename: str = "storage.json"):
+    def initialize(self, filename: str = "storage.json", save_on_exit: bool = False):
         """
         Initialize only the PersistentStorage.
 
         Not needed if you already called abllib.storage.initialize().
+
+        If save_on_exit is set to True, automatically calls save_to_disk on application exit.
         """
 
         if _PersistentStorage._instance is not None:
@@ -38,6 +40,9 @@ class _PersistentStorage(_BaseStorage):
 
         InternalStorage["_storage_file"] = full_filepath
         self.load_from_disk()
+
+        if save_on_exit:
+            onexit.register("PersistentStorage.save", self.save_to_disk)
 
     _LOCK_NAME = "_PersistentStorage"
 

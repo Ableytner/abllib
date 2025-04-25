@@ -1,7 +1,5 @@
 """A module containing json-like storages"""
 
-import atexit
-
 from .._storage import _base_storage, _internal_storage
 from ._persistent_storage import _PersistentStorage
 from ._volatile_storage import _VolatileStorage
@@ -11,21 +9,20 @@ from .. import wrapper
 # pylint: disable=protected-access
 
 @wrapper.singleuse
-def initialize(filename: str = "storage.json"):
+def initialize(filename: str = "storage.json", save_on_exit: bool = False):
     """
     Initialize the storage module.
 
     This function can only be called once.
+
+    If save_on_exit is set to True, automatically calls PersistentStorage.save_to_disk on application exit.
     """
 
     VolatileStorage.initialize()
     StorageView.add_storage(VolatileStorage)
 
-    PersistentStorage.initialize(filename)
+    PersistentStorage.initialize(filename, save_on_exit)
     StorageView.add_storage(PersistentStorage)
-
-    # save persistent storage before program exits
-    atexit.register(PersistentStorage.save_to_disk)
 
 VolatileStorage = _VolatileStorage()
 PersistentStorage = _PersistentStorage()

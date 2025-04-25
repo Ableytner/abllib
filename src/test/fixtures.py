@@ -4,7 +4,6 @@
 
 # pylint: disable=protected-access, missing-class-docstring
 
-import atexit
 import os
 import shutil
 
@@ -34,9 +33,6 @@ def setup():
         os.remove(STORAGE_FILE)
 
     storage.initialize(STORAGE_FILE)
-
-    # disable atexit storage saving
-    atexit.unregister(storage.PersistentStorage.save_to_disk)
 
     yield None
 
