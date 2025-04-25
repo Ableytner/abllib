@@ -37,7 +37,7 @@ class _PersistentStorage(_BaseStorage):
             if InternalStorage.contains_item("_storage_file", full_filepath):
                 # the storage file didn't change
                 return
-            
+
             # save current store to old file
             self.save_to_disk()
 

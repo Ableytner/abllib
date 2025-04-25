@@ -7,30 +7,32 @@ import os
 
 import pytest
 
-from abllib import error, storage, _storage
+from abllib import error, _storage
+from abllib.storage import _VolatileStorage, _PersistentStorage, _StorageView
+from abllib._storage._base_storage import _BaseStorage
 
 def test_volatilestorage_inheritance():
     """Ensure the VolatileStorage inherits from _BaseStorage"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
 
-    assert isinstance(VolatileStorage, _storage._base_storage._BaseStorage)
-    assert not isinstance(VolatileStorage, storage._persistent_storage._PersistentStorage)
+    assert isinstance(VolatileStorage, _BaseStorage)
+    assert not isinstance(VolatileStorage, _PersistentStorage)
 
 def test_volatilestorage_instantiation():
     """Ensure that VolatileStorage behaves like a singleton"""
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._volatile_storage._VolatileStorage().initialize()
+        _VolatileStorage()
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._volatile_storage._VolatileStorage().initialize()
+        _VolatileStorage()
 
 def test_volatilestorage_valuetype():
     """Test the VolatileStorages' support for different value types"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
 
     VolatileStorage["key1"] = ["1", 2, None]
@@ -45,7 +47,7 @@ def test_volatilestorage_valuetype():
 def test_volatilestorage_noinit_error():
     """Ensure the VolatileStorage methods don't work before initialization is complete"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = None
 
     with pytest.raises(error.NotInitializedError):
@@ -69,7 +71,7 @@ def test_volatilestorage_noinit_error():
 def test_volatilestorage_del_autoremovedict():
     """Test that AutoremoveDicts are correctly deleted on del"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
 
     VolatileStorage["key1.key2.key3.key4.key5.key6"] = "values"
@@ -83,25 +85,25 @@ def test_volatilestorage_del_autoremovedict():
 def test_persistentstorage_inheritance():
     """Ensure the PersistentStorage inherits from _BaseStorage"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
-    assert isinstance(PersistentStorage, _storage._base_storage._BaseStorage)
-    assert not isinstance(PersistentStorage, storage._volatile_storage._VolatileStorage)
+    assert isinstance(PersistentStorage, _BaseStorage)
+    assert not isinstance(PersistentStorage, _VolatileStorage)
 
 def test_persistentstorage_instantiation():
     """Ensure that PersistentStorage behaves like a singleton"""
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._persistent_storage._PersistentStorage().initialize("test.json")
+        _PersistentStorage()
 
     with pytest.raises(error.SingletonInstantiationError):
-        storage._persistent_storage._PersistentStorage().initialize("test.json")
+        _PersistentStorage()
 
 def test_persistentstorage_valuetype():
     """Test the PersistentStorages' support for different value types"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
     PersistentStorage["key1"] = True
@@ -130,7 +132,7 @@ def test_persistentstorage_valuetype():
 def test_persistentstorage_load_file():
     """Test the PersistentStorage._load_from_disk() method"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
     filepath = _storage.InternalStorage["_storage_file"]
@@ -157,7 +159,7 @@ def test_persistentstorage_load_file():
 def test_persistentstorage_save_file():
     """Test the PersistentStorage._save_to_disk() method"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
     filepath = _storage.InternalStorage["_storage_file"]
@@ -183,7 +185,7 @@ def test_persistentstorage_save_file_empty():
     if the PersistentStorage is empty
     """
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
     filepath = _storage.InternalStorage["_storage_file"]
@@ -201,7 +203,7 @@ def test_persistentstorage_save_file_empty():
 def test_persistentstorage_noinit_error():
     """Ensure the PersistentStorage methods don't work before initialization is complete"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = None
 
     with pytest.raises(error.NotInitializedError):
@@ -225,7 +227,7 @@ def test_persistentstorage_noinit_error():
 def test_persistentstorage_del_autoremovedict():
     """Test that AutoremoveDicts are correctly deleted on del"""
 
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
 
     PersistentStorage["key1.key2.key3.key4.key5.key6"] = "values"
@@ -239,11 +241,11 @@ def test_persistentstorage_del_autoremovedict():
 def test_storageview_instantiation():
     """Ensure that instantiating StorageView only works with valid arguments"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
-    StorageView = storage._StorageView()
+    StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)
@@ -257,11 +259,11 @@ def test_storageview_instantiation():
 def test_storageview_getitem():
     """Test the Storage.__getitem__() method"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
-    StorageView = storage._StorageView()
+    StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)
@@ -282,11 +284,11 @@ def test_storageview_getitem():
 def test_storageview_contains():
     """Test the Storage.contains() method"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
-    StorageView = storage._StorageView()
+    StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)
@@ -311,11 +313,11 @@ def test_storageview_contains():
 def test_storageview_contains_item():
     """Test the Storage.contains_item() method"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = {}
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
-    StorageView = storage._StorageView()
+    StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)
@@ -336,11 +338,11 @@ def test_storageview_contains_item():
 def test_storageview_noinit_error():
     """Ensure the StorageView methods don't work before initialization is complete"""
 
-    VolatileStorage = storage._volatile_storage._VolatileStorage()
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
     VolatileStorage._store = None
-    PersistentStorage = storage._persistent_storage._PersistentStorage()
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = None
-    StorageView = storage._StorageView()
+    StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)

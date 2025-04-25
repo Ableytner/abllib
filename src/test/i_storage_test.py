@@ -4,18 +4,19 @@
 
 import pytest
 
-from abllib import error, _storage
+from abllib import error
+from abllib._storage import _BaseStorage, _InternalStorage
 
 def test_basestorage_instantiation():
     """Ensure that BaseStorage cannot be initialized"""
 
     with pytest.raises(NotImplementedError):
-        _storage._base_storage._BaseStorage()
+        _BaseStorage()
 
 def test_basestorage_getitem():
     """Test the Storage.__getitem__() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = "value"
@@ -28,7 +29,7 @@ def test_basestorage_getitem():
 def test_basestorage_getitem_multi():
     """Test the Storage.__getitem__() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = {}
@@ -46,7 +47,7 @@ def test_basestorage_getitem_multi():
 def test_basestorage_getitem_keytype():
     """Test the Storage.__getitem__() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -59,7 +60,7 @@ def test_basestorage_getitem_keytype():
 def test_basestorage_getitem_valuetype():
     """Test the Storage.__getitem__() methods' support for different value types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = ["1", 2, None]
@@ -68,7 +69,7 @@ def test_basestorage_getitem_valuetype():
 def test_basestorage_getitem_wrong_key():
     """Test the Storage.__getitem__() methods' protection against nonexistent keys"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(error.KeyNotFoundError):
@@ -81,7 +82,7 @@ def test_basestorage_getitem_wrong_key():
 def test_basestorage_setitem():
     """Test the Storage.__setitem__() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage["key1"] = "value"
@@ -94,7 +95,7 @@ def test_basestorage_setitem():
 def test_basestorage_setitem_multi():
     """Test the Storage.__setitem__() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage["key1"] = {}
@@ -112,7 +113,7 @@ def test_basestorage_setitem_multi():
 def test_basestorage_setitem_create_subdict():
     """Test the Storage.__setitem__() methods' ability to create missing 'inbetween' dictionaries"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage["key1.key2"] = "value2"
@@ -128,7 +129,7 @@ def test_basestorage_setitem_create_subdict():
 def test_basestorage_setitem_keytype():
     """Test the Storage.__setitem__() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -141,7 +142,7 @@ def test_basestorage_setitem_keytype():
 def test_basestorage_setitem_valuetype():
     """Test the Storage.__setitem__() methods' support for different value types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage["key1"] = ["1", 2, None]
@@ -156,7 +157,7 @@ def test_basestorage_setitem_valuetype():
 def test_basestorage_delitem():
     """Test the Storage.__delitem__() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = "value"
@@ -166,7 +167,7 @@ def test_basestorage_delitem():
 def test_basestorage_delitem_multi():
     """Test the Storage.__delitem__() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = {}
@@ -217,7 +218,7 @@ def test_basestorage_delitem_multi():
 def test_basestorage_delitem_keytype():
     """Test the Storage.__delitem__() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -230,7 +231,7 @@ def test_basestorage_delitem_keytype():
 def test_basestorage_delitem_wrong_key():
     """Test the Storage.__delitem__() methods' protection against nonexistent keys"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(error.KeyNotFoundError):
@@ -243,7 +244,7 @@ def test_basestorage_delitem_wrong_key():
 def test_basestorage_pop():
     """Test the Storage.pop() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = "value"
@@ -254,7 +255,7 @@ def test_basestorage_pop():
 def test_basestorage_pop_multi():
     """Test the Storage.pop() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     BaseStorage._store["key1"] = {}
@@ -282,7 +283,7 @@ def test_basestorage_pop_multi():
 def test_basestorage_pop_keytype():
     """Test the Storage.pop() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -295,7 +296,7 @@ def test_basestorage_pop_keytype():
 def test_basestorage_pop_wrong_key():
     """Test the Storage.pop() methods' protection against nonexistent keys"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(error.KeyNotFoundError):
@@ -308,7 +309,7 @@ def test_basestorage_pop_wrong_key():
 def test_basestorage_contains():
     """Test the Storage.contains() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     assert not BaseStorage.contains("key1")
@@ -321,7 +322,7 @@ def test_basestorage_contains():
 def test_basestorage_contains_multi():
     """Test the Storage.contains() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     assert not BaseStorage.contains("key1.key2")
@@ -343,7 +344,7 @@ def test_basestorage_contains_multi():
 def test_basestorage_contains_keytype():
     """Test the Storage.contains() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -356,7 +357,7 @@ def test_basestorage_contains_keytype():
 def test_basestorage_contains_item():
     """Test the Storage.contains_item() method"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     assert not BaseStorage.contains_item("key1", "value")
@@ -367,7 +368,7 @@ def test_basestorage_contains_item():
 def test_basestorage_contains_item_multi():
     """Test the Storage.contains_item() method with subdicts specified in the key"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     assert not BaseStorage.contains_item("key1.key2", "value")
@@ -385,7 +386,7 @@ def test_basestorage_contains_item_multi():
 def test_basestorage_contains_item_keytype():
     """Test the Storage.contains_item() methods' protection against incorrect key types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     with pytest.raises(TypeError):
@@ -398,7 +399,7 @@ def test_basestorage_contains_item_keytype():
 def test_basestorage_contains_item_valuetype():
     """Test the Storage.contains_item() methods' support for different value types"""
 
-    BaseStorage = _storage._base_storage._BaseStorage.__new__(_storage._base_storage._BaseStorage)
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
     BaseStorage._store = {}
 
     assert not BaseStorage.contains_item("key1", ["1", 2, None])
@@ -409,21 +410,24 @@ def test_basestorage_contains_item_valuetype():
 def test_internalstorage_inheritance():
     """Ensure the InternalStorage inherits from _BaseStorage"""
 
-    assert isinstance(_storage.InternalStorage, _storage._base_storage._BaseStorage)
+    InternalStorage = _InternalStorage.__new__(_InternalStorage)
+    InternalStorage._store = {}
+
+    assert isinstance(InternalStorage, _BaseStorage)
 
 def test_internalstorage_instantiation():
     """Ensure that InternalStorage behaves like a singleton"""
 
     with pytest.raises(error.SingletonInstantiationError):
-        _storage._internal_storage._InternalStorage()._init()
+        _InternalStorage()._init()
 
     with pytest.raises(error.SingletonInstantiationError):
-        _storage._internal_storage._InternalStorage()._init()
+        _InternalStorage()._init()
 
 def test_internalstorage_setitem():
     """Ensure that InternalStorage only accepts keys prefixed with '__'"""
 
-    InternalStorage = _storage._internal_storage._InternalStorage.__new__(_storage._internal_storage._InternalStorage)
+    InternalStorage = _InternalStorage.__new__(_InternalStorage)
     InternalStorage._store = {}
 
     with pytest.raises(error.InternalFunctionUsedError):
