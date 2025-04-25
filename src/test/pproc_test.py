@@ -34,6 +34,8 @@ def test_workerthread_func_execution():
     if c >= 10:
         pytest.fail("thread did not complete in time")
 
+    # is_alive stays True for a short time after thread completes
+    sleep(0.1)
     assert not t.is_alive()
 
     assert out[0]
