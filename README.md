@@ -627,6 +627,41 @@ True
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
+#### Singleuse functions (`abllib.wrapper.singleuse`)
+
+The singleuse wrapper can be applied to functions to make them single-useable.
+If an already called function is called again, an CalledMultipleTimesError is raised.
+
+Example usage:
+```py
+>> from abllib.wrapper import singleuse
+>> @singleuse
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+hello world
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.CalledMultipleTimesError: The function can only be called once
+```
+
+If an error occured during function execution, the function can be called again.
+```py
+>> from abllib.wrapper import singleuse
+>> @singleuse
+.. def my_func(arg):
+    raise FileNotFoundError()
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise FileNotFoundError()
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise FileNotFoundError()
+```
+
 #### Custom lock (`abllib.wrapper.Lock`)
 
 The wrapper module contains a modified version of threading.Lock.

@@ -194,3 +194,29 @@ def test_singleuse():
 
     with pytest.raises(error.CalledMultipleTimesError):
         func1()
+
+def test_singleuse_exception():
+    """Ensure that raised exceptions reset singleuse flag"""
+
+    data = [1, 2, 3]
+
+    @wrapper.singleuse
+    def func1():
+        if len(data) > 0:
+            data.pop(0)
+            raise error.InternalCalculationError()
+
+    with pytest.raises(error.InternalCalculationError):
+        func1()
+    with pytest.raises(error.InternalCalculationError):
+        func1()
+    with pytest.raises(error.InternalCalculationError):
+        func1()
+
+    func1()
+
+    with pytest.raises(error.CalledMultipleTimesError):
+        func1()
+
+    with pytest.raises(error.CalledMultipleTimesError):
+        func1()
