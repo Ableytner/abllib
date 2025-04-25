@@ -78,7 +78,7 @@ def deregister(name: str) -> None:
     if f"_onexit.signal.{name}" in InternalStorage:
         deregister_sigterm(name)
         deleted = True
-    
+
     if not deleted:
         # no callback was deleted
         raise error.NameNotFoundError.with_values(name)
@@ -134,6 +134,7 @@ def _atexit_func():
         except Exception as e:
             logger.exception(e)
 
+# pylint: disable-next=unused-argument
 def _signal_func(signum, frame):
     if "_onexit.signal" not in InternalStorage:
         return
@@ -141,16 +142,17 @@ def _signal_func(signum, frame):
     for callback in InternalStorage["_onexit.signal"].values():
         try:
             callback()
+        # pylint: disable-next=broad-exception-caught
         except Exception as e:
             logger.exception(e)
 
 def _ensure_signal_handler():
     if "_onexit.signal" not in InternalStorage:
-        if signal.getsignal(signal.SIGTERM) != InternalStorage["_onexit.orig.signal"]:
+        if signal.getsignal(signal.SIGTERM) is not InternalStorage["_onexit.orig.signal"]:
             raise RuntimeError("signal handler was overwritten, "
                                + "make sure to only use this module to set signal handlers")
     else:
-        if signal.getsignal(signal.SIGTERM) != _signal_func:
+        if signal.getsignal(signal.SIGTERM) is not _signal_func:
             raise RuntimeError("signal handler was overwritten, "
                                + "make sure to only use this module to set signal handlers")
 

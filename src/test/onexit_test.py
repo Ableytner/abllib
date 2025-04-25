@@ -1,8 +1,8 @@
 """Module containing tests for the abllib.onexit module"""
 
-from abllib import error, onexit
-
 import pytest
+
+from abllib import error, onexit
 
 def test_register():
     """Ensure that registering the same callback multiple times raises an error"""

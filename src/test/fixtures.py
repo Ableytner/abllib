@@ -58,7 +58,7 @@ def clean_after_function():
     for key in list(_storage.InternalStorage._store.keys()):
         if key not in ["_onexit"]:
             del _storage.InternalStorage[key]
-    
+
     onexit.reset()
 
 @pytest.fixture(scope="function", autouse=False)
