@@ -4,7 +4,6 @@
 
 # pylint: disable=protected-access, missing-class-docstring
 
-import atexit
 import os
 import shutil
 
@@ -35,9 +34,6 @@ def setup():
 
     storage.initialize(STORAGE_FILE)
 
-    # disable atexit storage saving
-    atexit.unregister(storage.PersistentStorage.save_to_disk)
-
     yield None
 
     storage.PersistentStorage.save_to_disk()
@@ -52,11 +48,10 @@ def clean_after_function():
         del storage.PersistentStorage[key]
 
     for key in list(storage.VolatileStorage._store.keys()):
-        if key not in ["storage_file"]:
-            del storage.VolatileStorage[key]
+        del storage.VolatileStorage[key]
 
     for key in list(_storage.InternalStorage._store.keys()):
-        if key not in ["_onexit"]:
+        if key not in ["_storage_file", "_onexit"]:
             del _storage.InternalStorage[key]
 
     onexit.reset()
