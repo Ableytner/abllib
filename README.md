@@ -14,7 +14,7 @@ The following submodules are available:
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
 5. Logging (`abllib.log`)
-6. Application exit (`abllib.onexit`)
+6. Cleanup on exit (`abllib.onexit`)
 7. Parallel processing (`abllib.pproc`)
 8. Storages (`abllib.storage`)
 9. Function wrappers (`abllib.wrapper`)
@@ -276,7 +276,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Application exit (`abllib.onexit`)
+### 6. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 

@@ -18,17 +18,13 @@ def register(name: str, callback: Callable) -> None:
 
     registered = False
 
-    try:
+    if f"_onexit.atexit.{name}" not in InternalStorage:
         register_normal_exit(name, callback)
         registered = True
-    except error.RegisteredMultipleTimesError:
-        pass
 
-    try:
+    if f"_onexit.signal.{name}" not in InternalStorage:
         register_sigterm(name, callback)
         registered = True
-    except error.RegisteredMultipleTimesError:
-        pass
 
     if not registered:
         raise error.RegisteredMultipleTimesError.with_values(name)
