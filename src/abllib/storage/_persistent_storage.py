@@ -34,15 +34,30 @@ class _PersistentStorage(_BaseStorage):
             raise error.DirNotFoundError.with_values(os.path.dirname(full_filepath))
 
         if _PersistentStorage._store is not None:
+            # this is a re-initialization
+            if save_on_exit:
+                try:
+                    onexit.register("PersistentStorage.save", self.save_to_disk)
+                except error.RegisteredMultipleTimesError:
+                    pass
+            else:
+                try:
+                    onexit.deregister("PersistentStorage.save")
+                except error.NameNotFoundError:
+                    pass
+
             if InternalStorage.contains_item("_storage_file", full_filepath):
                 # the storage file didn't change
-                return
+                pass
+            else:
+                # the storage file changed
+                # save current store to old file
+                self.save_to_disk()
 
-            # save current store to old file
-            self.save_to_disk()
+                InternalStorage["_storage_file"] = full_filepath
+                self.load_from_disk()
 
-            InternalStorage["_storage_file"] = full_filepath
-            self.load_from_disk()
+            return
 
         _PersistentStorage._store = self._store = {}
 

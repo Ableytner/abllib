@@ -21,6 +21,7 @@ class _VolatileStorage(_BaseStorage):
         """
 
         if _VolatileStorage._store is not None:
+            # this is a re-initialization
             return
 
         _VolatileStorage._store = self._store = {}
