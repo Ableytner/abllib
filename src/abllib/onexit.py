@@ -131,6 +131,7 @@ def _atexit_func():
     for callback in InternalStorage["_onexit.atexit"].values():
         try:
             callback()
+        # pylint: disable-next=broad-exception-caught
         except Exception as e:
             logger.exception(e)
 
