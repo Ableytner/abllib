@@ -23,6 +23,8 @@ class _VolatileStorage(_BaseStorage):
         _VolatileStorage._store = self._store = {}
         _VolatileStorage._instance = self
 
+        # we cannot use StorageView defined in __init__.py because of circular imports
+        # pylint: disable-next=protected-access
         _StorageView._instance.add_storage(self)
 
     _LOCK_NAME = "_VolatileStorage"
