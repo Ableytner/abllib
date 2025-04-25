@@ -14,9 +14,10 @@ The following submodules are available:
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
 5. Logging (`abllib.log`)
-6. Storages (`abllib.storage`)
+6. Application exit (`abllib.onexit`)
 7. Parallel processing (`abllib.pproc`)
-8. Function wrappers (`abllib.wrapper`)
+8. Storages (`abllib.storage`)
+9. Function wrappers (`abllib.wrapper`)
 
 ## Submodules
 
@@ -275,7 +276,151 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Storages (`abllib.storage`)
+### 6. Application exit (`abllib.onexit`)
+
+This module contains functions to register callbacks which run on application exit.
+
+The registered functions are called if the application:
+* exits without an exception
+* exits with an exception
+* is killed by a SIGINT signal (the user pressed CTRL+C)
+* is killed by a SIGTERM signal (the program is asked to shut down, e.g. when used in a docker container)
+* calls sys.exit
+
+The registered functions are NOT called if the application:
+* is killed by a SIGKILL signal (cannot be handled by the program)
+* calls os._exit
+* encounters an unrecoverable interpreter exception
+
+Example usage:
+```py
+>> from abllib import onexit
+>> def my_function():
+..   print("we are exiting")
+>> onexit.register("myfunc", my_function)
+>> exit()
+we are exiting
+```
+
+Already registered callbacks can also be deregistered:
+```py
+>> from abllib import onexit
+>> def my_function():
+..   print("we are exiting")
+>> onexit.register("myfunc", my_function)
+>> onexit.deregister("myfunc")
+>> exit()
+```
+
+### 7. Parallel processing (`abllib.pproc`)
+
+This module contains parallel processing-related functionality, both thread-based and process-based.
+
+#### Thread vs Process
+
+The parallel processing module contains both thread-based and process-based methods with overlapping functionality.
+To help decide which solution to use, the key differences are outlined below:
+
+You should use thread-based processing if the parallel task:
+* is not CPU-intensive
+* modifies local variables
+* doesn't need to be killable
+
+Alternatively, you should use process-based processing if the parallel task:
+* is doing CPU-intensive calculations
+* needs to be killable
+
+The reason as to why CPU-intensive tasks in python should run in different processes is due to the [GIL](https://realpython.com/python-gil/) (global interpreter lock), which is further explained in the linked article. This effectively makes multiple threads run as fast as one thread if the bottleneck is the CPU.
+
+Another thing to consider is that thread-based processing is simple and straightforward, whereas process-based functionality can be pretty complex.
+Arguments passed to another process, for example, lose the reference to its original object.
+This means that passing a list to a different process and adding an element in that process doesn't add anything in the original list.
+
+TLDR: If you are not sure what to use, use thread-based processing.
+
+#### WorkerThread (`abllib.pproc.WorkerThread`)
+
+This class represents a seperate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occured exception is returned.
+If .join() is called with reraise=True, any caught exception will be reraised.
+
+Example usage:
+
+```py
+>> from abllib.pproc import WorkerThread
+>> def the_answer():
+..     return 42
+>> wt = WorkerThread(target=the_answer)
+>> wt.start()
+>> wt.join()
+42
+```
+
+Exceptions that occur are caught and returned. The exception object can be reraised manually.
+
+Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+```py
+>> from abllib.pproc import WorkerThread
+>> def not_the_answer():
+..     raise ValueError("The answer is not yet calculated!")
+>> wt = WorkerThread(target=not_the_answer)
+>> wt.start()
+>> wt.join()
+ValueError('The answer is not yet calculated!')
+>> isinstance(wt.join(), BaseException)
+True
+>> raise wt.join()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+>> wt.join(reraise=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+```
+
+#### WorkerProcess (`abllib.pproc.WorkerProcess`)
+
+This class represents a seperate process that runs a given function until completion.
+If .join() is called, the functions return value or any occured exception is returned.
+If .join() is called with reraise=True, any caught exception will be reraised.
+
+Example usage:
+
+```py
+>> from abllib.pproc import WorkerProcess
+>> def the_answer():
+..     return 42
+>> wp = WorkerProcess(target=the_answer)
+>> wp.start()
+>> wp.join()
+42
+```
+
+Exceptions that occur are caught and returned. The exception object can be reraised manually.
+
+Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+```py
+>> from abllib.pproc import WorkerProcess
+>> def not_the_answer():
+..     raise ValueError("The answer is not yet calculated!")
+>> wp = WorkerProcess(target=not_the_answer)
+>> wp.start()
+>> wp.join()
+ValueError('The answer is not yet calculated!')
+>> isinstance(wp.join(), BaseException)
+True
+>> raise wp.join()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+>> wp.join(reraise=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ValueError: The answer is not yet calculated!
+```
+
+### 8. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
 All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
@@ -466,115 +611,7 @@ True
 True
 ```
 
-### 7. Parallel processing (`abllib.pproc`)
-
-This module contains parallel processing-related functionality, both thread-based and process-based.
-
-#### Thread vs Process
-
-The parallel processing module contains both thread-based and process-based methods with overlapping functionality.
-To help decide which solution to use, the key differences are outlined below:
-
-You should use thread-based processing if the parallel task:
-* is not CPU-intensive
-* modifies local variables
-* doesn't need to be killable
-
-Alternatively, you should use process-based processing if the parallel task:
-* is doing CPU-intensive calculations
-* needs to be killable
-
-The reason as to why CPU-intensive tasks in python should run in different processes is due to the [GIL](https://realpython.com/python-gil/) (global interpreter lock), which is further explained in the linked article. This effectively makes multiple threads run as fast as one thread if the bottleneck is the CPU.
-
-Another thing to consider is that thread-based processing is simple and straightforward, whereas process-based functionality can be pretty complex.
-Arguments passed to another process, for example, lose the reference to its original object.
-This means that passing a list to a different process and adding an element in that process doesn't add anything in the original list.
-
-TLDR: If you are not sure what to use, use thread-based processing.
-
-#### WorkerThread (`abllib.pproc.WorkerThread`)
-
-This class represents a seperate thread that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
-If .join() is called with reraise=True, any caught exception will be reraised.
-
-Example usage:
-
-```py
->> from abllib.pproc import WorkerThread
->> def the_answer():
-..     return 42
->> wt = WorkerThread(target=the_answer)
->> wt.start()
->> wt.join()
-42
-```
-
-Exceptions that occur are caught and returned. The exception object can be reraised manually.
-
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
-```py
->> from abllib.pproc import WorkerThread
->> def not_the_answer():
-..     raise ValueError("The answer is not yet calculated!")
->> wt = WorkerThread(target=not_the_answer)
->> wt.start()
->> wt.join()
-ValueError('The answer is not yet calculated!')
->> isinstance(wt.join(), BaseException)
-True
->> raise wt.join()
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ValueError: The answer is not yet calculated!
->> wt.join(reraise=True)
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ValueError: The answer is not yet calculated!
-```
-
-#### WorkerProcess (`abllib.pproc.WorkerProcess`)
-
-This class represents a seperate process that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
-If .join() is called with reraise=True, any caught exception will be reraised.
-
-Example usage:
-
-```py
->> from abllib.pproc import WorkerProcess
->> def the_answer():
-..     return 42
->> wp = WorkerProcess(target=the_answer)
->> wp.start()
->> wp.join()
-42
-```
-
-Exceptions that occur are caught and returned. The exception object can be reraised manually.
-
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
-```py
->> from abllib.pproc import WorkerProcess
->> def not_the_answer():
-..     raise ValueError("The answer is not yet calculated!")
->> wp = WorkerProcess(target=not_the_answer)
->> wp.start()
->> wp.join()
-ValueError('The answer is not yet calculated!')
->> isinstance(wp.join(), BaseException)
-True
->> raise wp.join()
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ValueError: The answer is not yet calculated!
->> wp.join(reraise=True)
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ValueError: The answer is not yet calculated!
-```
-
-### 8. Function wrappers (`abllib.wrapper`)
+### 9. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
