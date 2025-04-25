@@ -2,6 +2,7 @@
 
 # TODO:
 # UP NEXT
+# supply package number manually to release workflow
 
 # IMPORTANT BUT ANNOYING
 # add tests for threaded storage access
