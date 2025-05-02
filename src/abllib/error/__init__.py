@@ -6,6 +6,7 @@ from ._general import CalledMultipleTimesError, \
                       DirNotFoundError, \
                       InternalCalculationError, \
                       InternalFunctionUsedError, \
+                      InvalidKeyError, \
                       KeyNotFoundError, \
                       LockAcquisitionTimeoutError, \
                       MissingDefaultMessageError, \
@@ -26,6 +27,7 @@ __exports__ = [
     DirNotFoundError,
     InternalCalculationError,
     InternalFunctionUsedError,
+    InvalidKeyError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,

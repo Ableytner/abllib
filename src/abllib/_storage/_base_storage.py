@@ -25,9 +25,6 @@ class _BaseStorage():
         If 'key' contains a '.', also checks if all sub-dicts exist.
         """
 
-        if not isinstance(key, str):
-            raise TypeError()
-
         if not self._contains(key):
             return False
         return item == self[key]
@@ -65,15 +62,9 @@ class _BaseStorage():
     def __str__(self) -> str:
         return str(self._store)
 
-    def _ensure_initialized(self) -> None:
-        if self._store is None:
-            raise error.NotInitializedError()
-
     def _contains(self, key: str) -> bool:
         self._ensure_initialized()
-
-        if not isinstance(key, str):
-            raise TypeError()
+        self._ensure_key_validity(key)
 
         if "." not in key:
             return key in self._store
@@ -91,9 +82,7 @@ class _BaseStorage():
 
     def _get(self, key: str) -> Any:
         self._ensure_initialized()
-
-        if not isinstance(key, str):
-            raise TypeError()
+        self._ensure_key_validity(key)
 
         if "." not in key:
             if key not in self._store:
@@ -118,9 +107,7 @@ class _BaseStorage():
 
     def _set(self, key: str, item: Any) -> None:
         self._ensure_initialized()
-
-        if not isinstance(key, str):
-            raise TypeError()
+        self._ensure_key_validity(key)
 
         if "." not in key:
             self._store[key] = item
@@ -141,9 +128,7 @@ class _BaseStorage():
 
     def _del(self, key: str) -> None:
         self._ensure_initialized()
-
-        if not isinstance(key, str):
-            raise TypeError()
+        self._ensure_key_validity(key)
 
         if "." not in key:
             if key not in self._store:
@@ -195,3 +180,18 @@ class _BaseStorage():
             else:
                 # we deleted every subkey
                 return
+
+    def _ensure_initialized(self) -> None:
+        if self._store is None:
+            raise error.NotInitializedError()
+
+    def _ensure_key_validity(self, key: Any) -> None:
+        if not isinstance(key, str):
+            raise error.WrongTypeError.with_values(key, str)
+
+        if key[0] == ".":
+            raise error.InvalidKeyError("Key cannot start with '.'")
+        if key[-1] == ".":
+            raise error.InvalidKeyError("Key cannot end with '.'")
+        if ".." in key:
+            raise error.InvalidKeyError("Key cannot contain '..'")

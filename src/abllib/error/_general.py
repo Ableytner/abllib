@@ -44,6 +44,14 @@ class InternalFunctionUsedError(CustomException):
         0: "This function is only for library-internal use"
     }
 
+class InvalidKeyError(CustomException):
+    """Exception raised when the key has an invalid format"""
+
+    default_messages = {
+        0: "The key has an invalid format",
+        1: "The key '{0}' has an invalid format"
+    }
+
 class KeyNotFoundError(CustomException):
     """Exception raised when the key is not found in the storage"""
 
