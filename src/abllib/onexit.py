@@ -16,6 +16,9 @@ def register(name: str, callback: Callable) -> None:
     Does not work if the application is killed with SIGKILL.
     """
 
+    if "." in name:
+        name = name.replace(".", "_")
+
     registered = False
 
     if f"_onexit.atexit.{name}" not in InternalStorage:
@@ -36,6 +39,9 @@ def register_normal_exit(name: str, callback: Callable) -> None:
     Does not work if the application is killed with SIGTERM or SIGKILL.
     """
 
+    if "." in name:
+        name = name.replace(".", "_")
+
     if f"_onexit.atexit.{name}" in InternalStorage:
         raise error.RegisteredMultipleTimesError.with_values(name)
 
@@ -49,6 +55,9 @@ def register_sigterm(name: str, callback: Callable) -> None:
     """
 
     _ensure_signal_handler()
+
+    if "." in name:
+        name = name.replace(".", "_")
 
     if f"_onexit.signal.{name}" in InternalStorage:
         raise error.RegisteredMultipleTimesError.with_values(name)
