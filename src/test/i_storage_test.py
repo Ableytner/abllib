@@ -4,7 +4,11 @@
 
 import pytest
 
-from abllib.error import InternalFunctionUsedError, InvalidKeyError, KeyNotFoundError, SingletonInstantiationError, WrongTypeError
+from abllib.error import InternalFunctionUsedError, \
+                         InvalidKeyError, \
+                         KeyNotFoundError, \
+                         SingletonInstantiationError, \
+                         WrongTypeError
 from abllib._storage import _BaseStorage, _InternalStorage
 
 def test_basestorage_instantiation():

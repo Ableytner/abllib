@@ -188,7 +188,7 @@ class _BaseStorage():
     def _ensure_key_validity(self, key: Any) -> None:
         if not isinstance(key, str):
             raise error.WrongTypeError.with_values(key, str)
-        
+
         if key[0] == ".":
             raise error.InvalidKeyError("Key cannot start with '.'")
         if key[-1] == ".":
