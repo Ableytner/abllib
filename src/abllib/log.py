@@ -135,7 +135,7 @@ def add_file_handler(filename: str = "latest.log") -> None:
         InternalStorage["_log.handlers"] = []
     InternalStorage["_log.handlers"].append(file_handler)
 
-def get_logger(name: str = None) -> logging.Logger:
+def get_logger(name: str | None = None) -> logging.Logger:
     """
     Return a logger with the given name, or the root logger if name is None.
 

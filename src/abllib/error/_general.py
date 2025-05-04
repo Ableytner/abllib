@@ -151,10 +151,15 @@ class WrongTypeError(CustomException):
     }
 
     @classmethod
-    def with_values(cls, received: Any | type, *expected: Any | type):
+    def with_values(cls, received: Any | type, expected: Any | type | tuple[Any | type]):
         if not isinstance(received, type):
             received = type(received)
-        expected = list(expected)
+
+        if isinstance(expected, tuple):
+            expected = list(expected)
+        if not isinstance(expected, list):
+            expected = [expected]
+
         for c, item in enumerate(expected):
             if not isinstance(item, type):
                 expected[c] = type(item)
