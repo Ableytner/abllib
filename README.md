@@ -423,14 +423,14 @@ ValueError: The answer is not yet calculated!
 ### 8. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
-All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+All data stored in these storages is accessable from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
 Multithreaded access is also allowed.
 
 The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
 
 #### Initialize storages
 
-The storage can be initialized (enabled) in two different ways:
+The storages can be initialized (enabled) in two different ways:
 
 Enable all storages:
 ```py
@@ -578,6 +578,68 @@ All storage data can be loaded and saved manually:
 >> PersistentStorage.load_from_disk()
 >> PersistentStorage.save_to_disk()
 ```
+
+#### CacheStorage (`abllib.CacheStorage`)
+
+This storage is specialized for caching things. It can hold any type of value. The stored data is reset after each program restart.
+
+Important: All stored data could be lost at any time, if a cache reset is forced.
+
+Example usage:
+
+First the storage needs to be imported:
+```py
+>> from abllib import CacheStorage
+```
+Initialization is not needed.
+
+Items can be assigned in multiple ways:
+```py
+>> CacheStorage["mykey"] = "myvalue"
+>> CacheStorage["toplevelkey.sublevelkey"] = "another value"
+>> CacheStorage["specialvalue"] = threading.Lock()
+```
+
+Presence of keys can be checked in multiple ways:
+```py
+>> "toplevelkey" in CacheStorage
+True
+>> "toplevelkey.sublevelkey" in CacheStorage
+True
+>> CacheStorage.contains("toplevelkey")
+True
+>> in CacheStorage.contains("toplevelkey.sublevelkey")
+True
+```
+
+Items can be retrieved in multiple ways:
+```py
+>> CacheStorage["mykey"]
+'myvalue'
+>> CacheStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> CacheStorage["toplevelkey.sublevelkey"]
+'another value'
+>> type(CacheStorage["specialvalue"])
+<class '_thread.lock'>
+```
+
+There also exists a way to check whether an item at a key matches a certain value:
+```py
+>> CacheStorage.contains_item("toplevelkey.sublevelkey", "another value")
+True
+>> # is equal to:
+>> CacheStorage["toplevelkey.sublevelkey"] == "another value"
+True
+```
+
+Items can be deleted in multiple ways:
+```py
+>> del CacheStorage["mykey"]
+>> del CacheStorage["toplevelkey"]["sublevelkey"]
+>> del CacheStorage["toplevelkey.sublevelkey"]
+```
+Trying to delete non-existent items raises a KeyNotFoundError.
 
 #### StorageView (`abllib.StorageView`)
 
