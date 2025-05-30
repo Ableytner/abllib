@@ -1,6 +1,6 @@
 """Module containing tests for the abllib.types module"""
 
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring, unused-argument
 
 import pytest
 
@@ -11,12 +11,12 @@ def test_enforce():
     """Ensure that fs.enforce works as expected"""
 
     assert callable(types.enforce)
-    
+
     types.enforce("test", str)
 
     types.enforce(0, int)
     types.enforce(-35752, int)
-    
+
     types.enforce(2.8, float)
 
     types.enforce(None, None)
@@ -49,7 +49,7 @@ def test_enforce_wrongtypes():
         types.enforce(-35752, float)
     with pytest.raises(WrongTypeError):
         types.enforce(999999, None)
-    
+
     with pytest.raises(WrongTypeError):
         types.enforce(2.8, int)
 
@@ -75,7 +75,7 @@ def test_enforce_wrapper():
     """Ensure that fs.enforce wraps a function as expected"""
 
     assert callable(types.enforce)
-    
+
     @types.enforce
     def myfunc(val1: str, val2: int, val3: float = 0.1, val4: int = -9999):
         return str(val2)
@@ -107,7 +107,7 @@ def test_enforce_wrapper_listtypes():
     """Ensure that fs.enforce handles lists with subtypes correctly"""
 
     assert callable(types.enforce)
-    
+
     @types.enforce
     def myfunc(val1: str, val2: list[int | str]):
         return int(val1)
