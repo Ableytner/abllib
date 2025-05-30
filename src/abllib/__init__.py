@@ -6,7 +6,7 @@ Contains many general-purpose functions which can be used across projects.
 
 from . import alg, error, fs, fuzzy, onexit, wrapper
 from .log import get_logger
-from .storage import PersistentStorage, VolatileStorage, StorageView
+from .storage import CacheStorage, VolatileStorage, PersistentStorage, StorageView
 
 __exports__ = [
     alg,
@@ -16,7 +16,8 @@ __exports__ = [
     onexit,
     wrapper,
     get_logger,
-    PersistentStorage,
+    CacheStorage,
     VolatileStorage,
+    PersistentStorage,
     StorageView
 ]

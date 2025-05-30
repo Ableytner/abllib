@@ -13,26 +13,5 @@ class _CacheStorage(_BaseStorage):
         _CacheStorage._instance = self
         _CacheStorage._store = self._store = {}
 
-    def contains_item(self, key, item):
-        return super().contains_item(key, item)
-
-    def contains(self, key):
-        return super().contains(key)
-
-    def pop(self, key):
-        return super().pop(key)
-
-    def __getitem__(self, key):
-        return super().__getitem__(key)
-
-    def __setitem__(self, key, item):
-        return super().__setitem__(key, item)
-
-    def __delitem__(self, key):
-        return super().__delitem__(key)
-
-    def __contains__(self, key):
-        return super().__contains__(key)
-
     def _ensure_initialized(self):
         return True
