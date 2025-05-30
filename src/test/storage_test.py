@@ -8,7 +8,7 @@ import os
 import pytest
 
 from abllib import error, _storage
-from abllib.storage import _VolatileStorage, _PersistentStorage, _StorageView
+from abllib.storage import _CacheStorage, _VolatileStorage, _PersistentStorage, _StorageView
 from abllib._storage._base_storage import _BaseStorage
 
 def test_volatilestorage_inheritance():
@@ -19,6 +19,7 @@ def test_volatilestorage_inheritance():
 
     assert isinstance(VolatileStorage, _BaseStorage)
     assert not isinstance(VolatileStorage, _PersistentStorage)
+    assert not isinstance(VolatileStorage, _CacheStorage)
 
 def test_volatilestorage_instantiation():
     """Ensure that VolatileStorage behaves like a singleton"""
@@ -90,6 +91,7 @@ def test_persistentstorage_inheritance():
 
     assert isinstance(PersistentStorage, _BaseStorage)
     assert not isinstance(PersistentStorage, _VolatileStorage)
+    assert not isinstance(PersistentStorage, _CacheStorage)
 
 def test_persistentstorage_instantiation():
     """Ensure that PersistentStorage behaves like a singleton"""
@@ -375,3 +377,51 @@ def test_storageview_noinit_error():
     PersistentStorage._store = {"testkey": "testval"}
 
     assert StorageView.contains_item("testkey", "testval")
+
+def test_cachestorage_inheritance():
+    """Ensure the CacheStorage inherits from _BaseStorage"""
+
+    CacheStorage = _CacheStorage.__new__(_CacheStorage)
+    CacheStorage._store = {}
+
+    assert isinstance(CacheStorage, _BaseStorage)
+    assert not isinstance(CacheStorage, _VolatileStorage)
+    assert not isinstance(CacheStorage, _PersistentStorage)
+
+def test_cachestorage_instantiation():
+    """Ensure that CacheStorage behaves like a singleton"""
+
+    with pytest.raises(error.SingletonInstantiationError):
+        _CacheStorage()
+
+    with pytest.raises(error.SingletonInstantiationError):
+        _CacheStorage()
+
+def test_cachestorage_valuetype():
+    """Test the CacheStorages' support for different value types"""
+
+    CacheStorage = _CacheStorage.__new__(_CacheStorage)
+    CacheStorage._store = {}
+
+    CacheStorage["key1"] = ["1", 2, None]
+    assert CacheStorage["key1"] == ["1", 2, None]
+
+    class CustomType():
+        pass
+    custom_item = CustomType()
+    CacheStorage["key1"] = custom_item
+    assert CacheStorage["key1"] == custom_item
+
+def test_cachestorage_del_autoremovedict():
+    """Test that AutoremoveDicts are correctly deleted on del"""
+
+    CacheStorage = _CacheStorage.__new__(_CacheStorage)
+    CacheStorage._store = {}
+
+    CacheStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    del CacheStorage["key1.key2.key3.key4.key5.key6"]
+    assert "key1.key2.key3.key4.key5" not in CacheStorage
+    assert "key1.key2.key3.key4" not in CacheStorage
+    assert "key1.key2.key3" not in CacheStorage
+    assert "key1.key2" not in CacheStorage
+    assert "key1" not in CacheStorage
