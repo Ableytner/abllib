@@ -4,7 +4,7 @@ from .._storage._base_storage import _BaseStorage
 from .. import error
 
 class _CacheStorage(_BaseStorage):
-    """Storage used for caching values at runtime"""
+    """Storage used for caching values"""
 
     def __init__(self) -> None:
         if _CacheStorage._instance is not None:
@@ -14,4 +14,5 @@ class _CacheStorage(_BaseStorage):
         _CacheStorage._store = self._store = {}
 
     def _ensure_initialized(self):
+        # the storage is always initialized
         return True
