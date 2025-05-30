@@ -1,7 +1,5 @@
 """Module containing tests for the abllib.fs module"""
 
-# pylint: disable=missing-class-docstring
-
 import pathlib
 import os
 
