@@ -2,9 +2,12 @@
 
 from typing import Any, Callable
 
-from ._enforce import absolute
+from ._enforce import enforce, enforce_var, enforce_args
 
 __exports__ = [
     Any,
-    Callable
+    Callable,
+    enforce,
+    enforce_var,
+    enforce_args
 ]
