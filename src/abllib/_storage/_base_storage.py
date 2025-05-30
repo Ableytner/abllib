@@ -189,9 +189,10 @@ class _BaseStorage():
         if not isinstance(key, str):
             raise error.WrongTypeError.with_values(key, str)
 
-        if key[0] == ".":
-            raise error.InvalidKeyError("Key cannot start with '.'")
-        if key[-1] == ".":
-            raise error.InvalidKeyError("Key cannot end with '.'")
-        if ".." in key:
-            raise error.InvalidKeyError("Key cannot contain '..'")
+        if "." in key:
+            if key[0] == ".":
+                raise error.InvalidKeyError("Key cannot start with '.'")
+            if key[-1] == ".":
+                raise error.InvalidKeyError("Key cannot end with '.'")
+            if ".." in key:
+                raise error.InvalidKeyError("Key cannot contain '..'")

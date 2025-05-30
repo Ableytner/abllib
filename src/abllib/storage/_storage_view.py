@@ -5,6 +5,7 @@ import functools
 from typing import Any
 
 from .._storage._base_storage import _BaseStorage
+from ._cache_storage import _CacheStorage
 from .. import error, wrapper
 
 # pylint: disable=protected-access
@@ -19,15 +20,17 @@ def _locking(func):
         self: _StorageView = args[0]
 
         for storage in self._storages:
-            lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
-            lock.acquire()
+            if storage._LOCK_NAME != "_BaseStorage":
+                lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
+                lock.acquire()
 
         try:
             return func(*args, **kwargs)
         finally:
             for storage in self._storages:
-                lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
-                lock.release()
+                if storage._LOCK_NAME != "_BaseStorage":
+                    lock = wrapper.NamedSemaphore(storage._LOCK_NAME)
+                    lock.release()
 
     return inner
 
@@ -41,8 +44,10 @@ class _StorageView():
         if _StorageView._instance is not None:
             raise error.SingletonInstantiationError.with_values(_StorageView)
 
-        _StorageView._storages = self._storages = []
         _StorageView._instance = self
+
+        # CacheStorage needs to be added like this to avoid circular imports
+        _StorageView._storages = self._storages = [_CacheStorage._instance]
 
     _instance: _StorageView = None
     _storages: list[_BaseStorage] = None
