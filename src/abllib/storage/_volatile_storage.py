@@ -1,26 +1,34 @@
 """Module containing the _VolatileStorage class"""
 
 from .._storage._base_storage import _BaseStorage
+from ..storage._storage_view import _StorageView
 from .. import error, wrapper
 
 class _VolatileStorage(_BaseStorage):
     """Storage that is not saved across restarts"""
 
     def __init__(self) -> None:
-        pass
+        if _VolatileStorage._instance is not None:
+            raise error.SingletonInstantiationError.with_values(_VolatileStorage)
+
+        _VolatileStorage._instance = self
 
     def initialize(self):
         """
-        Initialize only the VolatileStorage. Useful if you don't need the PersistentStorage.
+        Initialize only the VolatileStorage.
 
         Not needed if you already called abllib.storage.initialize().
         """
 
-        if _VolatileStorage._instance is not None:
-            raise error.SingletonInstantiationError.with_values(_VolatileStorage)
+        if _VolatileStorage._store is not None:
+            # this is a re-initialization
+            return
 
         _VolatileStorage._store = self._store = {}
-        _VolatileStorage._instance = self
+
+        # we cannot use StorageView defined in __init__.py because of circular imports
+        # pylint: disable-next=protected-access
+        _StorageView._instance.add_storage(self)
 
     _LOCK_NAME = "_VolatileStorage"
 

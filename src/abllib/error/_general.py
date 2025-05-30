@@ -44,6 +44,14 @@ class InternalFunctionUsedError(CustomException):
         0: "This function is only for library-internal use"
     }
 
+class InvalidKeyError(CustomException):
+    """Exception raised when the key has an invalid format"""
+
+    default_messages = {
+        0: "The key has an invalid format",
+        1: "The key '{0}' has an invalid format"
+    }
+
 class KeyNotFoundError(CustomException):
     """Exception raised when the key is not found in the storage"""
 
@@ -85,6 +93,14 @@ class MissingInheritanceError(CustomException):
 
         return super().with_values(base_class_name, class_name)
 
+class NameNotFoundError(CustomException):
+    """Exception raised when the name is not found"""
+
+    default_messages = {
+        0: "The requested name could not be found",
+        1: "The requested name '{0}' could not be found"
+    }
+
 class NoneTypeError(CustomException):
     """Exception raised when a value is unexpectedly None"""
 
@@ -97,6 +113,14 @@ class NotInitializedError(CustomException):
 
     default_messages = {
         0: "The instance is not yet initialized correctly"
+    }
+
+class RegisteredMultipleTimesError(CustomException):
+    """Exception raised when something is registered twice"""
+
+    default_messages = {
+        0: "This object is already registered",
+        1: "{0} is already registered"
     }
 
 class SingletonInstantiationError(CustomException):

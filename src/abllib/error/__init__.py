@@ -6,12 +6,15 @@ from ._general import CalledMultipleTimesError, \
                       DirNotFoundError, \
                       InternalCalculationError, \
                       InternalFunctionUsedError, \
+                      InvalidKeyError, \
                       KeyNotFoundError, \
                       LockAcquisitionTimeoutError, \
                       MissingDefaultMessageError, \
                       MissingInheritanceError, \
+                      NameNotFoundError, \
                       NoneTypeError, \
                       NotInitializedError, \
+                      RegisteredMultipleTimesError, \
                       SingletonInstantiationError, \
                       WrongTypeError
 
@@ -24,12 +27,15 @@ __exports__ = [
     DirNotFoundError,
     InternalCalculationError,
     InternalFunctionUsedError,
+    InvalidKeyError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,
     MissingInheritanceError,
+    NameNotFoundError,
     NoneTypeError,
     NotInitializedError,
+    RegisteredMultipleTimesError,
     SingletonInstantiationError,
     WrongTypeError,
     INTERNAL

@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import functools
+import traceback
 from datetime import datetime
 from time import sleep
 
 from ._lock import Lock, Semaphore
 from ._deprecated import deprecated
-from .. import error
+from .. import error, log
 from .._storage import InternalStorage
+
+logger = log.get_logger("LockWrapper")
 
 class _BaseNamedLock():
     """
@@ -138,6 +141,14 @@ class NamedLock(_BaseNamedLock):
 
         self._lock = InternalStorage[f"_locks.{lock_name}.l"]
 
+    def acquire(self):
+        _log_callstack(f"NamedLock '{self.name}' was acquired here:")
+        return super().acquire()
+
+    def release(self):
+        _log_callstack(f"NamedLock '{self.name}' was released here:")
+        return super().release()
+
     def _get_other(self):
         if f"_locks.{self.name}.s" in InternalStorage:
             return InternalStorage[f"_locks.{self.name}.s"]
@@ -161,10 +172,42 @@ class NamedSemaphore(_BaseNamedLock):
 
         self._lock = InternalStorage[f"_locks.{lock_name}.s"]
 
+    def acquire(self):
+        _log_callstack(f"NamedSemaphore '{self.name}' was acquired here:")
+        return super().acquire()
+
+    def release(self):
+        _log_callstack(f"NamedSemaphore '{self.name}' was released here:")
+        return super().release()
+
     def _get_other(self):
         if f"_locks.{self.name}.l" in InternalStorage:
             return InternalStorage[f"_locks.{self.name}.l"]
         return None
 
-WriteLock: type[NamedLock] = deprecated(NamedLock)
-ReadLock: type[NamedSemaphore] = deprecated(NamedSemaphore)
+def _log_callstack(message: str):
+    """Log the current callstack"""
+
+    if log.get_loglevel() != log.LogLevel.ALL:
+        return
+
+    traces = traceback.format_list(traceback.extract_stack())
+    traces.reverse()
+
+    for line in traces:
+        ignore = False
+        for filename in ["_lock_wrapper.py", "_persistent_storage.py", "_volatile_storage.py", "_storage_view.py"]:
+            if filename in line:
+                ignore = True
+
+        if not ignore:
+            logger.debug(message + "\n" + line.strip())
+            return
+
+@deprecated
+class WriteLock(NamedLock):
+    """Deprecated alias for NamedLock"""
+
+@deprecated
+class ReadLock(NamedSemaphore):
+    """Deprecated alias for NamedSemaphore"""

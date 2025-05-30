@@ -2,8 +2,7 @@
 
 # TODO:
 # UP NEXT
-# auto-remove empty subdicts from _BaseStorage on item deletion
-# make output of pylint test humanly readable
+# supply package number manually to release workflow
 
 # IMPORTANT BUT ANNOYING
 # add tests for threaded storage access

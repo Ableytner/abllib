@@ -13,8 +13,7 @@ def match_closest(target: str, candidates: list[str | tuple[str]], threshold: in
 
     After that, it chooses the closest-matching candidate
 
-    Returns a tuple[int, float], which represents the index in candidates that matched the closest,
-    and the similarity score, which is between 0.0 and 1.0
+    Returns a MatchResult
     """
 
     # TODO: type checking with abllib.type module

@@ -1,12 +1,13 @@
 """Module containing the _StorageView class"""
 
-# pylint: disable=protected-access
-
+from __future__ import annotations
 import functools
 from typing import Any
 
 from .._storage._base_storage import _BaseStorage
 from .. import error, wrapper
+
+# pylint: disable=protected-access
 
 def _locking(func):
     """Make a function require all storage locks to be held"""
@@ -36,19 +37,34 @@ class _StorageView():
     def __init__(self):
         pass
 
-    def _init(self, storages: list[_BaseStorage]):
-        for storage in storages:
-            if not isinstance(storage, _BaseStorage):
-                raise error.MissingInheritanceError.with_values(storage, _BaseStorage)
-            self._storages.append(storage)
+    def _init(self) -> None:
+        if _StorageView._instance is not None:
+            raise error.SingletonInstantiationError.with_values(_StorageView)
 
-    _storages: list[_BaseStorage] = []
+        _StorageView._storages = self._storages = []
+        _StorageView._instance = self
+
+    _instance: _StorageView = None
+    _storages: list[_BaseStorage] = None
+
+    def add_storage(self, storage: _BaseStorage) -> None:
+        """
+        Add a new storage to the StorageView.
+
+        The storage has to inherit from _BaseStorage.
+        """
+
+        if not isinstance(storage, _BaseStorage):
+            raise error.MissingInheritanceError.with_values(storage, _BaseStorage)
+
+        self._storages.append(storage)
 
     @_locking
     def contains_item(self, key: str, item: Any) -> bool:
         """
-        Checks whether a key within the storage equals an item
-        If 'key' contains a '.', also checks if all sub-dicts exist
+        Checks whether a key within the storage equals an item.
+
+        If 'key' contains a '.', also checks if all sub-dicts exist.
         """
 
         for storage in self._storages:
@@ -59,8 +75,9 @@ class _StorageView():
     @_locking
     def contains(self, key: str) -> bool:
         """
-        Checks whether a key exists within the storage
-        If 'key' contains a '.', also checks if all sub-dicts exist
+        Checks whether a key exists within the storage.
+
+        If 'key' contains a '.', also checks if all sub-dicts exist.
         """
 
         for storage in self._storages:

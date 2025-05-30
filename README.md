@@ -14,9 +14,10 @@ The following submodules are available:
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
 5. Logging (`abllib.log`)
-6. Storages (`abllib.storage`)
+6. Cleanup on exit (`abllib.onexit`)
 7. Parallel processing (`abllib.pproc`)
-8. Function wrappers (`abllib.wrapper`)
+8. Storages (`abllib.storage`)
+9. Function wrappers (`abllib.wrapper`)
 
 ## Submodules
 
@@ -275,195 +276,40 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Storages (`abllib.storage`)
+### 6. Cleanup on exit (`abllib.onexit`)
 
-This module contains multiple storage types.
-All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
-Multithreaded access is also allowed.
+This module contains functions to register callbacks which run on application exit.
 
-The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
+The registered functions are called if the application:
+* exits without an exception
+* exits with an exception
+* is killed by a SIGINT signal (the user pressed CTRL+C)
+* is killed by a SIGTERM signal (the program is asked to shut down, e.g. when used in a docker container)
+* calls sys.exit
 
-#### Initialize storages
-
-The storage can be initialized (enabled) in two different ways:
-
-Enable all storages:
-```py
->> from abllib import storage
->> storage.initialize()
-```
-
-Alternatively, only the VolatileStorage can be enabled:
-```py
->> from abllib import VolatileStorage
->> VolatileStorage.initialize()
-```
-
-#### VolatileStorage (`abllib.VolatileStorage`)
-
-This storage instance can hold any type of value. The stored data is reset after each program restart.
+The registered functions are NOT called if the application:
+* is killed by a SIGKILL signal (cannot be handled by the program)
+* calls os._exit
+* encounters an unrecoverable interpreter exception
 
 Example usage:
-
-First the storage needs to be imported:
 ```py
->> from abllib import VolatileStorage
+>> from abllib import onexit
+>> def my_function():
+..   print("we are exiting")
+>> onexit.register("myfunc", my_function)
+>> exit()
+we are exiting
 ```
 
-Items can be assigned in multiple ways:
+Already registered callbacks can also be deregistered:
 ```py
->> VolatileStorage["mykey"] = "myvalue"
->> VolatileStorage["toplevelkey.sublevelkey"] = "another value"
->> VolatileStorage["specialvalue"] = threading.Lock()
-```
-
-Presence of keys can be checked in multiple ways:
-```py
->> "toplevelkey" in VolatileStorage
-True
->> "toplevelkey.sublevelkey" in VolatileStorage
-True
->> VolatileStorage.contains("toplevelkey")
-True
->> in VolatileStorage.contains("toplevelkey.sublevelkey")
-True
-```
-
-Items can be retrieved in multiple ways:
-```py
->> VolatileStorage["mykey"]
-'myvalue'
->> VolatileStorage["toplevelkey"]["sublevelkey"]
-'another value'
->> VolatileStorage["toplevelkey.sublevelkey"]
-'another value'
->> type(VolatileStorage["specialvalue"])
-<class '_thread.lock'>
-```
-
-There also exists a way to check whether an item at a key matches a certain value:
-```py
->> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
-True
->> # is equal to:
->> VolatileStorage["toplevelkey.sublevelkey"] == "another value"
-True
-```
-
-Items can be deleted in multiple ways:
-```py
->> del VolatileStorage["mykey"]
->> del VolatileStorage["toplevelkey"]["sublevelkey"]
->> del VolatileStorage["toplevelkey.sublevelkey"] # TODO: implement properly
-```
-Trying to delete non-existent items raises an KeyNotFoundError.
-
-#### PersistentStorage (`abllib.PersistentStorage`)
-
-This storage instance automatically loads saved data on program start and saves its data on program exit.
-
-It can only hold values of type str, int, list or dict.
-
-Example usage:
-
-First the storage needs to be imported:
-```py
->> from abllib import PersistentStorage
-```
-
-Items can be assigned in multiple ways:
-```py
->> PersistentStorage["mykey"] = "myvalue"
->> PersistentStorage["toplevelkey.sublevelkey"] = "another value"
-```
-
-Presence of keys can be checked in multiple ways:
-```py
->> "toplevelkey" in PersistentStorage
-True
->> "toplevelkey.sublevelkey" in PersistentStorage
-True
->> PersistentStorage.contains("toplevelkey")
-True
->> in PersistentStorage.contains("toplevelkey.sublevelkey")
-True
-```
-
-Items can be retrieved in multiple ways:
-```py
->> PersistentStorage["mykey"]
-'myvalue'
->> PersistentStorage["toplevelkey"]["sublevelkey"]
-'another value'
->> PersistentStorage["toplevelkey.sublevelkey"]
-'another value'
-```
-
-There also exists a way to check whether an item at a key matches a certain value:
-```py
->> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
-True
->> # is equal to:
->> PersistentStorage["toplevelkey.sublevelkey"] == "another value"
-True
-```
-
-Items can be deleted in multiple ways:
-```py
->> del PersistentStorage["mykey"]
->> del PersistentStorage["toplevelkey"]["sublevelkey"]
->> del PersistentStorage["toplevelkey.sublevelkey"] # TODO: implement properly
-```
-Trying to delete non-existent items raises an KeyNotFoundError.
-
-All storage data can be loaded and saved manually:
-```py
->> PersistentStorage.load_from_disk()
->> PersistentStorage.save_to_disk()
-```
-
-#### StorageView (`abllib.StorageView`)
-
-This instance is a read-only view on both VolatileStorage and PersistentStorage. It is useful to check whether a key exists in any of the storages.
-
-The StorageView first checks PersistentStorage, then VolatileStorage.
-
-Example usage:
-
-First the storage needs to be imported:
-```py
->> from abllib import StorageView
-```
-
-Presence of keys can be checked in multiple ways:
-```py
->> "toplevelkey" in StorageView
-True
->> "toplevelkey.sublevelkey" in StorageView
-True
->> StorageView.contains("toplevelkey")
-True
->> in StorageView.contains("toplevelkey.sublevelkey")
-True
-```
-
-Items can be retrieved in multiple ways:
-```py
->> StorageView["mykey"]
-'myvalue'
->> StorageView["toplevelkey"]["sublevelkey"]
-'another value'
->> StorageView["toplevelkey.sublevelkey"]
-'another value'
-```
-
-There also exists a way to check whether an item at a key matches a certain value:
-```py
->> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
-True
->> # is equal to:
->> StorageView["toplevelkey.sublevelkey"] == "another value"
-True
+>> from abllib import onexit
+>> def my_function():
+..   print("we are exiting")
+>> onexit.register("myfunc", my_function)
+>> onexit.deregister("myfunc")
+>> exit()
 ```
 
 ### 7. Parallel processing (`abllib.pproc`)
@@ -574,9 +420,247 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 8. Function wrappers (`abllib.wrapper`)
+### 8. Storages (`abllib.storage`)
+
+This module contains multiple storage types.
+All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+Multithreaded access is also allowed.
+
+The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
+
+#### Initialize storages
+
+The storage can be initialized (enabled) in two different ways:
+
+Enable all storages:
+```py
+>> from abllib import storage
+>> storage.initialize()
+```
+
+Alternatively, only the needed storages can be enabled:
+```py
+>> from abllib import VolatileStorage, PersistentStorage
+>> VolatileStorage.initialize()
+>> PersistentStorage.initialize()
+```
+
+#### VolatileStorage (`abllib.VolatileStorage`)
+
+This storage can hold any type of value. The stored data is reset after each program restart.
+
+Example usage:
+
+First the storage needs to be imported and initialized:
+```py
+>> from abllib import VolatileStorage
+>> VolatileStorage.initialize()
+```
+
+Items can be assigned in multiple ways:
+```py
+>> VolatileStorage["mykey"] = "myvalue"
+>> VolatileStorage["toplevelkey.sublevelkey"] = "another value"
+>> VolatileStorage["specialvalue"] = threading.Lock()
+```
+
+Presence of keys can be checked in multiple ways:
+```py
+>> "toplevelkey" in VolatileStorage
+True
+>> "toplevelkey.sublevelkey" in VolatileStorage
+True
+>> VolatileStorage.contains("toplevelkey")
+True
+>> in VolatileStorage.contains("toplevelkey.sublevelkey")
+True
+```
+
+Items can be retrieved in multiple ways:
+```py
+>> VolatileStorage["mykey"]
+'myvalue'
+>> VolatileStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> VolatileStorage["toplevelkey.sublevelkey"]
+'another value'
+>> type(VolatileStorage["specialvalue"])
+<class '_thread.lock'>
+```
+
+There also exists a way to check whether an item at a key matches a certain value:
+```py
+>> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
+True
+>> # is equal to:
+>> VolatileStorage["toplevelkey.sublevelkey"] == "another value"
+True
+```
+
+Items can be deleted in multiple ways:
+```py
+>> del VolatileStorage["mykey"]
+>> del VolatileStorage["toplevelkey"]["sublevelkey"]
+>> del VolatileStorage["toplevelkey.sublevelkey"]
+```
+Trying to delete non-existent items raises a KeyNotFoundError.
+
+#### PersistentStorage (`abllib.PersistentStorage`)
+
+This storage automatically loads saved data on program start.
+It can also save its data on program exit, if desired.
+
+It can only hold values of the following types:
+* bool
+* int
+* float
+* str
+* list
+* dict
+* tuple
+* None
+
+Example usage:
+
+First the storage needs to be imported and initialized:
+```py
+>> from abllib import PersistentStorage
+>> PersistentStorage.initialize(save_on_exit=True)
+```
+
+Items can be assigned in multiple ways:
+```py
+>> PersistentStorage["mykey"] = "myvalue"
+>> PersistentStorage["toplevelkey.sublevelkey"] = "another value"
+```
+
+Presence of keys can be checked in multiple ways:
+```py
+>> "toplevelkey" in PersistentStorage
+True
+>> "toplevelkey.sublevelkey" in PersistentStorage
+True
+>> PersistentStorage.contains("toplevelkey")
+True
+>> in PersistentStorage.contains("toplevelkey.sublevelkey")
+True
+```
+
+Items can be retrieved in multiple ways:
+```py
+>> PersistentStorage["mykey"]
+'myvalue'
+>> PersistentStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> PersistentStorage["toplevelkey.sublevelkey"]
+'another value'
+```
+
+There also exists a way to check whether an item at a key matches a certain value:
+```py
+>> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
+True
+>> # is equal to:
+>> PersistentStorage["toplevelkey.sublevelkey"] == "another value"
+True
+```
+
+Items can be deleted in multiple ways:
+```py
+>> del PersistentStorage["mykey"]
+>> del PersistentStorage["toplevelkey"]["sublevelkey"]
+>> del PersistentStorage["toplevelkey.sublevelkey"]
+```
+Trying to delete non-existent items raises an KeyNotFoundError.
+
+All storage data can be loaded and saved manually:
+```py
+>> PersistentStorage.load_from_disk()
+>> PersistentStorage.save_to_disk()
+```
+
+#### StorageView (`abllib.StorageView`)
+
+Implements a read-only view on any loaded storage. It is useful to check whether a key exists in any of the storages.
+
+The StorageView checks storages in the order in which they were initialized.
+
+Example usage:
+
+First the view needs to be imported:
+```py
+>> from abllib import StorageView
+```
+
+Presence of keys can be checked in multiple ways:
+```py
+>> "toplevelkey" in StorageView
+True
+>> "toplevelkey.sublevelkey" in StorageView
+True
+>> StorageView.contains("toplevelkey")
+True
+>> in StorageView.contains("toplevelkey.sublevelkey")
+True
+```
+
+Items can be retrieved in multiple ways:
+```py
+>> StorageView["mykey"]
+'myvalue'
+>> StorageView["toplevelkey"]["sublevelkey"]
+'another value'
+>> StorageView["toplevelkey.sublevelkey"]
+'another value'
+```
+
+There also exists a way to check whether an item at a key matches a certain value:
+```py
+>> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
+True
+>> # is equal to:
+>> StorageView["toplevelkey.sublevelkey"] == "another value"
+True
+```
+
+### 9. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
+
+#### Singleuse functions (`abllib.wrapper.singleuse`)
+
+The singleuse wrapper can be applied to functions to make them single-useable.
+If an already called function is called again, an CalledMultipleTimesError is raised.
+
+Example usage:
+```py
+>> from abllib.wrapper import singleuse
+>> @singleuse
+.. def my_func(arg):
+    print(arg)
+>> my_func("hello world")
+hello world
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.CalledMultipleTimesError: The function can only be called once
+```
+
+If an error occured during function execution, the function can be called again.
+```py
+>> from abllib.wrapper import singleuse
+>> @singleuse
+.. def my_func(arg):
+    raise FileNotFoundError()
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise FileNotFoundError()
+>> my_func("hello world")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise FileNotFoundError()
+```
 
 #### Custom lock (`abllib.wrapper.Lock`)
 
@@ -703,6 +787,6 @@ This will automatically install all other dependencies.
 
 If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
 ```text
-abllib @ git+https://github.com/Ableytner/abllib@1.3.0
+abllib @ git+https://github.com/Ableytner/abllib@1.3.4
 ```
-whereas 1.3.0 is the version that you want to install.
+whereas 1.3.4 is the version that you want to install.

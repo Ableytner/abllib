@@ -1,42 +1,29 @@
 """A module containing json-like storages"""
 
-# pylint: disable=protected-access
-
-import atexit
-import os
-
 from .._storage import _base_storage, _internal_storage
 from ._persistent_storage import _PersistentStorage
 from ._volatile_storage import _VolatileStorage
 from ._storage_view import _StorageView
-from .. import error, fs, wrapper
 
-@wrapper.singleuse
-def initialize(filename: str = "storage.json"):
+# pylint: disable=protected-access
+
+def initialize(filename: str = "storage.json", save_on_exit: bool = False):
     """
     Initialize the storage module.
 
-    This function can only be called once.
+    If save_on_exit is set to True, automatically calls PersistentStorage.save_to_disk on application exit.
     """
 
-    full_filepath = fs.absolute(filename)
-    if not os.path.isdir(os.path.dirname(full_filepath)):
-        raise error.DirNotFoundError()
-
     VolatileStorage.initialize()
-    PersistentStorage._init()
-    StorageView._init([PersistentStorage, VolatileStorage])
+    StorageView.add_storage(VolatileStorage)
 
-    VolatileStorage["storage_file"] = full_filepath
-
-    PersistentStorage.load_from_disk()
-
-    # save persistent storage before program exits
-    atexit.register(PersistentStorage.save_to_disk)
+    PersistentStorage.initialize(filename, save_on_exit)
+    StorageView.add_storage(PersistentStorage)
 
 VolatileStorage = _VolatileStorage()
 PersistentStorage = _PersistentStorage()
 StorageView = _StorageView()
+StorageView._init()
 
 __exports__ = [
     initialize,

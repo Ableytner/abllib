@@ -21,13 +21,26 @@ class LogLevel(Enum):
     WARN = logging.WARN
     INFO = logging.INFO
     DEBUG = logging.DEBUG
+    ALL = 1
     NOTSET = logging.NOTSET
+
+    def __eq__(self, other):
+        return self is other or self.value == other
+
+    def __ne__(self, other):
+        return self is not other and self.value != other
+
+    # for more details look here:
+    # https://stackoverflow.com/a/72664895/15436169
+    def __hash__(self):
+        return hash(self.value)
 
 def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.ERROR]
                           | Literal[LogLevel.WARNING]
                           | Literal[LogLevel.INFO]
                           | Literal[LogLevel.DEBUG]
+                          | Literal[LogLevel.ALL]
                           | None = None):
     """
     Initialize the custom logging module.
@@ -70,7 +83,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     InternalStorage["_log.level"] = log_level
     get_logger().setLevel(log_level)
 
-def add_console_handler():
+def add_console_handler() -> None:
     """
     Add a console handler to the root logger.
 
@@ -95,7 +108,7 @@ def add_console_handler():
         InternalStorage["_log.handlers"] = []
     InternalStorage["_log.handlers"].append(stream_handler)
 
-def add_file_handler(filename: str = "latest.log"):
+def add_file_handler(filename: str = "latest.log") -> None:
     """
     Add a file handler to the root logger.
 
@@ -136,6 +149,17 @@ def get_logger(name: str = None) -> logging.Logger:
         raise TypeError(f"Expected logger name to be of type {str}, but got {type(name)}")
 
     return logging.getLogger(name)
+
+def get_loglevel() -> Literal[LogLevel.CRITICAL] \
+                      | Literal[LogLevel.ERROR] \
+                      | Literal[LogLevel.INFO] \
+                      | Literal[LogLevel.WARNING] \
+                      | Literal[LogLevel.DEBUG] \
+                      | Literal[LogLevel.ALL] \
+                      | None:
+    """Return the current LogLevel"""
+
+    return InternalStorage["_log.level"] if "_log.level" in InternalStorage else None
 
 def _get_formatter():
     dt_fmt = r"%Y-%m-%d %H:%M:%S"
