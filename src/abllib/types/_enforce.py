@@ -87,6 +87,7 @@ def enforce_var(value: Any, target_type: Any) -> None:
         if isinstance(value, target_type):
             # success
             return
+    # pylint: disable-next=broad-exception-caught
     except Exception:
         pass
 
