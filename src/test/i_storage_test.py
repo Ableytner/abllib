@@ -266,6 +266,47 @@ def test_basestorage_delitem_wrong_key():
     with pytest.raises(KeyNotFoundError):
         del BaseStorage["key1.key2.key3.key4.key5.key6"]
 
+def test_basestorage_keys():
+    """Test the Storage.keys() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.keys()) == 0
+    assert "key1" not in BaseStorage.keys()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.keys()) == 1
+    assert "key1" in BaseStorage.keys()
+    assert list(BaseStorage.keys())[0] == "key1"
+
+def test_basestorage_values():
+    """Test the Storage.values() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.values()) == 0
+    assert "value" not in BaseStorage.values()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.values()) == 1
+    assert "value" in BaseStorage.values()
+    assert list(BaseStorage.values())[0] == "value"
+
+def test_basestorage_items():
+    """Test the Storage.items() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.items()) == 0
+    assert ("key1", "value") not in BaseStorage.items()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.items()) == 1
+    assert ("key1", "value") in BaseStorage.items()
+
 def test_basestorage_pop():
     """Test the Storage.pop() method"""
 
