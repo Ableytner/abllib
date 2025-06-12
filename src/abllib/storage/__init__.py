@@ -1,10 +1,10 @@
 """A module containing json-like storages"""
 
-from .._storage import _base_storage, _internal_storage
 from ._cache_storage import _CacheStorage
 from ._persistent_storage import _PersistentStorage
-from ._volatile_storage import _VolatileStorage
 from ._storage_view import _StorageView
+from ._threadsafe_storage import _ThreadsafeStorage
+from ._volatile_storage import _VolatileStorage
 
 # pylint: disable=protected-access
 
@@ -21,18 +21,22 @@ def initialize(filename: str = "storage.json", save_on_exit: bool = False):
     PersistentStorage.initialize(filename, save_on_exit)
     StorageView.add_storage(PersistentStorage)
 
-VolatileStorage = _VolatileStorage()
-PersistentStorage = _PersistentStorage()
 CacheStorage = _CacheStorage()
+PersistentStorage = _PersistentStorage()
+VolatileStorage = _VolatileStorage()
+
 StorageView = _StorageView()
 StorageView._init()
 
 __exports__ = [
     initialize,
-    VolatileStorage,
-    PersistentStorage,
     CacheStorage,
+    PersistentStorage,
     StorageView,
-    _base_storage,
-    _internal_storage
+    VolatileStorage,
+    _CacheStorage,
+    _PersistentStorage,
+    _StorageView,
+    _ThreadsafeStorage,
+    _VolatileStorage
 ]

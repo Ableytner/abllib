@@ -7,11 +7,11 @@ import os
 from typing import Any
 
 from .._storage import InternalStorage
-from .._storage._base_storage import _BaseStorage
+from ._threadsafe_storage import _ThreadsafeStorage
 from ..storage._storage_view import _StorageView
-from .. import error, fs, onexit, wrapper
+from .. import error, fs, onexit
 
-class _PersistentStorage(_BaseStorage):
+class _PersistentStorage(_ThreadsafeStorage):
     """Storage that persists across restarts"""
 
     def __init__(self) -> None:
@@ -71,23 +71,6 @@ class _PersistentStorage(_BaseStorage):
 
     _LOCK_NAME = "_PersistentStorage"
 
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains_item(self, key, item):
-        return super().contains_item(key, item)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains(self, key):
-        return super().contains(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def pop(self, key) -> Any:
-        return super().pop(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __getitem__(self, key):
-        return super().__getitem__(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
     def __setitem__(self, key: str, item: Any) -> None:
         # TODO: type check list / dict content types
 
@@ -95,14 +78,6 @@ class _PersistentStorage(_BaseStorage):
             raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def __delitem__(self, key):
-        return super().__delitem__(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __contains__(self, key):
-        return super().__contains__(key)
 
     def load_from_disk(self) -> None:
         """Load the data from the storage file"""
