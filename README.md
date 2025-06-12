@@ -496,7 +496,7 @@ Items can be retrieved in multiple ways:
 42
 ```
 
-Multiple objects can also be retrieved at once:
+Multiple items can also be retrieved at once:
 ```py
 >> VolatileStorage.keys()
 dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
@@ -506,7 +506,7 @@ dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock
 dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -586,7 +586,7 @@ Items can be retrieved in multiple ways:
 42
 ```
 
-Multiple objects can also be retrieved at once:
+Multiple items can also be retrieved at once:
 ```py
 >> PersistentStorage.keys()
 dict_keys(['mykey', 'toplevelkey'])
@@ -596,7 +596,7 @@ dict_values(['myvalue', {'sublevelkey': 'another value'}])
 dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'})])
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -676,7 +676,7 @@ Items can be retrieved in multiple ways:
 42
 ```
 
-Multiple objects can also be retrieved at once:
+Multiple items can also be retrieved at once:
 ```py
 >> CacheStorage.keys()
 dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
@@ -686,7 +686,7 @@ dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock
 dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> CacheStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -736,13 +736,29 @@ Items can be retrieved in multiple ways:
 ```py
 >> StorageView["mykey"]
 'myvalue'
+>> StorageView.get("mykey")
+'myvalue'
 >> StorageView["toplevelkey"]["sublevelkey"]
 'another value'
 >> StorageView["toplevelkey.sublevelkey"]
 'another value'
+>> StorageView.get("toplevelkey.sublevelkey")
+'another value'
+>> StorageView.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> StorageView.keys()
+['mykey', 'toplevelkey', 'specialvalue']
+>> StorageView.values()
+['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>]
+>> StorageView.items()
+[('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)]
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
 True

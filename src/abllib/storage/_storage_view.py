@@ -63,6 +63,55 @@ class _StorageView():
                 return True
         return False
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Return the value of an key if it exists in the storage.
+
+        If the key is not found, return the default value instead.
+        """
+
+        for storage in self._storages:
+            if storage.contains(key):
+                return storage[key]
+
+        return default
+
+    def items(self) -> list[tuple[str, Any]]:
+        """
+        Return the top-level keys and values in the storage.
+        """
+
+        items = []
+
+        for storage in self._storages:
+            items += list(storage.items())
+
+        return items
+
+    def keys(self):
+        """
+        Return the top-level keys in the storage.
+        """
+
+        keys = []
+
+        for storage in self._storages:
+            keys += list(storage.keys())
+
+        return keys
+
+    def values(self):
+        """
+        Return the top-level items in the storage.
+        """
+
+        values = []
+
+        for storage in self._storages:
+            values += list(storage.values())
+
+        return values
+
     def __getitem__(self, key: str) -> Any:
         for storage in self._storages:
             if key in storage:
