@@ -118,7 +118,7 @@ class Similarity():
 
         return total_score / score_divisor
 
-    def _construct_primitive_indexes(self) -> list[int]:
+    def _construct_primitive_indexes(self) -> list[np.intp]:
         indexes = []
 
         for row in self.scores_array:
@@ -176,9 +176,9 @@ class Similarity():
 
         number_of_targets = sum((len(item) for item in indexes.values()))
         optimal_indexes = np.full(number_of_targets, dtype=int, fill_value=-1)
-        for candidate_i, target_i in indexes.items():
+        for candidate_i, target_is in indexes.items():
             if candidate_i != -1:
-                optimal_indexes[target_i[0]] = candidate_i
+                optimal_indexes[target_is[0]] = candidate_i
 
         if -1 in indexes:
             # fill up remaining slots with target_i which didn't match (candidate_1 == -1)
