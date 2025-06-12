@@ -20,6 +20,10 @@ class _ThreadsafeStorage(_BaseStorage):
         return super().contains(key)
 
     @wrapper.NamedSemaphore(_LOCK_NAME)
+    def get(self, key, default = None):
+        return super().get(key, default)
+
+    @wrapper.NamedSemaphore(_LOCK_NAME)
     def items(self):
         return super().items()
 
