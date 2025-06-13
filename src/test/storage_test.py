@@ -430,6 +430,31 @@ def test_storageview_get():
     assert StorageView.contains("key2")
     assert StorageView.get("key2") == "value2"
 
+def test_storageview_uniqueness():
+    """Test that StorageView.add_storage() only accepts each storage instance once"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    PersistentStorage2 = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage2._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage)
+
+    StorageView.add_storage(PersistentStorage2)
+
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage2)
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage2)
+
 def test_basestorage_get_default():
     """Test the Storage.get() methods' optional default argument"""
 

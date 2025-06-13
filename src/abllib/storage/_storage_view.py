@@ -32,10 +32,16 @@ class _StorageView():
         Add a new storage to the StorageView.
 
         The storage has to inherit from _BaseStorage.
+
+        If the exact same storage object is registered twice, a RegisteredMultipleTimesError error is raised.
         """
 
         if not isinstance(storage, _BaseStorage):
             raise error.MissingInheritanceError.with_values(storage, _BaseStorage)
+
+        for item in self._storages:
+            if id(item) == id(storage):
+                raise error.RegisteredMultipleTimesError.with_values(storage)
 
         self._storages.append(storage)
 

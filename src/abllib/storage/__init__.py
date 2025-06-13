@@ -16,10 +16,8 @@ def initialize(filename: str = "storage.json", save_on_exit: bool = False):
     """
 
     VolatileStorage.initialize()
-    StorageView.add_storage(VolatileStorage)
 
     PersistentStorage.initialize(filename, save_on_exit)
-    StorageView.add_storage(PersistentStorage)
 
 CacheStorage = _CacheStorage()
 PersistentStorage = _PersistentStorage()
