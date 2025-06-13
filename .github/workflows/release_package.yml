@@ -68,7 +68,7 @@ jobs:
     - name: Read tag from pyproject.toml
       id: read-tag
       run: |
-        TAG=$(python -c 'import tomli; print(tomli.load(open("pyproject.toml", "rb"))["project"]["version"])')
+        TAG=$(python3 -c 'print(next(filter(lambda x: x.startswith("__version__ = "), open("src/abllib/__init__.py").readlines())).split(" = ")[1].strip("\"\n").split("rc")[0])')
         echo $TAG
         echo "release-tag=$(echo $TAG)" >> $GITHUB_OUTPUT
     - uses: mukunku/tag-exists-action@v1.6.0
