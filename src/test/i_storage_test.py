@@ -266,6 +266,47 @@ def test_basestorage_delitem_wrong_key():
     with pytest.raises(KeyNotFoundError):
         del BaseStorage["key1.key2.key3.key4.key5.key6"]
 
+def test_basestorage_keys():
+    """Test the Storage.keys() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.keys()) == 0
+    assert "key1" not in BaseStorage.keys()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.keys()) == 1
+    assert "key1" in BaseStorage.keys()
+    assert list(BaseStorage.keys())[0] == "key1"
+
+def test_basestorage_values():
+    """Test the Storage.values() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.values()) == 0
+    assert "value" not in BaseStorage.values()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.values()) == 1
+    assert "value" in BaseStorage.values()
+    assert list(BaseStorage.values())[0] == "value"
+
+def test_basestorage_items():
+    """Test the Storage.items() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.items()) == 0
+    assert ("key1", "value") not in BaseStorage.items()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.items()) == 1
+    assert ("key1", "value") in BaseStorage.items()
+
 def test_basestorage_pop():
     """Test the Storage.pop() method"""
 
@@ -452,6 +493,91 @@ def test_basestorage_contains_item_valuetype():
 
     BaseStorage["key1"] = ["1", 2, None]
     assert BaseStorage.contains_item("key1", ["1", 2, None])
+
+def test_basestorage_get():
+    """Test the Storage.get() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") is None
+
+    BaseStorage["key1"] = "value"
+    assert BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") == "value"
+
+def test_basestorage_get_multi():
+    """Test the Storage.get() method with subdicts specified in the key"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1.key2")
+    assert BaseStorage.get("key1.key2") is None
+
+    BaseStorage["key1.key2"] = "value2"
+    assert BaseStorage.contains("key1.key2")
+    assert BaseStorage.get("key1.key2") == "value2"
+
+    del BaseStorage["key1"]
+
+    assert not BaseStorage.contains("key1.key2.key3.key4.key5.key6")
+    assert BaseStorage.get("key1.key2.key3.key4.key5.key6") is None
+
+    BaseStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    assert BaseStorage.get("key1.key2.key3.key4.key5.key6") == "values"
+
+def test_basestorage_get_keytype():
+    """Test the Storage.get() methods' protection against incorrect key types"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(None)
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(10)
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(list(("1",)))
+
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get(".some.key")
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get("some.key.")
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get("some..key")
+
+def test_basestorage_get_default():
+    """Test the Storage.get() methods' optional default argument"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") is None
+
+    assert BaseStorage.get("key1", None) is None
+    assert BaseStorage.get("key1", default=None) is None
+
+    assert BaseStorage.get("key1", 45) == 45
+    assert BaseStorage.get("key1", default=45) == 45
+
+    assert BaseStorage.get("key1", "test") == "test"
+    assert BaseStorage.get("key1", default="test") == "test"
+
+    BaseStorage["key1"] = "value"
+    assert BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") == "value"
+
+    assert BaseStorage.get("key1", None) == "value"
+    assert BaseStorage.get("key1", default=None) == "value"
+
+    assert BaseStorage.get("key1", 45) == "value"
+    assert BaseStorage.get("key1", default=45) == "value"
+
+    assert BaseStorage.get("key1", "test") == "value"
+    assert BaseStorage.get("key1", default="test") == "value"
 
 def test_internalstorage_inheritance():
     """Ensure the InternalStorage inherits from _BaseStorage"""

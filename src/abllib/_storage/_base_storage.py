@@ -38,6 +38,25 @@ class _BaseStorage():
 
         return self._contains(key)
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Return the value of an key if it exists in the storage.
+
+        If the key is not found, return the default value instead.
+        """
+
+        if self._contains(key):
+            return self._get(key)
+
+        return default
+
+    def items(self):
+        """
+        Return a view on the top-level keys and values in the storage.
+        """
+
+        return self._store.items()
+
     def pop(self, key: str) -> Any:
         """
         Return the value of an key if it exists in the storage.
@@ -46,6 +65,24 @@ class _BaseStorage():
         val = self._get(key)
         self._del(key)
         return val
+
+    def keys(self):
+        """
+        Return a view on the top-level keys in the storage.
+        """
+
+        self._ensure_initialized()
+
+        return self._store.keys()
+
+    def values(self):
+        """
+        Return a view on the top-level items in the storage.
+        """
+
+        self._ensure_initialized()
+
+        return self._store.values()
 
     def __getitem__(self, key: str) -> Any:
         return self._get(key)

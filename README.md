@@ -480,15 +480,33 @@ Items can be retrieved in multiple ways:
 ```py
 >> VolatileStorage["mykey"]
 'myvalue'
+>> VolatileStorage.get("mykey")
+'myvalue'
 >> VolatileStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> VolatileStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> VolatileStorage["toplevelkey.sublevelkey"]
 'another value'
+>> VolatileStorage.get("toplevelkey.sublevelkey")
+'another value'
 >> type(VolatileStorage["specialvalue"])
 <class '_thread.lock'>
+>> VolatileStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> VolatileStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> VolatileStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> VolatileStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -500,8 +518,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del VolatileStorage["mykey"]
+>> VolatileStorage.pop("mykey")
+'myvalue'
 >> del VolatileStorage["toplevelkey"]["sublevelkey"]
 >> del VolatileStorage["toplevelkey.sublevelkey"]
+>> VolatileStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises a KeyNotFoundError.
 
@@ -550,13 +572,31 @@ Items can be retrieved in multiple ways:
 ```py
 >> PersistentStorage["mykey"]
 'myvalue'
+>> PersistentStorage.get("mykey")
+'myvalue'
 >> PersistentStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> PersistentStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> PersistentStorage["toplevelkey.sublevelkey"]
 'another value'
+>> PersistentStorage.get("toplevelkey.sublevelkey")
+'another value'
+>> PersistentStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> PersistentStorage.keys()
+dict_keys(['mykey', 'toplevelkey'])
+>> PersistentStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}])
+>> PersistentStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'})])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -568,8 +608,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del PersistentStorage["mykey"]
+>> PersistentStorage.pop("mykey")
+'myvalue'
 >> del PersistentStorage["toplevelkey"]["sublevelkey"]
 >> del PersistentStorage["toplevelkey.sublevelkey"]
+>> PersistentStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises an KeyNotFoundError.
 
@@ -616,15 +660,33 @@ Items can be retrieved in multiple ways:
 ```py
 >> CacheStorage["mykey"]
 'myvalue'
+>> CacheStorage.get("mykey")
+'myvalue'
 >> CacheStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> CacheStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> CacheStorage["toplevelkey.sublevelkey"]
 'another value'
+>> CacheStorage.get("toplevelkey.sublevelkey")
+'another value'
 >> type(CacheStorage["specialvalue"])
 <class '_thread.lock'>
+>> CacheStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> CacheStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> CacheStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> CacheStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> CacheStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -636,8 +698,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del CacheStorage["mykey"]
+>> CacheStorage.pop("mykey")
+'myvalue'
 >> del CacheStorage["toplevelkey"]["sublevelkey"]
 >> del CacheStorage["toplevelkey.sublevelkey"]
+>> CacheStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises a KeyNotFoundError.
 
@@ -670,13 +736,29 @@ Items can be retrieved in multiple ways:
 ```py
 >> StorageView["mykey"]
 'myvalue'
+>> StorageView.get("mykey")
+'myvalue'
 >> StorageView["toplevelkey"]["sublevelkey"]
 'another value'
 >> StorageView["toplevelkey.sublevelkey"]
 'another value'
+>> StorageView.get("toplevelkey.sublevelkey")
+'another value'
+>> StorageView.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> StorageView.keys()
+['mykey', 'toplevelkey', 'specialvalue']
+>> StorageView.values()
+['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>]
+>> StorageView.items()
+[('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)]
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
 True

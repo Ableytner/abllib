@@ -247,10 +247,13 @@ def test_storageview_instantiation():
     VolatileStorage._store = {}
     PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
     PersistentStorage._store = {}
+    CacheStorage = _CacheStorage.__new__(_CacheStorage)
+    CacheStorage._store = {}
     StorageView = _StorageView()
     StorageView._storages = []
     StorageView.add_storage(VolatileStorage)
     StorageView.add_storage(PersistentStorage)
+    StorageView.add_storage(CacheStorage)
 
     class FakeStorage():
         pass
@@ -282,6 +285,74 @@ def test_storageview_getitem():
     PersistentStorage["key2.key3.key4.key5.key6.key7"] = "value2"
     assert StorageView["key1.key2.key3"] == "value"
     assert StorageView["key2.key3.key4.key5.key6.key7"] == "value2"
+
+def test_storageview_keys():
+    """Test the Storage.keys() method"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    assert len(StorageView.keys()) == 0
+    assert "key1" not in StorageView.keys()
+    assert "key2" not in StorageView.keys()
+
+    VolatileStorage["key1"] = "value"
+    PersistentStorage["key2"] = "value2"
+    assert len(StorageView.keys()) == 2
+    assert "key1" in StorageView.keys()
+    assert "key2" in StorageView.keys()
+    assert list(StorageView.keys())[0] in ["key1", "key2"]
+
+def test_storageview_values():
+    """Test the Storage.values() method"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    assert len(StorageView.values()) == 0
+    assert "value" not in StorageView.values()
+    assert "value2" not in StorageView.values()
+
+    VolatileStorage["key1"] = "value"
+    PersistentStorage["key2"] = "value2"
+    assert len(StorageView.values()) == 2
+    assert "value" in StorageView.values()
+    assert "value2" in StorageView.values()
+    assert list(StorageView.values())[0] in ["value", "value2"]
+
+def test_storageview_items():
+    """Test the Storage.items() method"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    assert len(StorageView.items()) == 0
+    assert ("key1", "value") not in StorageView.items()
+    assert ("key2", "value2") not in StorageView.items()
+
+    VolatileStorage["key1"] = "value"
+    PersistentStorage["key2"] = "value2"
+    assert len(StorageView.items()) == 2
+    assert ("key1", "value") in StorageView.items()
+    assert ("key2", "value2") in StorageView.items()
 
 def test_storageview_contains():
     """Test the Storage.contains() method"""
@@ -336,6 +407,99 @@ def test_storageview_contains_item():
     PersistentStorage["key2.key3.key4.key5.key6.key7"] = "value2"
     assert StorageView.contains_item("key1.key2.key3", "value")
     assert StorageView.contains_item("key2.key3.key4.key5.key6.key7", "value2")
+
+def test_storageview_get():
+    """Test the Storage.get() method"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    assert not StorageView.contains("key1")
+    assert StorageView.get("key1") is None
+
+    VolatileStorage["key1"] = "value"
+    PersistentStorage["key2"] = "value2"
+    assert StorageView.contains("key1")
+    assert StorageView.get("key1") == "value"
+    assert StorageView.contains("key2")
+    assert StorageView.get("key2") == "value2"
+
+def test_storageview_uniqueness():
+    """Test that StorageView.add_storage() only accepts each storage instance once"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    PersistentStorage2 = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage2._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage)
+
+    StorageView.add_storage(PersistentStorage2)
+
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage2)
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        StorageView.add_storage(PersistentStorage2)
+
+def test_basestorage_get_default():
+    """Test the Storage.get() methods' optional default argument"""
+
+    VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
+    VolatileStorage._store = {}
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+    StorageView = _StorageView()
+    StorageView._storages = []
+    StorageView.add_storage(VolatileStorage)
+    StorageView.add_storage(PersistentStorage)
+
+    assert not StorageView.contains("key1")
+    assert StorageView.get("key1") is None
+
+    assert StorageView.get("key1", None) is None
+    assert StorageView.get("key1", default=None) is None
+
+    assert StorageView.get("key1", 45) == 45
+    assert StorageView.get("key1", default=45) == 45
+
+    assert StorageView.get("key1", "test") == "test"
+    assert StorageView.get("key1", default="test") == "test"
+
+    VolatileStorage["key1"] = "value"
+    PersistentStorage["key2"] = "value2"
+    assert StorageView.contains("key1")
+    assert StorageView.get("key1") == "value"
+    assert StorageView.contains("key2")
+    assert StorageView.get("key2") == "value2"
+
+    assert StorageView.get("key1", None) == "value"
+    assert StorageView.get("key1", default=None) == "value"
+    assert StorageView.get("key2", None) == "value2"
+    assert StorageView.get("key2", default=None) == "value2"
+
+    assert StorageView.get("key1", 45) == "value"
+    assert StorageView.get("key1", default=45) == "value"
+    assert StorageView.get("key2", 45) == "value2"
+    assert StorageView.get("key2", default=45) == "value2"
+
+    assert StorageView.get("key1", "test") == "value"
+    assert StorageView.get("key1", default="test") == "value"
+    assert StorageView.get("key2", "test") == "value2"
+    assert StorageView.get("key2", default="test") == "value2"
 
 def test_storageview_noinit_error():
     """Ensure the StorageView methods don't work before initialization is complete"""
