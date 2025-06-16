@@ -16,7 +16,16 @@ class _BaseStorage():
     _instance: _BaseStorage = None
     _store: dict[str, Any] = None
 
+    _STORAGE_NAME = "BaseStorage"
     _LOCK_NAME = "_BaseStorage"
+
+    @property
+    def name(self) -> str:
+        return self._STORAGE_NAME
+
+    @name.setter
+    def name(self, _) -> None:
+        raise error.ReadonlyError.with_values("Storage.name")
 
     def contains_item(self, key: str, item: Any) -> bool:
         """
@@ -233,3 +242,10 @@ class _BaseStorage():
                 raise error.InvalidKeyError("Key cannot end with '.'")
             if ".." in key:
                 raise error.InvalidKeyError("Key cannot contain '..'")
+
+    def __init_subclass__(cls):
+        if cls._STORAGE_NAME == "BaseStorage":
+            raise error.UninitializedFieldError.with_values(cls, "_STORAGE_NAME")
+
+        if not isinstance(cls._STORAGE_NAME, str):
+            raise error.WrongTypeError.with_values(cls._STORAGE_NAME, str)

@@ -3,12 +3,13 @@
 from typing import Any
 
 from .._storage._base_storage import _BaseStorage
-from .. import wrapper
+from .. import error, wrapper
 
 class _ThreadsafeStorage(_BaseStorage):
     def __init__(self):
         raise NotImplementedError()
 
+    _STORAGE_NAME = "ThreadsafeStorage"
     _LOCK_NAME = "_ThreadsafeStorage"
 
     @wrapper.NamedSemaphore(_LOCK_NAME)
@@ -54,3 +55,10 @@ class _ThreadsafeStorage(_BaseStorage):
     @wrapper.NamedSemaphore(_LOCK_NAME)
     def __contains__(self, key):
         return super().__contains__(key)
+
+    def __init_subclass__(cls):
+        if cls._STORAGE_NAME in ("BaseStorage", "ThreadsafeStorage"):
+            raise error.UninitializedFieldError.with_values(cls, "_STORAGE_NAME")
+
+        if not isinstance(cls._STORAGE_NAME, str):
+            raise error.WrongTypeError.with_values(cls._STORAGE_NAME, str)

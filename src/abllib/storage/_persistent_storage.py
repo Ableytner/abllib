@@ -69,6 +69,7 @@ class _PersistentStorage(_ThreadsafeStorage):
         if save_on_exit:
             onexit.register("PersistentStorage.save", self.save_to_disk)
 
+    _STORAGE_NAME = "PersistentStorage"
     _LOCK_NAME = "_PersistentStorage"
 
     def __setitem__(self, key: str, item: Any) -> None:
