@@ -8,8 +8,42 @@ import os
 import pytest
 
 from abllib import error, _storage
-from abllib.storage import _CacheStorage, _VolatileStorage, _PersistentStorage, _StorageView
+from abllib.storage import _CacheStorage, _VolatileStorage, _PersistentStorage, _StorageView, _ThreadsafeStorage
 from abllib._storage._base_storage import _BaseStorage
+
+def test_threadsafestorage_name_custom():
+    """Ensure that custom storages need to overwrite _STORAGE_NAME"""
+
+    ThreadsafeStorage = _ThreadsafeStorage.__new__(_ThreadsafeStorage)
+    ThreadsafeStorage._store = {}
+
+    with pytest.raises(error.UninitializedFieldError):
+        class _TestStorage(_ThreadsafeStorage):
+            def __init__(self):
+                pass
+
+    with pytest.raises(error.WrongTypeError):
+        class _TestStorage2(_ThreadsafeStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = 42
+
+    with pytest.raises(error.UninitializedFieldError):
+        class _TestStorage3(_ThreadsafeStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = "BaseStorage"
+
+    with pytest.raises(error.UninitializedFieldError):
+        class _TestStorage4(_ThreadsafeStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = "ThreadsafeStorage"
+
+    class _TestStorage5(_ThreadsafeStorage):
+        def __init__(self):
+            pass
+        _STORAGE_NAME = "TestStorage5"
 
 def test_volatilestorage_inheritance():
     """Ensure the VolatileStorage inherits from _BaseStorage"""
@@ -455,7 +489,7 @@ def test_storageview_uniqueness():
     with pytest.raises(error.RegisteredMultipleTimesError):
         StorageView.add_storage(PersistentStorage2)
 
-def test_basestorage_get_default():
+def test_storageview_get_default():
     """Test the Storage.get() methods' optional default argument"""
 
     VolatileStorage = _VolatileStorage.__new__(_VolatileStorage)
