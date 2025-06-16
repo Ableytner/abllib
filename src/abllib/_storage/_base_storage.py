@@ -21,6 +21,8 @@ class _BaseStorage():
 
     @property
     def name(self) -> str:
+        """Provide a human-readable name for this storage"""
+
         return self._STORAGE_NAME
 
     @name.setter
