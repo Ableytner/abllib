@@ -57,4 +57,5 @@ class CustomException(Exception):
                 raise TypeError()
 
         if hasattr(cls, "default_message"):
+            # TODO: handle legacy classes, as default_message is deprecated
             pass

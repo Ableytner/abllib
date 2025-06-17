@@ -69,7 +69,7 @@ class _PersistentStorage(_ThreadsafeStorage):
         if save_on_exit:
             onexit.register("PersistentStorage.save", self.save_to_disk)
 
-    _LOCK_NAME = "_PersistentStorage"
+    _STORAGE_NAME = "PersistentStorage"
 
     def __setitem__(self, key: str, item: Any) -> None:
         # TODO: type check list / dict content types

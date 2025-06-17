@@ -123,6 +123,14 @@ class RegisteredMultipleTimesError(CustomException):
         1: "{0} is already registered"
     }
 
+class ReadonlyError(CustomException):
+    """Exception raised when a read-only object is changed"""
+
+    default_messages = {
+        0: "This object is read-only and cannot be changed",
+        1: "{0} is read-only and cannot be changed"
+    }
+
 class SingletonInstantiationError(CustomException):
     """Exception raised when a singleton class is instantiated twice"""
 
@@ -137,6 +145,15 @@ class SingletonInstantiationError(CustomException):
             class_name = type(class_name)
 
         return super().with_values(class_name)
+
+class UninitializedFieldError(CustomException):
+    """Exception raised when a subclass doesn't initialize a mandatory field"""
+
+    default_messages = {
+        0: "The subclass doesn't initialize a mandatory field",
+        1: "The subclass doesn't initialize the mandatory field {0}",
+        2: "{0} doesn't initialize the mandatory field {1}"
+    }
 
 class WrongTypeError(CustomException):
     """Exception raised when a value wasn't of an expected type"""

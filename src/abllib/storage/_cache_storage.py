@@ -13,6 +13,8 @@ class _CacheStorage(_BaseStorage):
         _CacheStorage._instance = self
         _CacheStorage._store = self._store = {}
 
+    _STORAGE_NAME = "CacheStorage"
+
     def _ensure_initialized(self):
         # the storage is always initialized
         return True

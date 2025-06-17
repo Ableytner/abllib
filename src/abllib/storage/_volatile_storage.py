@@ -30,7 +30,7 @@ class _VolatileStorage(_ThreadsafeStorage):
         # pylint: disable-next=protected-access
         _StorageView._instance.add_storage(self)
 
-    _LOCK_NAME = "_VolatileStorage"
+    _STORAGE_NAME = "VolatileStorage"
 
     def _ensure_initialized(self):
         try:
