@@ -31,7 +31,6 @@ class _VolatileStorage(_ThreadsafeStorage):
         _StorageView._instance.add_storage(self)
 
     _STORAGE_NAME = "VolatileStorage"
-    _LOCK_NAME = "_VolatileStorage"
 
     def _ensure_initialized(self):
         try:

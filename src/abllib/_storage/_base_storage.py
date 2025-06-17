@@ -17,7 +17,6 @@ class _BaseStorage():
     _store: dict[str, Any] = None
 
     _STORAGE_NAME = "BaseStorage"
-    _LOCK_NAME = "_BaseStorage"
 
     @property
     def name(self) -> str:
