@@ -8,7 +8,7 @@ from . import alg, error, fs, fuzzy, onexit, wrapper
 from .log import get_logger
 from .storage import CacheStorage, VolatileStorage, PersistentStorage, StorageView
 
-__version__ = "1.3.5rc1"
+__version__ = "1.3.6rc1"
 
 __exports__ = [
     alg,
