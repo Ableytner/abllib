@@ -1,4 +1,4 @@
-name: Run Tests
+name: Remove 'ready to merge' label
 
 on:
   pull_request:

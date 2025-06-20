@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run all tests on label apply
 
 on:
   pull_request:
