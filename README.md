@@ -19,7 +19,40 @@ The following submodules are available:
 8. Storages (`abllib.storage`)
 9. Function wrappers (`abllib.wrapper`)
 
-## Submodules
+## Installation
+
+### PyPi
+
+Not yet available
+
+### Github
+
+To install the latest development version directly from Github, run the following command:
+```bash
+pip install git+https://github.com/Ableytner/abllib.git
+```
+This will automatically install all other dependencies.
+
+Alternatively, a specific version can be installed as follows:
+```bash
+pip install git+https://github.com/Ableytner/abllib/releases/download/1.3.5/abllib-1.3.5.tar.gz
+```
+where 1.3.5 is the version that you want to install.
+
+### requirements.txt
+
+If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
+```text
+abllib @ git+https://github.com/Ableytner/abllib/releases/download/1.3.5/abllib-1.3.5.tar.gz
+```
+where 1.3.5 is the version that you want to install.
+
+Alternatively, to always install the latest development version, use the following line:
+```text
+abllib @ git+https://github.com/Ableytner/abllib.git
+```
+
+## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
 
@@ -911,26 +944,3 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func instead
 ```
-
-## Installation
-
-### PyPi
-
-Not yet available
-
-### Github
-
-To install the latest version directly from Github, run the following command:
-```bash
-pip install git+https://github.com/Ableytner/abllib.git
-```
-
-This will automatically install all other dependencies.
-
-### requirements.txt
-
-If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
-```text
-abllib @ git+https://github.com/Ableytner/abllib@1.3.4
-```
-whereas 1.3.4 is the version that you want to install.
