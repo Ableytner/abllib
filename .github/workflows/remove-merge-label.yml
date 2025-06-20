@@ -1,0 +1,16 @@
+name: Run Tests
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  remove_label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-ecosystem/action-remove-labels@v1
+        if: github.event.pull_request.merged == true
+        with:
+          labels: 'ready to merge'
+          fail_on_error: false
