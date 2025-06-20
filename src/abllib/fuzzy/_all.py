@@ -2,9 +2,6 @@
 
 from ._matchresult import MatchResult
 from ._similarity import Similarity
-from .. import log
-
-logger = log.get_logger("test")
 
 def match_all(target: str, candidates: list[str | tuple[str]], threshold: int = 5) -> list[MatchResult]:
     """

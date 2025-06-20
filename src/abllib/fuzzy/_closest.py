@@ -3,7 +3,7 @@
 from ._matchresult import MatchResult
 from ._similarity import Similarity
 
-def match_closest(target: str, candidates: list[str | tuple[str]], threshold: int = 5) -> MatchResult:
+def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> MatchResult:
     """
     Match the target to the most similar candidate. Applies fuzzy logic when comparing.
 
@@ -11,7 +11,7 @@ def match_closest(target: str, candidates: list[str | tuple[str]], threshold: in
     * the edit distance (levenshtein distance) needs to be smaller than >threshold<
     * a single word (>target< split at ' ') needs to have an edit distance smaller than (len(>word<) / 3) + 1
 
-    After that, it chooses the closest-matching candidate
+    After that, it chooses the closest-matching candidate.
 
     Returns a MatchResult
     """

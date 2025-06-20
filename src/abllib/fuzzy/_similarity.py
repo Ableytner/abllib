@@ -2,10 +2,8 @@
 
 import numpy as np
 
-from abllib import error, log
+from abllib import error
 from ..alg import levenshtein_distance
-
-logger = log.get_logger("Similarity")
 
 class Similarity():
     """
@@ -69,10 +67,6 @@ class Similarity():
     def calculate(self) -> float:
         """Calculate the similarity"""
 
-        combinations = min(self.scores_array.shape) \
-                       * (abs(self.scores_array.shape[0] - self.scores_array.shape[1]) + 1)
-        logger.debug(f"Calculating at maximum {combinations} combinations")
-
         score = max(
             self._calculate_simple(),
             self._calculate_complex()
@@ -101,7 +95,6 @@ class Similarity():
 
         if not _contains_duplicates(self._construct_primitive_indexes()):
             # the target words don't interfere with each other, so we can use the best score for each
-            logger.debug("we are good to fast-exit")
 
             total_score = 0.0
             for row in self.scores_array:
@@ -212,34 +205,6 @@ def _contains_duplicates(arr: np.ndarray) -> bool:
         seen.add(item)
 
     return False
-
-def _alg(data: np.ndarray, combined_score: float) -> float:
-    """
-    I have no idea what to call this algorithm.
-    
-    It generates all unique combinations of a 2d input array such that in each combination,
-    each row and each column only occurs once.
-
-    This process is done recursively and is quite costly,
-    as the number of combinations equals !n, where n is the number of rows / columns.
-    """
-
-    if data.shape[0] == 1:
-        # take the maximum score of all current scores
-        return combined_score + data.max()
-
-    max_score = 0.0
-
-    for row_index in range(data.shape[0]):
-        reduced_data = _reduce(data, row_index)
-
-        score = _alg(reduced_data, combined_score + data[row_index][0])
-        # branching with if is much faster than max, because max_score only rarely changes
-        # pylint: disable-next=consider-using-max-builtin
-        if score > max_score:
-            max_score = score
-
-    return max_score
 
 def _alg_with_index(data: np.ndarray, combined_score: float) -> tuple[float, list[int]]:
     """
