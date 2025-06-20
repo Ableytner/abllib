@@ -14,8 +14,10 @@ from ._general import CalledMultipleTimesError, \
                       NameNotFoundError, \
                       NoneTypeError, \
                       NotInitializedError, \
+                      ReadonlyError, \
                       RegisteredMultipleTimesError, \
                       SingletonInstantiationError, \
+                      UninitializedFieldError, \
                       WrongTypeError
 
 INTERNAL =  "Internal error, please report it on github!"
@@ -35,8 +37,10 @@ __exports__ = [
     NameNotFoundError,
     NoneTypeError,
     NotInitializedError,
+    ReadonlyError,
     RegisteredMultipleTimesError,
     SingletonInstantiationError,
+    UninitializedFieldError,
     WrongTypeError,
     INTERNAL
 ]

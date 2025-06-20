@@ -18,6 +18,8 @@ class _InternalStorage(_BaseStorage):
         _InternalStorage._store = self._store = {}
         _InternalStorage._instance = self
 
+    _STORAGE_NAME = "InternalStorage"
+
     def __setitem__(self, key: str, item: Any) -> None:
         if not key.startswith("_"):
             raise error.InternalFunctionUsedError("Please use storage.VolatileStorage")

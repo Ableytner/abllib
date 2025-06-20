@@ -7,7 +7,9 @@ import pytest
 from abllib.error import InternalFunctionUsedError, \
                          InvalidKeyError, \
                          KeyNotFoundError, \
+                         ReadonlyError, \
                          SingletonInstantiationError, \
+                         UninitializedFieldError, \
                          WrongTypeError
 from abllib._storage import _BaseStorage, _InternalStorage
 
@@ -578,6 +580,53 @@ def test_basestorage_get_default():
 
     assert BaseStorage.get("key1", "test") == "value"
     assert BaseStorage.get("key1", default="test") == "value"
+
+def test_basestorage_name():
+    """Test the Storage.name member"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert hasattr(BaseStorage, "name")
+    assert isinstance(BaseStorage.name, str)
+    assert BaseStorage.name == "BaseStorage"
+
+def test_basestorage_name_readonly():
+    """Ensure that Storage.name is readonly"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(ReadonlyError):
+        BaseStorage.name = "AnotherName"
+
+def test_basestorage_name_custom():
+    """Ensure that custom storages need to overwrite _STORAGE_NAME"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(UninitializedFieldError):
+        class _TestStorage(_BaseStorage):
+            def __init__(self):
+                pass
+
+    with pytest.raises(WrongTypeError):
+        class _TestStorage2(_BaseStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = 42
+
+    with pytest.raises(UninitializedFieldError):
+        class _TestStorage3(_BaseStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = "BaseStorage"
+
+    class _TestStorage4(_BaseStorage):
+        def __init__(self):
+            pass
+        _STORAGE_NAME = "TestStorage4"
 
 def test_internalstorage_inheritance():
     """Ensure the InternalStorage inherits from _BaseStorage"""
