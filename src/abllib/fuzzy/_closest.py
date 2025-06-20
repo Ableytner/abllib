@@ -8,8 +8,8 @@ def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshol
     Match the target to the most similar candidate. Applies fuzzy logic when comparing.
 
     In order to successfully match a candidate, at least one of two conditions need to be true:
-    * the edit distance (levenshtein distance) needs to be smaller than >threshold<
-    * a single word (>target< split at ' ') needs to have an edit distance smaller than (len(>word<) / 3) + 1
+    * the edit distance (levenshtein distance) needs to be smaller than *threshold*
+    * a single word (*target* split at ' ') needs to have an edit distance smaller than (len(*word*) / 3) + 1
 
     After that, it chooses the closest-matching candidate.
 
@@ -29,7 +29,7 @@ def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshol
 
     return result
 
-def _matches_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> MatchResult:
+def _matches_single_candidate(target: str, candidate: str | tuple[str, ...], threshold: int) -> MatchResult:
     if isinstance(candidate, str):
         score = Similarity(target, candidate, threshold).calculate()
         return MatchResult(score, candidate)

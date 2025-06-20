@@ -214,7 +214,7 @@ def _alg_with_index(data: np.ndarray, combined_score: float) -> tuple[float, lis
     each row and each column only occurs once.
 
     This process is done recursively and is quite costly,
-    as the number of combinations equals !n, where n is the number of rows / columns.
+    as the number of combinations equals !n, where n is (number of rows / number of columns).
     """
 
     if data.shape[0] == 1:
