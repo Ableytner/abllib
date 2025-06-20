@@ -34,7 +34,7 @@ jobs:
     - name: Read tag from __init__.py
       id: read-tag
       run: |
-        TAG=$(sed -n -e '/__version__/ s/.*\= *//p' src/abllib/__init__.py | tr -d '"' | cut -d 'r' -f1)
+        TAG=$(sed -n -e '/version/ s/.*\= *//p' pyproject.toml | tr -d '"' | cut -d 'r' -f1)
         echo $TAG
         echo "release-tag=$(echo $TAG)" >> $GITHUB_OUTPUT
     - uses: mukunku/tag-exists-action@v1.6.0
@@ -70,7 +70,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Update version string
       run: |
-        sed -i 's/__version__ = ".*"/__version__ = "${{ needs.tag.outputs.release-tag }}"/' src/abllib/__init__.py
+        sed -i 's/version = ".*"/version = "${{ needs.tag.outputs.release-tag }}"/' pyproject.toml
     - name: Build the package
       run: |
         python -m build
