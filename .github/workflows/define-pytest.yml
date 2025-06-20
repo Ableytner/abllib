@@ -1,4 +1,4 @@
-name: Define Pytest
+name: Define pytest
 
 on:
   workflow_call:
