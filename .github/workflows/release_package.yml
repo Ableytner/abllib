@@ -83,8 +83,12 @@ jobs:
   release:
     needs: [pylint, pytest, build, tag]
     runs-on: self-hosted
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/abllib
     permissions:
-      contents: write
+      contents: write # mandatory to create release
+      id-token: write  # mandatory for pypi 'trusted publishing'
     steps:
     - uses: actions/checkout@v3
     - name: Load persisted builds
@@ -113,3 +117,5 @@ jobs:
         tag: "${{ needs.tag.outputs.release-tag }}"
         commit: "master"
         token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to pypi
+      uses: pypa/gh-action-pypi-publish@release/v1
