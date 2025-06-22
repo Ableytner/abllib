@@ -110,6 +110,7 @@ jobs:
       run: |
         echo "${{ needs.tag.outputs.release-tag }}"
     - name: Create new release
+      if: false
       uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
