@@ -6,7 +6,9 @@ Supports Python versions 3.10 - 3.13.
 
 ## Overview
 
-This project contains many submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
+This project is a collection of many small helper modules that can be used for all kinds of projects.
+
+It is structured into small submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
@@ -21,35 +23,45 @@ The following submodules are available:
 
 ## Installation
 
-### PyPi
+### PyPI
 
-Not yet available
-
-### Github
-
-To install the latest development version directly from Github, run the following command:
+All stable versions get released on PyPI. To download the newest version, run the following command:
 ```bash
-pip install git+https://github.com/Ableytner/abllib.git
+pip install abllib
 ```
 This will automatically install all other dependencies.
 
 Alternatively, a specific version can be installed as follows:
 ```bash
-pip install git+https://github.com/Ableytner/abllib/releases/download/1.3.5/abllib-1.3.5.tar.gz
+pip install abllib==1.3.6
 ```
-where 1.3.5 is the version that you want to install.
+where 1.3.6 is the version you want to install.
+
+### Github
+
+To install the latest development version directly from Github, run the following command:
+```bash
+pip install git+https://github.com/Ableytner/abllib
+```
+
+Additionally, a [wheel](https://peps.python.org/pep-0427/) is added to every [stable release](https://github.com/Ableytner/abllib/releases), which can be manually downloaded and installed.
 
 ### requirements.txt
 
 If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
 ```text
-abllib @ git+https://github.com/Ableytner/abllib/releases/download/1.3.5/abllib-1.3.5.tar.gz
+abllib==1.3.6
 ```
-where 1.3.5 is the version that you want to install.
+where 1.3.6 is the version that you want to install.
 
-Alternatively, to always install the latest development version, use the following line:
+To always use the latest stable version:
 ```text
-abllib @ git+https://github.com/Ableytner/abllib.git
+abllib
+```
+
+To always install the latest development version:
+```text
+abllib @ git+https://github.com/Ableytner/abllib
 ```
 
 ## Documentation
