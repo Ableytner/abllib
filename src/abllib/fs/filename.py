@@ -9,7 +9,8 @@ def sanitize(filename: str) -> str:
     Additionally, all spaces are replaced with underscores.
     """
 
-    if not isinstance(filename, str): raise WrongTypeError.with_values(filename, str)
+    if not isinstance(filename, str):
+        raise WrongTypeError.with_values(filename, str)
 
     chars_to_remove = "',#^?!\"<>%$%°*"
     chars_to_replace = " /\\|~+:;"
@@ -22,7 +23,7 @@ def sanitize(filename: str) -> str:
 
     for char in chars_to_remove:
         filename = filename.replace(char, "")
-    
+
     for char in chars_to_replace:
         filename = filename.replace(char, "_")
 
