@@ -1,10 +1,10 @@
 """Module containing the _VolatileStorage class"""
 
-from .._storage._base_storage import _BaseStorage
+from ._threadsafe_storage import _ThreadsafeStorage
 from ..storage._storage_view import _StorageView
-from .. import error, wrapper
+from .. import error
 
-class _VolatileStorage(_BaseStorage):
+class _VolatileStorage(_ThreadsafeStorage):
     """Storage that is not saved across restarts"""
 
     def __init__(self) -> None:
@@ -30,35 +30,7 @@ class _VolatileStorage(_BaseStorage):
         # pylint: disable-next=protected-access
         _StorageView._instance.add_storage(self)
 
-    _LOCK_NAME = "_VolatileStorage"
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains_item(self, key, item):
-        return super().contains_item(key, item)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains(self, key):
-        return super().contains(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def pop(self, key):
-        return super().pop(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __getitem__(self, key):
-        return super().__getitem__(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def __setitem__(self, key, item):
-        return super().__setitem__(key, item)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def __delitem__(self, key):
-        return super().__delitem__(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __contains__(self, key):
-        return super().__contains__(key)
+    _STORAGE_NAME = "VolatileStorage"
 
     def _ensure_initialized(self):
         try:

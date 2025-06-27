@@ -16,7 +16,17 @@ class _BaseStorage():
     _instance: _BaseStorage = None
     _store: dict[str, Any] = None
 
-    _LOCK_NAME = "_BaseStorage"
+    _STORAGE_NAME = "BaseStorage"
+
+    @property
+    def name(self) -> str:
+        """Provide a human-readable name for this storage"""
+
+        return self._STORAGE_NAME
+
+    @name.setter
+    def name(self, _) -> None:
+        raise error.ReadonlyError.with_values("Storage.name")
 
     def contains_item(self, key: str, item: Any) -> bool:
         """
@@ -38,6 +48,25 @@ class _BaseStorage():
 
         return self._contains(key)
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Return the value of an key if it exists in the storage.
+
+        If the key is not found, return the default value instead.
+        """
+
+        if self._contains(key):
+            return self._get(key)
+
+        return default
+
+    def items(self):
+        """
+        Return a view on the top-level keys and values in the storage.
+        """
+
+        return self._store.items()
+
     def pop(self, key: str) -> Any:
         """
         Return the value of an key if it exists in the storage.
@@ -46,6 +75,24 @@ class _BaseStorage():
         val = self._get(key)
         self._del(key)
         return val
+
+    def keys(self):
+        """
+        Return a view on the top-level keys in the storage.
+        """
+
+        self._ensure_initialized()
+
+        return self._store.keys()
+
+    def values(self):
+        """
+        Return a view on the top-level items in the storage.
+        """
+
+        self._ensure_initialized()
+
+        return self._store.values()
 
     def __getitem__(self, key: str) -> Any:
         return self._get(key)
@@ -196,3 +243,10 @@ class _BaseStorage():
                 raise error.InvalidKeyError("Key cannot end with '.'")
             if ".." in key:
                 raise error.InvalidKeyError("Key cannot contain '..'")
+
+    def __init_subclass__(cls):
+        if cls._STORAGE_NAME == "BaseStorage":
+            raise error.UninitializedFieldError.with_values(cls, "_STORAGE_NAME")
+
+        if not isinstance(cls._STORAGE_NAME, str):
+            raise error.WrongTypeError.with_values(cls._STORAGE_NAME, str)

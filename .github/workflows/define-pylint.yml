@@ -1,4 +1,4 @@
-name: Define Pylint
+name: Define pylint
 
 on:
   workflow_call:

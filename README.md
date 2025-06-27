@@ -6,7 +6,9 @@ Supports Python versions 3.10 - 3.13.
 
 ## Overview
 
-This project contains many submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
+This project is a collection of many small helper modules that can be used for all kinds of projects.
+
+It is structured into small submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
@@ -19,7 +21,50 @@ The following submodules are available:
 8. Storages (`abllib.storage`)
 9. Function wrappers (`abllib.wrapper`)
 
-## Submodules
+## Installation
+
+### PyPI
+
+All stable versions get released on PyPI. To download the newest version, run the following command:
+```bash
+pip install abllib
+```
+This will automatically install all other dependencies.
+
+Alternatively, a specific version can be installed as follows:
+```bash
+pip install abllib==1.3.6
+```
+where 1.3.6 is the version you want to install.
+
+### Github
+
+To install the latest development version directly from Github, run the following command:
+```bash
+pip install git+https://github.com/Ableytner/abllib
+```
+
+Additionally, a [wheel](https://peps.python.org/pep-0427/) is added to every [stable release](https://github.com/Ableytner/abllib/releases), which can be manually downloaded and installed.
+
+### requirements.txt
+
+If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
+```text
+abllib==1.3.6
+```
+where 1.3.6 is the version that you want to install.
+
+To always use the latest stable version:
+```text
+abllib
+```
+
+To always install the latest development version:
+```text
+abllib @ git+https://github.com/Ableytner/abllib
+```
+
+## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
 
@@ -480,15 +525,33 @@ Items can be retrieved in multiple ways:
 ```py
 >> VolatileStorage["mykey"]
 'myvalue'
+>> VolatileStorage.get("mykey")
+'myvalue'
 >> VolatileStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> VolatileStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> VolatileStorage["toplevelkey.sublevelkey"]
 'another value'
+>> VolatileStorage.get("toplevelkey.sublevelkey")
+'another value'
 >> type(VolatileStorage["specialvalue"])
 <class '_thread.lock'>
+>> VolatileStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> VolatileStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> VolatileStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> VolatileStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -500,8 +563,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del VolatileStorage["mykey"]
+>> VolatileStorage.pop("mykey")
+'myvalue'
 >> del VolatileStorage["toplevelkey"]["sublevelkey"]
 >> del VolatileStorage["toplevelkey.sublevelkey"]
+>> VolatileStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises a KeyNotFoundError.
 
@@ -550,13 +617,31 @@ Items can be retrieved in multiple ways:
 ```py
 >> PersistentStorage["mykey"]
 'myvalue'
+>> PersistentStorage.get("mykey")
+'myvalue'
 >> PersistentStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> PersistentStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> PersistentStorage["toplevelkey.sublevelkey"]
 'another value'
+>> PersistentStorage.get("toplevelkey.sublevelkey")
+'another value'
+>> PersistentStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> PersistentStorage.keys()
+dict_keys(['mykey', 'toplevelkey'])
+>> PersistentStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}])
+>> PersistentStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'})])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -568,8 +653,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del PersistentStorage["mykey"]
+>> PersistentStorage.pop("mykey")
+'myvalue'
 >> del PersistentStorage["toplevelkey"]["sublevelkey"]
 >> del PersistentStorage["toplevelkey.sublevelkey"]
+>> PersistentStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises an KeyNotFoundError.
 
@@ -616,15 +705,33 @@ Items can be retrieved in multiple ways:
 ```py
 >> CacheStorage["mykey"]
 'myvalue'
+>> CacheStorage.get("mykey")
+'myvalue'
 >> CacheStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> CacheStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> CacheStorage["toplevelkey.sublevelkey"]
 'another value'
+>> CacheStorage.get("toplevelkey.sublevelkey")
+'another value'
 >> type(CacheStorage["specialvalue"])
 <class '_thread.lock'>
+>> CacheStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> CacheStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> CacheStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> CacheStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> CacheStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -636,8 +743,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del CacheStorage["mykey"]
+>> CacheStorage.pop("mykey")
+'myvalue'
 >> del CacheStorage["toplevelkey"]["sublevelkey"]
 >> del CacheStorage["toplevelkey.sublevelkey"]
+>> CacheStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises a KeyNotFoundError.
 
@@ -670,13 +781,29 @@ Items can be retrieved in multiple ways:
 ```py
 >> StorageView["mykey"]
 'myvalue'
+>> StorageView.get("mykey")
+'myvalue'
 >> StorageView["toplevelkey"]["sublevelkey"]
 'another value'
 >> StorageView["toplevelkey.sublevelkey"]
 'another value'
+>> StorageView.get("toplevelkey.sublevelkey")
+'another value'
+>> StorageView.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> StorageView.keys()
+['mykey', 'toplevelkey', 'specialvalue']
+>> StorageView.values()
+['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>]
+>> StorageView.items()
+[('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)]
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -829,26 +956,3 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func instead
 ```
-
-## Installation
-
-### PyPi
-
-Not yet available
-
-### Github
-
-To install the latest version directly from Github, run the following command:
-```bash
-pip install git+https://github.com/Ableytner/abllib.git
-```
-
-This will automatically install all other dependencies.
-
-### requirements.txt
-
-If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
-```text
-abllib @ git+https://github.com/Ableytner/abllib@1.3.4
-```
-whereas 1.3.4 is the version that you want to install.
