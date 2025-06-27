@@ -84,8 +84,8 @@ jobs:
     needs: [pylint, pytest, build, tag]
     runs-on: self-hosted
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/abllib
+      name: pypi
+      url: https://pypi.org/p/abllib
     permissions:
       contents: write # mandatory to create release
       id-token: write  # mandatory for pypi 'trusted publishing'
@@ -120,5 +120,3 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish to pypi
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
