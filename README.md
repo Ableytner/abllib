@@ -185,7 +185,7 @@ Currently supported language-specific text transliterations:
 | german     | yes       |                                                                                                                                            |
 | japanese   | partial   | needs optional library [pykakasi](https://pypi.org/project/pykakasi/) (`pip install pykakasi`), otherwise removes japanese characters      |
 
-Special characters from all unsupported languages will simply be removed.
+Special characters from unsupported languages and any other non-ascii will be removed from the resulting text.
 
 ### 4. Fuzzy matching (`abllib.fuzzy`)
 
