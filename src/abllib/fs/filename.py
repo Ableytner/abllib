@@ -9,10 +9,7 @@ try:
 except ImportError:
     pass
 
-from .. import log
 from ..error import WrongTypeError
-
-logger = log.get_logger("sanitize")
 
 CHARS_TO_REMOVE = "',#^?!\"<>%$%°*"
 CHARS_TO_REPLACE = " /\\|~+:;@"
@@ -53,11 +50,16 @@ def _sanitize_letters(filename: str) -> str:
     filename = filename.replace("Ü", "U")
 
     # japanese characters
-    if _contains_japanese_char(filename) or True:
+    if _contains_japanese_char(filename):
         if "pykakasi" in sys.modules:
             filename = _replace_japanese_chars(filename)
         else:
-            logger.warning("to properly transliterate japanese text to rōmaji, you need to install the optional dependency 'pykakasi'")
+            # needs to be imported here to prevent circular import
+            # pylint: disable-next=cyclic-import, import-outside-toplevel
+            from .. import log
+            logger = log.get_logger("sanitize")
+            logger.warning("to properly transliterate japanese text to rōmaji, "
+                           "you need to install the optional dependency 'pykakasi'")
             filename = _remove_japanese_chars(filename)
 
     return filename
@@ -89,25 +91,25 @@ def _sanitize_symbols(filename: str) -> str:
 
     for char in CHARS_TO_REPLACE:
         filename = filename.replace(char, "_")
-    
+
     return filename
 
 # original code from here:
 # https://stackoverflow.com/a/30070664/15436169
 japanese_char_ranges = [
-    {"from": ord(u"\u3300"), "to": ord(u"\u33ff")},         # compatibility ideographs
-    {"from": ord(u"\ufe30"), "to": ord(u"\ufe4f")},         # compatibility ideographs
-    {"from": ord(u"\uf900"), "to": ord(u"\ufaff")},         # compatibility ideographs
-    {"from": ord(u"\U0002F800"), "to": ord(u"\U0002fa1f")}, # compatibility ideographs
-    {'from': ord(u'\u3040'), 'to': ord(u'\u309f')},         # Japanese Hiragana
-    {"from": ord(u"\u30a0"), "to": ord(u"\u30ff")},         # Japanese Katakana
-    {"from": ord(u"\u2e80"), "to": ord(u"\u2eff")},         # cjk radicals supplement
-    {"from": ord(u"\u4e00"), "to": ord(u"\u9fff")},
-    {"from": ord(u"\u3400"), "to": ord(u"\u4dbf")},
-    {"from": ord(u"\U00020000"), "to": ord(u"\U0002a6df")},
-    {"from": ord(u"\U0002a700"), "to": ord(u"\U0002b73f")},
-    {"from": ord(u"\U0002b740"), "to": ord(u"\U0002b81f")},
-    {"from": ord(u"\U0002b820"), "to": ord(u"\U0002ceaf")}  # included as of Unicode 8.0
+    {"from": ord("\u3300"), "to": ord("\u33ff")},         # compatibility ideographs
+    {"from": ord("\ufe30"), "to": ord("\ufe4f")},         # compatibility ideographs
+    {"from": ord("\uf900"), "to": ord("\ufaff")},         # compatibility ideographs
+    {"from": ord("\U0002F800"), "to": ord("\U0002fa1f")}, # compatibility ideographs
+    {"from": ord("\u3040"), "to": ord("\u309f")},         # Japanese Hiragana
+    {"from": ord("\u30a0"), "to": ord("\u30ff")},         # Japanese Katakana
+    {"from": ord("\u2e80"), "to": ord("\u2eff")},         # cjk radicals supplement
+    {"from": ord("\u4e00"), "to": ord("\u9fff")},
+    {"from": ord("\u3400"), "to": ord("\u4dbf")},
+    {"from": ord("\U00020000"), "to": ord("\U0002a6df")},
+    {"from": ord("\U0002a700"), "to": ord("\U0002b73f")},
+    {"from": ord("\U0002b740"), "to": ord("\U0002b81f")},
+    {"from": ord("\U0002b820"), "to": ord("\U0002ceaf")}  # included as of Unicode 8.0
 ]
 
 def _contains_japanese_char(text) -> bool:
@@ -121,10 +123,10 @@ def _is_japanese_letter(char: str) -> bool:
     if char == " ":
         return False
 
-    for range in japanese_char_ranges:
-        if range["from"] <= ord(char) <= range["to"]:
+    for char_range in japanese_char_ranges:
+        if char_range["from"] <= ord(char) <= char_range["to"]:
             return True
-    
+
     return False
 
 def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
@@ -137,7 +139,7 @@ def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
             start = i
             while i < len(text) and _is_japanese_letter(text[i]):
                 i += 1
-            
+
             converted_text = " ".join([item["hepburn"] for item in pykakasi.kakasi().convert(text[start:i])])
 
             text = text[:start] + converted_text + text[i:]
