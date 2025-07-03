@@ -93,31 +93,51 @@ This module contains a custom exception system, which supports default messages 
 
 The base class to all custom exceptions. This class cannot be invoked on its own, but should be subclassed to create your own error classes.
 
-Note that all deriving classes should end with 'Error', not 'Exception', to stay consistent with the python naming scheme.
+Note that all deriving classes' names should end with 'Error', not 'Exception', to stay consistent with the python naming scheme.
 
 Example usage:
 ```py
 >> from abllib.error import CustomException
 >> class MySpecialError(CustomException):
-..     default_message = "This error has a default message!"
+..     default_messages = {0: "This error shows a default message!", 1: "This error shows {0}!"}
 >> raise MySpecialError()
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-MySpecialError: This error has a default message!
+    raise MySpecialError()
+MySpecialError: This error shows a default message!
+>> raise MySpecialError.with_values("a customizable message")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise MySpecialError.with_values("a customizable message")
+MySpecialError: This error shows a customizable message!
 ```
+
+Note that custom error classes need to define the class member `default_messages`, which contains the default error messages.
+The keys (0 in this example) refer to the number of arguments that will be auto-filled.
+
+A default message for 0 arguments is mandatory.
 
 #### General purpose errors
 
-This module also contains some premade general-purpose error types, which all derive from `CustomException`. The following error classes are provided:
+This module also contains some premade general-purpose error classes, which all derive from `CustomException`. The following classes are provided:
 * CalledMultipleTimesError
+* DeprecatedError
 * DirNotFoundError
+* InternalCalculationError
 * InternalFunctionUsedError
+* InvalidKeyError
 * KeyNotFoundError
 * LockAcquisitionTimeoutError
+* MissingDefaultMessageError
 * MissingInheritanceError
+* NameNotFoundError
 * NoneTypeError
 * NotInitializedError
+* ReadonlyError
+* RegisteredMultipleTimesError
 * SingletonInstantiationError
+* UninitializedFieldError
+* WrongTypeError
 
 ### 3. File system (`abllib.fs`)
 
