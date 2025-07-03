@@ -45,12 +45,14 @@ def test_sanitize():
     assert callable(fs.sanitize)
     assert fs.sanitize("title") == "title"
     assert fs.sanitize("myimage.jpeg") == "myimage.jpeg"
+    assert fs.sanitize("myfilename.txt") == "myfilename.txt"
 
-    # test spaces
+    # spaces
     assert fs.sanitize("this is a normal sentence") == "this_is_a_normal_sentence"
     assert fs.sanitize("the sentence ends.") == "the_sentence_ends."
 
     # punctuation marks
+    assert fs.sanitize("This sentence gets converted..txt") == "This_sentence_gets_converted.txt"
     assert fs.sanitize("the sentence ends..txt") == "the_sentence_ends.txt"
     assert fs.sanitize("sure?") == "sure"
     assert fs.sanitize("sure!") == "sure"
@@ -64,8 +66,12 @@ def test_sanitize():
     assert fs.sanitize("first line\nnext line") == "first_line_next_line"
     assert fs.sanitize("first line \nnext line") == "first_line_next_line"
 
+    # special characters
+    assert fs.sanitize("special' char/act\\ers ar|e i*gnor;ed") == "special_char_act_ers_ar_e_ignor_ed"
+
     # german Umlaute
     assert fs.sanitize("Äpfel") == "Apfel"
+    assert fs.sanitize("Die grüne Böschung") == "Die_grune_Boschung"
 
     # japanese characters
     assert fs.sanitize("ハウルの動く城") == "hauru_no_ugoku_shiro"

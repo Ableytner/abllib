@@ -12,7 +12,7 @@ except ImportError:
 from ..error import WrongTypeError
 
 CHARS_TO_REMOVE = "',#^?!\"<>%$%°*"
-CHARS_TO_REPLACE = " /\\|~+:;@"
+CHARS_TO_REPLACE = " /\\|~+:;@\n"
 
 def sanitize(filename: str) -> str:
     """
@@ -72,14 +72,12 @@ def _sanitize_punctuations(filename: str) -> str:
     filename = filename.replace(". ", "_")
     filename = filename.replace("! ", "_")
     filename = filename.replace("? ", "_")
+    filename = filename.replace("; ", "_")
+    filename = filename.replace(": ", "_")
     filename = filename.replace(" \n", "_")
 
     # fix sentences ending in a dot
     filename = filename.replace("..", ".")
-
-    # remove newlines
-    # has to be done early, because pykakasi breaks with newlines
-    filename = filename.replace("\n", "_")
 
     return filename
 
@@ -91,6 +89,9 @@ def _sanitize_symbols(filename: str) -> str:
 
     for char in CHARS_TO_REPLACE:
         filename = filename.replace(char, "_")
+
+    # remove leftover non-ascii characters
+    filename = filename.encode('ascii', 'ignore').decode()
 
     return filename
 
