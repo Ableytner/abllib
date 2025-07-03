@@ -1,6 +1,7 @@
 """A module containing file name-modification functions."""
 
 import sys
+from typing import Generator
 
 try:
     # optional module for japanese character transliterating
@@ -31,9 +32,9 @@ def sanitize(filename: str) -> str:
     # remove trailing chars
     filename = filename.strip(CHARS_TO_REPLACE)
 
-    filename = _sanitize_punctuations(filename)
-
     filename = _sanitize_letters(filename)
+
+    filename = _sanitize_punctuations(filename)
 
     filename = _sanitize_symbols(filename)
 
@@ -54,29 +55,10 @@ def _sanitize_letters(filename: str) -> str:
     # japanese characters
     if _contains_japanese_char(filename) or True:
         if "pykakasi" in sys.modules:
-            logger.info(filename)
-            logger.info([item["hepburn"] for item in pykakasi.kakasi().convert(filename)])
-
-            converted_filename = pykakasi.kakasi().convert(filename)
-            filename = ""
-            for item in converted_filename:
-                item = item["hepburn"].strip(" ")
-                if len(item) == 1 and item in CHARS_TO_REMOVE + CHARS_TO_REPLACE:
-                    # ignore item
-                    logger.info(f"ignoring item: {item}")
-                elif item == ".":
-                    # add dot without spacing
-                    filename += "."
-                else:
-                    if filename == "":
-                        filename = item
-                    elif filename.endswith("."):
-                        filename += item
-                    else:
-                        filename += f" {item}"
+            filename = _replace_japanese_chars(filename)
         else:
             logger.warning("to properly transliterate japanese text to rōmaji, you need to install the optional dependency 'pykakasi'")
-            filename = _replace_japanese_chars(filename)
+            filename = _remove_japanese_chars(filename)
 
     return filename
 
@@ -127,15 +109,43 @@ japanese_char_ranges = [
     {"from": ord(u"\U0002b740"), "to": ord(u"\U0002b81f")},
     {"from": ord(u"\U0002b820"), "to": ord(u"\U0002ceaf")}  # included as of Unicode 8.0
 ]
+
 def _contains_japanese_char(text) -> bool:
     for char in text:
-        for range in japanese_char_ranges:
-            if range["from"] <= ord(char) <= range["to"]:
-                return True
+        if _is_japanese_letter(char):
+            return True
 
     return False
 
-def _replace_japanese_chars(text) -> str:
+def _is_japanese_letter(char: str) -> bool:
+    if char == " ":
+        return False
+
+    for range in japanese_char_ranges:
+        if range["from"] <= ord(char) <= range["to"]:
+            return True
+    
+    return False
+
+def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
+    # replace japanese Full stop (https://en.wikipedia.org/wiki/Japanese_punctuation#Full_stop)
+    text = text.replace("。", ". ")
+
+    i = 0
+    while i < len(text):
+        if _is_japanese_letter(text[i]):
+            start = i
+            while i < len(text) and _is_japanese_letter(text[i]):
+                i += 1
+            
+            converted_text = " ".join([item["hepburn"] for item in pykakasi.kakasi().convert(text[start:i])])
+
+            text = text[:start] + converted_text + text[i:]
+        i += 1
+
+    return text
+
+def _remove_japanese_chars(text) -> str:
     i = 0
     while i < len(text):
         for range in japanese_char_ranges:
