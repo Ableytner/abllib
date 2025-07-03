@@ -150,8 +150,8 @@ def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
 def _remove_japanese_chars(text) -> str:
     i = 0
     while i < len(text):
-        for range in japanese_char_ranges:
-            if range["from"] <= ord(text[i]) <= range["to"]:
+        for char_range in japanese_char_ranges:
+            if char_range["from"] <= ord(text[i]) <= char_range["to"]:
                 text = text[:i] + text[i + 1:]
                 i -= 1
                 break
