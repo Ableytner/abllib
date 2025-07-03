@@ -60,7 +60,6 @@ def _sanitize_letters(filename: str) -> str:
             logger = log.get_logger("sanitize")
             logger.warning("to properly transliterate japanese text to rōmaji, "
                            "you need to install the optional dependency 'pykakasi'")
-            filename = _remove_japanese_chars(filename)
 
     return filename
 
@@ -138,25 +137,16 @@ def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
     while i < len(text):
         if _is_japanese_letter(text[i]):
             start = i
+
+            # the current character is known to be japanese
+            i += 1
+
             while i < len(text) and _is_japanese_letter(text[i]):
                 i += 1
 
             converted_text = " ".join([item["hepburn"] for item in pykakasi.kakasi().convert(text[start:i])])
 
             text = text[:start] + converted_text + text[i:]
-        i += 1
-
-    return text
-
-def _remove_japanese_chars(text) -> str:
-    i = 0
-    while i < len(text):
-        for char_range in japanese_char_ranges:
-            if char_range["from"] <= ord(text[i]) <= char_range["to"]:
-                text = text[:i] + text[i + 1:]
-                i -= 1
-                break
-
         i += 1
 
     return text
