@@ -1,4 +1,5 @@
 dill
 numpy
+pykakasi
 pylint
 pytest

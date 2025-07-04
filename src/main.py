@@ -4,6 +4,8 @@
 # UP NEXT
 # supply package number manually to release workflow
 # add Storage.get(key, default) function
+# publish to pypi
+# replace all TypeError occurances with WrongTypeError
 
 # IMPORTANT BUT ANNOYING
 # add tests for threaded storage access
