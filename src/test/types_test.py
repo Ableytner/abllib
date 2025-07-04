@@ -103,6 +103,32 @@ def test_enforce_wrapper():
     with pytest.raises(WrongTypeError):
         myfunc("test", 187, val4=None)
 
+def test_enforce_wrapper_uniontypes():
+    """Ensure that fs.enforce handles UnionTypes correctly"""
+
+    assert callable(types.enforce)
+
+    from types import GenericAlias
+    assert isinstance(dict[int], GenericAlias)
+
+    @types.enforce
+    def myfunc(val1: str | None, val2: int | float):
+        return str(val2)
+
+    assert myfunc("test", 187) == "187"
+    assert myfunc("test", 187.1) == "187.1"
+    assert myfunc(None, 187) == "187"
+    assert myfunc(None, 187.1) == "187.1"
+
+    with pytest.raises(WrongTypeError):
+        myfunc("test", "187")
+    with pytest.raises(WrongTypeError):
+        myfunc(1.5, 187)
+    with pytest.raises(WrongTypeError):
+        myfunc(None, None)
+    with pytest.raises(WrongTypeError):
+        myfunc(187, 187)
+
 def test_enforce_wrapper_listtypes():
     """Ensure that fs.enforce handles lists with subtypes correctly"""
 

@@ -1,6 +1,7 @@
 """A module containing functions to enforce that given values match their type hint."""
 
 import inspect
+from time import sleep
 from types import GenericAlias, UnionType
 import typing
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
@@ -15,7 +16,11 @@ logger = log.get_logger("types.enforce")
 P = ParamSpec('P')
 T = TypeVar('T')
 
-def enforce(value_or_func: Any | Callable[P, T], target_type_or_None: Any = None) \
+class UnionTuple(tuple):
+    def __repr__(self):
+        return f"UnionTuple{super().__repr__()}"
+
+def enforce(value_or_func: Any | Callable[P, T], target_type_or_None: Any | None = None) \
    -> None | Callable[Concatenate[str, P], T]:
     """
     Multi-purpose function for type validation.
@@ -49,10 +54,12 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
     for key, val in sig.parameters.items():
         types_annotation = _genericalias_to_types(val.annotation)
 
-        # also add all kwargs to arg_types
+        # add args and kwargs to arg_types
         arg_types.append(types_annotation)
+        logger.info(arg_types)
 
         if val.default != val.empty:
+            # add only kwargs to kwarg_types
             kwarg_types[key] = types_annotation
 
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -70,7 +77,7 @@ def enforce_var(value: Any, target_type: Any) -> None:
     """
     Function for type validation.
 
-    If value and target_type mismatch, raise a WrongTypeError.
+    If the type of value and target_type mismatch, raise a WrongTypeError.
     """
 
     # None-types are easily handled
@@ -79,6 +86,7 @@ def enforce_var(value: Any, target_type: Any) -> None:
             # success
             return
 
+        logger.info(f"invalid1: {value} {target_type}")
         raise WrongTypeError.with_values(value, target_type)
 
     # non-raising try blocks are zero-cost (the most common case here)
@@ -86,7 +94,9 @@ def enforce_var(value: Any, target_type: Any) -> None:
     try:
         if isinstance(value, target_type):
             # success
+            logger.info(f"valid1:   {value} {target_type}")
             return
+    # TODO: use more specific exception
     # pylint: disable-next=broad-exception-caught
     except Exception:
         pass
@@ -97,67 +107,128 @@ def enforce_var(value: Any, target_type: Any) -> None:
         # TODO: cache conversion
         target_type = _genericalias_to_types(target_type)
 
-    if type(target_type) not in (list, dict, tuple, set, type):
+    if type(target_type) not in (type, list, dict, tuple, set, UnionTuple):
+        logger.info(f"invalid2: {value} {target_type}")
         raise WrongTypeError(f"Expected target_type to be a valid type, not {target_type}")
 
     valid = _validate(value, target_type)
     if valid:
+        # success
+        logger.info(f"valid2:   {value} {target_type}")
         return
 
-    logger.info(f"invalid: {value} {target_type}")
+    logger.info(f"invalid3: {value} {target_type}")
     raise WrongTypeError.with_values(value, target_type)
 
-def _genericalias_to_types(target_type: GenericAlias) -> tuple[Any]:
-    if isinstance(target_type, type):
-        return (target_type,)
+def _log_io(func):
+    """Log the input and output of the wrapped function"""
 
+    c = 0
+    def wrapper(*args, **kwargs):
+        nonlocal c
+
+        c += 1
+        logger.info(f"({c})in:  {args} {kwargs}")
+
+        res = func(*args, **kwargs)
+
+        sleep(0.1)
+
+        logger.info(f"({c})out: {res}")
+        c -= 1
+
+        sleep(0.1)
+
+        return res
+    return wrapper
+
+@_log_io
+def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list | Any:
+    """
+    Converts a GenericAlias
+    (e.g. int|str, list[int], tuple[int, int] or dict[str, Any])
+    to the internal representation
+    (e.g. UnionTuple(int, str), [int], (int, int) or {str: Any})
+
+    Any other type is returned as-is.
+    """
+
+    # any type not inheriting from GenericAlias returns None
     main_type = typing.get_origin(target_type)
 
-    if main_type == list:
-        res_type = []
-
-        for arg in typing.get_args(target_type):
-            res_type += _genericalias_to_types(arg)
-
-        return res_type
-    # TODO: dict, set, tuple
+    if main_type is None:
+        return target_type
 
     if main_type == UnionType:
         res_type = []
 
         for arg in typing.get_args(target_type):
-            res_type += _genericalias_to_types(arg)
+            res_type.append(_genericalias_to_types(arg))
 
-        return tuple(res_type)
+        return UnionTuple(res_type)
 
-    logger.info(f"unhandled type: {target_type}")
+    if main_type == list:
+        res_type = []
+
+        for arg in typing.get_args(target_type):
+            res_type.append(_genericalias_to_types(arg))
+
+        return res_type
+
+    # TODO: dict, set, tuple
+
+    logger.info(f"unhandled GenericAlias inheritent: {target_type}")
     raise RuntimeError()
 
-def _validate(value: Any, *target_types: list | dict | tuple | set | type) -> bool:
-    validated = False
+def _validate(value: Any, *target_types: type | UnionTuple | list | dict | tuple | set) -> bool:
+    """Checks if the given values' type matches any of the given target_types"""
 
     for target_type in target_types:
-        # target_type is None:
-        if target_type is None and value is None:
+        # target_type: None
+        if target_type is None:
+            if value is not None:
+                continue
+
             return True
 
-        # target_type is int or str or float
-        if isinstance(target_type, type) and isinstance(value, target_type):
+        # target_type: int or str or float
+        if isinstance(target_type, type):
+            if not isinstance(value, target_type):
+                continue
+
+            return True
+        
+        # target_type: UnionTuple(int, float) or UnionTuple(str, None)
+        if isinstance(target_type, UnionTuple):
+            # unpack to check if any type matches
+            if not _validate(value, *target_type):
+                continue
+            
             return True
 
-        # target_type is [] or [int] or [str, float]
-        if isinstance(target_type, list) and isinstance(value, list):
+        # target_type: [] or [int] or [UnionTuple(str, float)]
+        if isinstance(target_type, list):
+            if not isinstance(value, list):
+                continue
+
             # if the list has no subtypes we are done
             if len(target_type) == 0:
                 return True
 
             # validate all list items
-            items_valid = True
             for item in value:
-                if not _validate(item, *target_type):
-                    items_valid = False
+                if not _validate(item, target_type[0]):
                     break
-            if items_valid:
+            else:
+                # the loop completed without reaching the break statement
                 return True
+            
+            # the loop reached the break statement
+            continue
 
-    return validated
+        # TODO: dict, set, tuple
+
+        logger.info(f"unhandled type: {target_type}")
+        raise RuntimeError()
+
+    return False
