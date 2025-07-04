@@ -158,6 +158,35 @@ Example usage:
 'C:\\MyUser\\Some\\image.png'
 ```
 
+#### Filename sanitization (`abllib.fs.sanitize`)
+
+A function which accepts any text and sanitizes it for use as a file name / folder name.
+The resulting text only contains ascii characters.
+
+Example usage:
+```py
+>> from abllib.fs import sanitize
+>> sanitize("myfilename.txt")
+'myfilename.txt'
+>> sanitize("This sentence gets converted..txt")
+'This_sentence_gets_converted.txt'
+>> sanitize("special' char/act\\ers ar|e i*gnor;ed")
+'special_char_act_ers_ar_e_ignor_ed'
+>> sanitize("Die grüne Böschung")
+'Die_grune_Boschung'
+>> sanitize("ハウルの動く城")
+'hauru_no_ugoku_shiro'
+```
+
+Currently supported language-specific text transliterations:
+| language   | supported | additional notes                                                                                                                           |
+| ---------- | :-------: | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| english    | yes       |                                                                                                                                            |
+| german     | yes       |                                                                                                                                            |
+| japanese   | partial   | needs optional library [pykakasi](https://pypi.org/project/pykakasi/) (`pip install pykakasi`), otherwise removes japanese characters      |
+
+Special characters from unsupported languages and any other non-ascii will be removed from the resulting text.
+
 ### 4. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
