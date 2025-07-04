@@ -108,9 +108,6 @@ def test_enforce_wrapper_uniontypes():
 
     assert callable(types.enforce)
 
-    from types import GenericAlias
-    assert isinstance(dict[int], GenericAlias)
-
     @types.enforce
     def myfunc(val1: str | None, val2: int | float):
         return str(val2)

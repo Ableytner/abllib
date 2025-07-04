@@ -17,6 +17,8 @@ P = ParamSpec('P')
 T = TypeVar('T')
 
 class UnionTuple(tuple):
+    """An internal class inheriting from tuple which holds all allowed types for a value"""
+
     def __repr__(self):
         return f"UnionTuple{super().__repr__()}"
 
@@ -197,13 +199,13 @@ def _validate(value: Any, *target_types: type | UnionTuple | list | dict | tuple
                 continue
 
             return True
-        
+
         # target_type: UnionTuple(int, float) or UnionTuple(str, None)
         if isinstance(target_type, UnionTuple):
             # unpack to check if any type matches
             if not _validate(value, *target_type):
                 continue
-            
+
             return True
 
         # target_type: [] or [int] or [UnionTuple(str, float)]
@@ -222,7 +224,7 @@ def _validate(value: Any, *target_types: type | UnionTuple | list | dict | tuple
             else:
                 # the loop completed without reaching the break statement
                 return True
-            
+
             # the loop reached the break statement
             continue
 
