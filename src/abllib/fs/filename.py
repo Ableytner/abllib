@@ -48,6 +48,7 @@ def _sanitize_letters(filename: str) -> str:
     filename = filename.replace("Ö", "O")
     filename = filename.replace("ü", "u")
     filename = filename.replace("Ü", "U")
+    filename = filename.replace("ß", "ss")
 
     # japanese characters
     if _contains_japanese_char(filename):

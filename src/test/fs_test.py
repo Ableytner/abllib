@@ -72,6 +72,7 @@ def test_sanitize():
     # german Umlaute
     assert fs.sanitize("Äpfel") == "Apfel"
     assert fs.sanitize("Die grüne Böschung") == "Die_grune_Boschung"
+    assert fs.sanitize("Straße") == "Strasse"
 
     # japanese characters
     assert fs.sanitize("ハウルの動く城") == "hauru_no_ugoku_shiro"
