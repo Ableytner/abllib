@@ -182,55 +182,41 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
     logger.info(f"unhandled GenericAlias inheritent: {target_type}")
     raise RuntimeError()
 
-def _validate(value: Any, *target_types: type | UnionTuple | list | dict | tuple | set) -> bool:
-    """Checks if the given values' type matches any of the given target_types"""
+# pylint: disable-next=too-many-return-statements
+def _validate(value: Any, target_type: type | UnionTuple | list | dict | tuple | set) -> bool:
+    """Checks if the given values' type matches the given target_type"""
 
-    for target_type in target_types:
-        # target_type: None
-        if target_type is None:
-            if value is not None:
-                continue
+    # target_type: None
+    if target_type is None:
+        return value is None
 
-            return True
+    # target_type: int or str or float
+    if isinstance(target_type, type):
+        return isinstance(value, target_type)
 
-        # target_type: int or str or float
-        if isinstance(target_type, type):
-            if not isinstance(value, target_type):
-                continue
-
-            return True
-
-        # target_type: UnionTuple(int, float) or UnionTuple(str, None)
-        if isinstance(target_type, UnionTuple):
-            # unpack to check if any type matches
-            if not _validate(value, *target_type):
-                continue
-
-            return True
-
-        # target_type: [] or [int] or [UnionTuple(str, float)]
-        if isinstance(target_type, list):
-            if not isinstance(value, list):
-                continue
-
-            # if the list has no subtypes we are done
-            if len(target_type) == 0:
+    # target_type: UnionTuple(int, float) or UnionTuple(str, None)
+    if isinstance(target_type, UnionTuple):
+        # unpack to check if any type matches
+        for target in target_type:
+            if _validate(value, target):
                 return True
+        return False
 
-            # validate all list items
-            for item in value:
-                if not _validate(item, target_type[0]):
-                    break
-            else:
-                # the loop completed without reaching the break statement
-                return True
+    # target_type: [] or [int] or [UnionTuple(str, float)]
+    if isinstance(target_type, list):
+        if not isinstance(value, list):
+            return False
 
-            # the loop reached the break statement
-            continue
+        # if the list has no subtypes we are done
+        if len(target_type) == 0:
+            return True
 
-        # TODO: dict, set, tuple
+        # validate all list items
+        for item in value:
+            if not _validate(item, target_type[0]):
+                return False
+        return True
 
-        logger.info(f"unhandled type: {target_type}")
-        raise RuntimeError()
+    # TODO: dict, set, tuple
 
-    return False
+    raise NotImplementedError(f"unhandled type: {target_type}")
