@@ -16,9 +16,12 @@ def test_pylint():
         files = " ".join([file.strip() for file in files.split("\n")])
 
         pylint_output = []
-        for line in os.popen(f"pylint {files}").readlines():
+        for line in os.popen(f"python -m pylint {files}").readlines():
             if line.strip().strip("-") != "":
                 pylint_output.append(line.strip())
+
+        if len(pylint_output) == 0:
+            pytest.fail("Detected error during test. Is pylint installed?")
 
         if not "Your code has been rated at 10.00/10" in pylint_output[-1]:
             for line in pylint_output:
@@ -27,4 +30,4 @@ def test_pylint():
             pytest.fail(pylint_output[-1])
     else:
         # logging pylint errors on linux doesn't work
-        assert "Your code has been rated at 10.00/10" in os.popen("pylint $(git ls-files '*.py')").read()
+        assert "Your code has been rated at 10.00/10" in os.popen("python3 -m pylint $(git ls-files '*.py')").read()
