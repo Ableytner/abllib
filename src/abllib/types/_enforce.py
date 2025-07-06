@@ -177,7 +177,33 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
 
         return res_type
 
-    # TODO: dict, set, tuple
+    if main_type == dict:
+        args = typing.get_args(target_type)
+        if len(args) != 2:
+            # TODO: proper exception type
+            raise RuntimeError(f"expected 2 args, not {len(args)}")
+
+        res_type = {
+            _genericalias_to_types(args[0]): _genericalias_to_types(args[1])
+        }
+
+        return res_type
+
+    if main_type == tuple:
+        res_type = []
+
+        for arg in typing.get_args(target_type):
+            res_type.append(_genericalias_to_types(arg))
+
+        return tuple(res_type)
+
+    if main_type == set:
+        res_type = []
+
+        for arg in typing.get_args(target_type):
+            res_type.append(_genericalias_to_types(arg))
+
+        return set(res_type)
 
     logger.info(f"unhandled GenericAlias inheritent: {target_type}")
     raise RuntimeError()
@@ -217,6 +243,68 @@ def _validate(value: Any, target_type: type | UnionTuple | list | dict | tuple |
                 return False
         return True
 
-    # TODO: dict, set, tuple
+    # target_type: {} or {str: str} or {int: UnionTuple(str, float, None)}
+    if isinstance(target_type, dict):
+        if not isinstance(value, dict):
+            return False
+
+        # if the dict has no subtypes we are done
+        if len(target_type) == 0:
+            return True
+
+        # validate all dict items
+        key_type, item_type = list(target_type.items())[0]
+        for key, item in value.items():
+            if not _validate(key, key_type):
+                return False
+            if not _validate(item, item_type):
+                return False
+        return True
+
+    # target_type: () or (int, int) or (UnionTuple(str, float), float) or (str, ...)
+    if isinstance(target_type, tuple):
+        if not isinstance(value, tuple):
+            return False
+
+        # if the tuple has no subtypes we are done
+        if len(target_type) == 0:
+            return True
+
+        # tuple should be variable length with homogenous types
+        if len(target_type) == 2 and target_type[1] == Ellipsis:
+            for item in value:
+                if not _validate(item, target_type[0]):
+                    return False
+            return True
+
+        # value is either too long or too short
+        if len(target_type) != len(value):
+            return False
+
+        # validate all tuple items
+        for c, item_type in enumerate(target_type):
+            # zero-cost try block
+            try:
+                if not _validate(value[c], item_type):
+                    return False
+            except IndexError:
+                return False
+
+        return True
+
+    # target_type: set() or set(int) or set(UnionTuple(str, float))
+    if isinstance(target_type, set):
+        if not isinstance(value, set):
+            return False
+
+        # if the set has no subtypes we are done
+        if len(target_type) == 0:
+            return True
+
+        # validate all set items
+        for item in value:
+            if not _validate(item, list(target_type)[0]):
+                return False
+        return True
 
     raise NotImplementedError(f"unhandled type: {target_type}")

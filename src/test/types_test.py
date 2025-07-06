@@ -145,3 +145,73 @@ def test_enforce_wrapper_listtypes():
         myfunc("42", ["1", "2", "3", 1.0])
     with pytest.raises(WrongTypeError):
         myfunc("42", [-0.2, "1", "2", "3"])
+
+def test_enforce_wrapper_dicttypes():
+    """Ensure that fs.enforce handles dicts with subtypes correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(val1: str, val2: dict[int, str | None]):
+        return int(val1)
+
+    assert myfunc("42", {}) == 42
+    assert myfunc("42", {1: "test", 2: "test2"}) == 42
+    assert myfunc("42", {1: None, 2: None}) == 42
+    assert myfunc("42", {1: None, 2: "test"}) == 42
+    assert myfunc("42", {1: "test", 2: None}) == 42
+    assert myfunc("42", {1: "test", 2: "test2", 3: "test3", 4: "test4", 5: None, 6: "test6"}) == 42
+
+    with pytest.raises(WrongTypeError):
+        myfunc("42", {1.1: None})
+    with pytest.raises(WrongTypeError):
+        myfunc("42", {None: "test"})
+    with pytest.raises(WrongTypeError):
+        myfunc("42", {1: "test", 2: "test2", 3: "test3", 4: "test4", 5: 5.1})
+
+def test_enforce_wrapper_tupletypes():
+    """Ensure that fs.enforce handles tuples with subtypes correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(val1: str, val2: tuple[int | str, str, str | None]):
+        return int(val1)
+
+    assert myfunc("42", (1, "2", "3")) == 42
+    assert myfunc("42", ("1", "2", "3")) == 42
+    assert myfunc("42", ("test", "test2", None)) == 42
+    assert myfunc("42", (20, "test", None)) == 42
+
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", 2, "3"))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", "2", 3))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", 2, 3))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", (0.1, "2", "3"))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", (2, 2), "3"))
+
+def test_enforce_wrapper_settypes():
+    """Ensure that fs.enforce handles sets with subtypes correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(val1: str, val2: set[int | float]):
+        return int(val1)
+
+    assert myfunc("42", set()) == 42
+    assert myfunc("42", set([1, 2])) == 42
+    assert myfunc("42", set([2.5])) == 42
+    assert myfunc("42", set([1.01, -2.02, 3, 4, 5.05])) == 42
+    assert myfunc("42", set([1, 1, 1])) == 42
+
+    with pytest.raises(WrongTypeError):
+        myfunc("42", set([1, "2", 3, 1.0]))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", set([-0.2, 1, 2, "3"]))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", set([-0.2, "test"]))
