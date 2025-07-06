@@ -194,6 +194,30 @@ def test_enforce_wrapper_tupletypes():
     with pytest.raises(WrongTypeError):
         myfunc("42", ("1", (2, 2), "3"))
 
+def test_enforce_wrapper_tupletypes_ellipsis():
+    """Ensure that fs.enforce handles tuples with an Ellipsis subtype correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(val1: str, val2: tuple[int, ...]):
+        return int(val1)
+
+    assert myfunc("42", ()) == 42
+    assert myfunc("42", (1)) == 42
+    assert myfunc("42", (1, 2, 3)) == 42
+
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", 2, "3"))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", "2", 3))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", 2, 3))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", (0.1, "2", "3"))
+    with pytest.raises(WrongTypeError):
+        myfunc("42", ("1", (2, 2), "3"))
+
 def test_enforce_wrapper_settypes():
     """Ensure that fs.enforce handles sets with subtypes correctly"""
 
