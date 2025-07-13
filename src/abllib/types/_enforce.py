@@ -1,7 +1,6 @@
 """A module containing functions to enforce that given values match their type hint."""
 
 import inspect
-from time import sleep
 from types import GenericAlias, UnionType
 import typing
 from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
@@ -54,7 +53,21 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
 
     sig = inspect.signature(func)
     for key, val in sig.parameters.items():
-        types_annotation = _genericalias_to_types(val.annotation)
+        # ignore undecorated arguments
+        # pylint: disable-next=protected-access
+        if val.annotation is inspect._empty:
+            types_annotation = Any
+        elif isinstance(val.annotation, str):
+            # if 'from __future__ import annotations' is present, all type hints are literal strings
+            # e.g. "str" or "int | None", not <class 'str'> or <class 'types.UnionType'>
+            try:
+                # pylint: disable-next=eval-used
+                types_annotation = _genericalias_to_types(eval(val.annotation))
+            except NameError:
+                logger.warning(f"recursive type hints are not yet supported, ignoring instead: {val.annotation}")
+                types_annotation = Any
+        else:
+            types_annotation = _genericalias_to_types(val.annotation)
 
         # add args and kwargs to arg_types
         arg_types.append(types_annotation)
@@ -80,6 +93,11 @@ def enforce_var(value: Any, target_type: Any) -> None:
 
     If the type of value and target_type mismatch, raise a WrongTypeError.
     """
+
+    # Any means the value was not decorated at all
+    if target_type is Any:
+        # success
+        return
 
     # None-types are easily handled
     if target_type is None:
@@ -107,7 +125,7 @@ def enforce_var(value: Any, target_type: Any) -> None:
         target_type = _genericalias_to_types(target_type)
 
     if type(target_type) not in (type, list, dict, tuple, set, UnionTuple):
-        raise WrongTypeError(f"Expected target_type to be a valid type, not {target_type}")
+        raise WrongTypeError(f"Expected target_type to be a valid type, not '{target_type}'")
 
     valid = _validate(value, target_type)
     if valid:
@@ -128,12 +146,8 @@ def _log_io(func):
 
         res = func(*args, **kwargs)
 
-        sleep(0.1)
-
 #        logger.info(f"({c})out: {res}")
         c -= 1
-
-        sleep(0.1)
 
         return res
     return wrapper
@@ -142,9 +156,9 @@ def _log_io(func):
 def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list | Any:
     """
     Converts a GenericAlias
-    (e.g. int|str, list[int], tuple[int, int] or dict[str, Any])
+    (e.g. int|str or list[int] or tuple[int, int] or dict[str, Any])
     to the internal representation
-    (e.g. UnionTuple(int, str), [int], (int, int) or {str: Any})
+    (e.g. UnionTuple(int, str) or [int] or (int, int) or {str: Any})
 
     Any other type is returned as-is.
     """

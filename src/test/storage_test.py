@@ -158,6 +158,8 @@ def test_persistentstorage_valuetype():
     assert PersistentStorage["key1"] == ("1", "2")
     PersistentStorage["key1"] = None
     assert PersistentStorage["key1"] is None
+    PersistentStorage["base.key1.key2.key3.key4"] = None
+    assert PersistentStorage["base.key1.key2.key3.key4"] is None
 
     class CustomType():
         pass

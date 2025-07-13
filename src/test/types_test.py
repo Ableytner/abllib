@@ -1,6 +1,6 @@
 """Module containing tests for the abllib.types module"""
 
-# pylint: disable=missing-class-docstring, unused-argument
+# pylint: disable=missing-class-docstring, unused-argument, missing-function-docstring
 
 import pytest
 
@@ -239,3 +239,26 @@ def test_enforce_wrapper_settypes():
         myfunc("42", set([-0.2, 1, 2, "3"]))
     with pytest.raises(WrongTypeError):
         myfunc("42", set([-0.2, "test"]))
+
+def test_enforce_wrapper_class_members():
+    """Ensure that fs.enforce handles class member functions correctly"""
+
+    assert callable(types.enforce)
+
+    class MyClass:
+        @types.enforce
+        def myfunc(self, val1: str, val2: int | None):
+            return int(val1)
+
+    m = MyClass()
+
+    assert m.myfunc("42", 0) == 42
+    assert m.myfunc("42", None) == 42
+    assert m.myfunc("3", 9999999) == 3
+
+    with pytest.raises(WrongTypeError):
+        m.myfunc("42", 0.1)
+    with pytest.raises(WrongTypeError):
+        m.myfunc(42, 1)
+    with pytest.raises(WrongTypeError):
+        m.myfunc(None, 15)
