@@ -1,8 +1,10 @@
 """A module containing the fuzzy match function"""
 
+from .. import types
 from ._matchresult import MatchResult
 from ._similarity import Similarity
 
+@types.enforce
 def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> MatchResult:
     """
     Match the target to the most similar candidate. Applies fuzzy logic when comparing.
@@ -15,8 +17,6 @@ def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshol
 
     Returns a MatchResult
     """
-
-    # TODO: type checking with abllib.type module
 
     if threshold < 0:
         raise ValueError("Threshold needs to be >= 0")
