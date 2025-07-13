@@ -58,7 +58,6 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
 
         # add args and kwargs to arg_types
         arg_types.append(types_annotation)
-        logger.info(arg_types)
 
         if val.default != val.empty:
             # add only kwargs to kwarg_types
@@ -88,7 +87,6 @@ def enforce_var(value: Any, target_type: Any) -> None:
             # success
             return
 
-        logger.info(f"invalid1: {value} {target_type}")
         raise WrongTypeError.with_values(value, target_type)
 
     # non-raising try blocks are zero-cost (the most common case here)
@@ -96,7 +94,6 @@ def enforce_var(value: Any, target_type: Any) -> None:
     try:
         if isinstance(value, target_type):
             # success
-            logger.info(f"valid1:   {value} {target_type}")
             return
     # TODO: use more specific exception
     # pylint: disable-next=broad-exception-caught
@@ -110,16 +107,13 @@ def enforce_var(value: Any, target_type: Any) -> None:
         target_type = _genericalias_to_types(target_type)
 
     if type(target_type) not in (type, list, dict, tuple, set, UnionTuple):
-        logger.info(f"invalid2: {value} {target_type}")
         raise WrongTypeError(f"Expected target_type to be a valid type, not {target_type}")
 
     valid = _validate(value, target_type)
     if valid:
         # success
-        logger.info(f"valid2:   {value} {target_type}")
         return
 
-    logger.info(f"invalid3: {value} {target_type}")
     raise WrongTypeError.with_values(value, target_type)
 
 def _log_io(func):
@@ -130,13 +124,13 @@ def _log_io(func):
         nonlocal c
 
         c += 1
-        logger.info(f"({c})in:  {args} {kwargs}")
+#        logger.info(f"({c})in:  {args} {kwargs}")
 
         res = func(*args, **kwargs)
 
         sleep(0.1)
 
-        logger.info(f"({c})out: {res}")
+#        logger.info(f"({c})out: {res}")
         c -= 1
 
         sleep(0.1)
@@ -205,8 +199,7 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
 
         return set(res_type)
 
-    logger.info(f"unhandled GenericAlias inheritent: {target_type}")
-    raise RuntimeError()
+    raise RuntimeError(f"unhandled GenericAlias inheritent: {target_type}")
 
 # pylint: disable-next=too-many-return-statements
 def _validate(value: Any, target_type: type | UnionTuple | list | dict | tuple | set) -> bool:
