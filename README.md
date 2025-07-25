@@ -25,7 +25,7 @@ The following submodules are available:
 
 ### PyPI
 
-All stable versions get released on PyPI. To download the newest version, run the following command:
+All stable versions get released on [PyPI](https://pypi.org/project/abllib). To download the newest version, run the following command:
 ```bash
 pip install abllib
 ```
