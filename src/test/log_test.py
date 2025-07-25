@@ -128,4 +128,3 @@ def test_initialize_invalidtypes():
     """Ensure that initialize only accepts valid arguments"""
 
     # to be added when abllib.type module is implemented
-    pass
