@@ -628,6 +628,18 @@ def test_basestorage_name_custom():
             pass
         _STORAGE_NAME = "TestStorage4"
 
+def test_basestorage_non_ascii():
+    """Ensure that non-ascii characters work correctly"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    BaseStorage["testkey"] = "ÄöÜ"
+    assert BaseStorage["testkey"] == "ÄöÜ"
+
+    BaseStorage["testkey2"] = "ハウルの動く城"
+    assert BaseStorage["testkey2"] == "ハウルの動く城"
+
 def test_internalstorage_inheritance():
     """Ensure the InternalStorage inherits from _BaseStorage"""
 
