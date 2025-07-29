@@ -142,15 +142,13 @@ def enforce_var(value: Any, target_type: Any) -> None:
         if isinstance(value, target_type):
             # success
             return
-    # TODO: use more specific exception
-    # pylint: disable-next=broad-exception-caught
-    except Exception:
+    # if the target_type is a GenericAlias / custom types class
+    except TypeError:
         pass
 
     # start handling all special cases
 
     if isinstance(target_type, GenericAlias):
-        # TODO: cache conversion
         target_type = _genericalias_to_types(target_type)
 
     if type(target_type) not in (type, list, dict, tuple, set, UnionTuple, LiteralTuple):
