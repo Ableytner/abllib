@@ -6,6 +6,13 @@ from typing import Any
 
 from ._custom_exception import CustomException
 
+class ArgumentCombinationError(CustomException):
+    """Exception raised when the given combination of arguments is invalid"""
+
+    default_messages = {
+        0: "This combination of argumetns is invalid"
+    }
+
 class CalledMultipleTimesError(CustomException):
     """Exception raised when a single-use function is called twice"""
 

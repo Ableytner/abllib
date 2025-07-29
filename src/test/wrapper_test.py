@@ -1,12 +1,14 @@
 """Module containing tests for the abllib.wrapper module"""
 
-# pylint: disable=function-redefined, consider-using-with
+# pylint: disable=function-redefined, consider-using-with, unused-argument
 
+import re
+import os
 from datetime import datetime
 
 import pytest
 
-from abllib import error, wrapper
+from abllib import error, wrapper, log
 from abllib.pproc import WorkerThread
 
 def test_lock():
@@ -220,3 +222,98 @@ def test_singleuse_exception():
 
     with pytest.raises(error.CalledMultipleTimesError):
         func1()
+
+def test_log_error_default(capture_logs):
+    """Ensure that log_error uses the root logger by default"""
+
+    @wrapper.log_error
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] root: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_loggername(capture_logs):
+    """Ensure that log_error uses the provided logger name"""
+
+    @wrapper.log_error("mycustomlogger")
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_customlogger(capture_logs):
+    """Ensure that log_error uses the provided custom logger"""
+
+    @wrapper.log_error(log.get_logger("mycustomlogger"))
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_handler():
+    """Ensure that log_error uses the provided handler"""
+
+    results = []
+    def myhandler(exc_text):
+        results.append(exc_text)
+
+    @wrapper.log_error(handler=myhandler)
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert len(results) == 1
+    assert results[0] == "RuntimeError: my message"
