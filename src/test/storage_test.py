@@ -276,6 +276,23 @@ def test_persistentstorage_del_autoremovedict():
     assert "key1.key2" not in PersistentStorage
     assert "key1" not in PersistentStorage
 
+def test_persistentstorage_non_ascii():
+    """Ensure that non-ascii characters are saved and loaded correctly"""
+
+    PersistentStorage = _PersistentStorage.__new__(_PersistentStorage)
+    PersistentStorage._store = {}
+
+    PersistentStorage["testkey"] = "ÄöÜ"
+    PersistentStorage["testkey2"] = "ハウルの動く城"
+
+    PersistentStorage.save_to_disk()
+
+    PersistentStorage._store = {}
+    PersistentStorage.load_from_disk()
+
+    assert PersistentStorage["testkey"] == "ÄöÜ"
+    assert PersistentStorage["testkey2"] == "ハウルの動く城"
+
 def test_storageview_instantiation():
     """Ensure that instantiating StorageView only works with valid arguments"""
 

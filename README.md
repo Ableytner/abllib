@@ -25,7 +25,7 @@ The following submodules are available:
 
 ### PyPI
 
-All stable versions get released on PyPI. To download the newest version, run the following command:
+All stable versions get released on [PyPI](https://pypi.org/project/abllib). To download the newest version, run the following command:
 ```bash
 pip install abllib
 ```
@@ -334,7 +334,8 @@ Logging to a file is supported as follows:
 >> logger = log.get_logger()
 >> logger.info("this is written to the file")
 ```
-The logfile will automatically be closed on program exit.
+The logfile will be created once the first message with a high enough log level is logged.
+The file is closed at program exit or handler removal.
 
 Multiple handlers can also be added simultaneously.
 In this case, the logged message is sent to all of them.

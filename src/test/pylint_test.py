@@ -4,12 +4,16 @@ import os
 
 import pytest
 
-from abllib import log
+from abllib import fs, log
 
 logger = log.get_logger("pylint")
 
 def test_pylint():
     """Checks if all git-tracked python files adhere to pylint rules"""
+
+    ROOTDIR = fs.absolute(__file__, "..", "..", "..")
+    PREV_DIR = os.getcwd()
+    os.chdir(ROOTDIR)
 
     if os.name == "nt":
         files = os.popen("git ls-files *.py").read()
@@ -19,6 +23,8 @@ def test_pylint():
         for line in os.popen(f"python -m pylint {files}").readlines():
             if line.strip().strip("-") != "":
                 pylint_output.append(line.strip())
+
+        os.chdir(PREV_DIR)
 
         if len(pylint_output) == 0:
             pytest.fail("Detected error during test. Is pylint installed?")
@@ -30,4 +36,8 @@ def test_pylint():
             pytest.fail(pylint_output[-1])
     else:
         # logging pylint errors on linux doesn't work
-        assert "Your code has been rated at 10.00/10" in os.popen("python3 -m pylint $(git ls-files '*.py')").read()
+        pylint_output = os.popen("pylint $(git ls-files '*.py')").read()
+
+        os.chdir(PREV_DIR)
+
+        assert "Your code has been rated at 10.00/10" in pylint_output
