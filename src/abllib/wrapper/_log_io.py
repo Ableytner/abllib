@@ -5,6 +5,7 @@ from logging import Logger
 from typing import Callable, Any
 
 from .. import log
+from ..error import WrongTypeError
 
 class log_io():
     """
@@ -32,6 +33,8 @@ class log_io():
         # logger is a logging.Logger object
         elif isinstance(logger, Logger):
             _logger = logger
+        else:
+            raise WrongTypeError.with_values(logger, str, Logger, None, Callable)
 
         inst.logger = _logger
         return inst
@@ -47,7 +50,9 @@ class log_io():
             res = func(*args, **kwargs)
 
             self.logger.debug(f"func: {func.__name__}")
-            arg_str = ", ".join([self._format(item) for item in args] + [f"{key}={self._format(value)}" for key, value in kwargs.items()])
+            form_args = [self._format(item) for item in args]
+            form_kwargs = [f"{key}={self._format(value)}" for key, value in kwargs.items()]
+            arg_str = ", ".join(form_args + form_kwargs)
             self.logger.debug(f"in  : {arg_str}")
             self.logger.debug(f"out : {self._format(res)}")
 
@@ -61,5 +66,5 @@ class log_io():
     def _format(self, arg: Any) -> str:
         if isinstance(arg, str):
             return f"\"{arg}\""
-        
+
         return str(arg)
