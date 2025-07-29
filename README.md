@@ -1006,3 +1006,60 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func instead
 ```
+
+#### Log function error (`abllib.wrapper.log_error`)
+
+The log_error wrapper can be applied to functions to send any occured exception to the default logger.
+
+First, logging needs to be setup. In this example, the library-internal logging is used.
+```py
+>> from abllib import log
+>> log.initialize()
+>> log.add_console_handler()
+```
+
+Example usage:
+```py
+>> from abllib.wrapper import log_error
+>> @log_error
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+[2025-07-29 11:58:54] [ERROR   ] root: my message
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+RuntimeError: my message
+```
+
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import log_error
+>> @log_error(logger)
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: my message
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+RuntimeError: my message
+```
+
+Instead of logging, a custom handler function can be provided, which will be passed the error message.
+```py
+>> from abllib.wrapper import log_error
+>> @log_error(handler=lambda exc: print(exc))
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+RuntimeError: my message
+```
