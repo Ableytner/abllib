@@ -161,6 +161,9 @@ def enforce_var(value: Any, target_type: Any) -> None:
 
     if isinstance(target_type, LiteralTuple):
         raise WrongValueError.with_values(value, *target_type[:5])
+    
+    if isinstance(target_type, UnionTuple):
+        raise WrongTypeError.with_values(value, *target_type[:5])
 
     raise WrongTypeError.with_values(value, target_type)
 
