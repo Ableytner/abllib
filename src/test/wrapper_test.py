@@ -236,6 +236,10 @@ def test_log_error_default(capture_logs):
     assert os.path.isfile("test.log")
     with open("test.log", "r", encoding="utf8") as f:
         content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
         assert len(content) == 7
         assert re.match(r"\[.*\] \[ERROR   \] root: my message", content[0])
         assert re.match(r"Traceback \(most recent call last\):", content[1])
@@ -258,6 +262,10 @@ def test_log_error_loggername(capture_logs):
     assert os.path.isfile("test.log")
     with open("test.log", "r", encoding="utf8") as f:
         content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
         assert len(content) == 7
         assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
         assert re.match(r"Traceback \(most recent call last\):", content[1])
@@ -280,6 +288,10 @@ def test_log_error_customlogger(capture_logs):
     assert os.path.isfile("test.log")
     with open("test.log", "r", encoding="utf8") as f:
         content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
         assert len(content) == 7
         assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
         assert re.match(r"Traceback \(most recent call last\):", content[1])
