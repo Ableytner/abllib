@@ -227,6 +227,7 @@ def _genericalias_to_types(target_type: GenericAlias | Any) \
 
         return set(res_type)
 
+    # pylint: disable-next=comparison-with-callable
     if main_type == Literal:
         return LiteralTuple(typing.get_args(target_type))
 
