@@ -1011,7 +1011,7 @@ abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func 
 
 The log_error wrapper can be applied to functions to send any occured exception to the default logger.
 
-First, logging needs to be setup. In this example, the library-internal logging is used.
+First, logging needs to be setup. In this example, this librarys' logging is used.
 ```py
 >> from abllib import log
 >> log.initialize()
@@ -1062,4 +1062,47 @@ Instead of logging, a custom handler function can be provided, which will be pas
 .. except:
 ..   pass
 RuntimeError: my message
+```
+
+#### Log arguments and return value (`abllib.wrapper.log_io`)
+
+The log_io wrapper can be applied to functions to send all arguments, keyword arguments and return values to the default logger.
+
+First, logging needs to be setup. In this example, this librarys' logging is used.
+```py
+>> from abllib import log
+>> log.initialize()
+>> log.add_console_handler()
+```
+
+Example usage:
+```py
+>> from abllib.wrapper import log_io
+>> @log_io
+.. def my_func(arg):
+..   return False
+>> _ = my_func("hello world")
+[2025-07-29 11:58:54] [ERROR   ] root: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] root: in  : "hello world"
+[2025-07-29 11:58:54] [ERROR   ] root: out : False
+```
+
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import log_io
+>> @log_io(logger)
+.. def my_func(arg):
+..   return False
+>> _ = my_func(arg="Test")
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: in  : arg="hello world"
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: out : False
+>> @log_io("CustomLogger")
+.. def my_func(arg):
+..   return False
+>> _ = my_func(111)
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: in  : 111
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: out : False
 ```

@@ -317,3 +317,69 @@ def test_log_error_handler():
 
     assert len(results) == 1
     assert results[0] == "RuntimeError: my message"
+
+def test_log_io_default(capture_logs):
+    """Ensure that log_io uses the root logger by default"""
+
+    @wrapper.log_io
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, message="no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: in  : "Anna", 77, message="no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: out : "Anna: no"', content[5])
+
+def test_log_io_loggername(capture_logs):
+    """Ensure that log_io uses the provided logger name"""
+
+    @wrapper.log_io("SpecialLogger")
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, "no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: in  : "Anna", 77, "no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: out : "Anna: no"', content[5])
+
+def test_log_io_custom_logger(capture_logs):
+    """Ensure that log_io uses a custom provided logger"""
+
+    @wrapper.log_io(log.get_logger("ExtraLogger"))
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, "no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: in  : "Anna", 77, "no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: out : "Anna: no"', content[5])
