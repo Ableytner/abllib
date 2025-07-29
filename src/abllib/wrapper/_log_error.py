@@ -4,10 +4,10 @@ import functools
 from logging import Logger
 from typing import Callable
 
-from .. import log
 from ..error import ArgumentCombinationError
+from ._base_log_wrapper import BaseLogWrapper
 
-class log_error():
+class log_error(BaseLogWrapper):
     """
     Decorate a function, which logs any exception occuring during execution.
 
@@ -24,29 +24,14 @@ class log_error():
         if logger is None and handler is None:
             raise ArgumentCombinationError("Either logger or handler need to be provided")
 
-        # used directly as a wrapper
-        if callable(logger):
-            _handler = log.get_logger().exception
-            inst = super().__new__(cls)
-            inst.handler = _handler
-            return inst(logger)
-
-        # logger is the loggers' name
-        if isinstance(logger, str):
-            _handler = log.get_logger(logger).exception
-        # logger is a logging.Logger object
-        elif isinstance(logger, Logger):
-            _handler = logger.exception
         # handler is given
-        else:
+        if handler is not None:
+            inst = super().__new__(cls)
             # pylint: disable-next=unnecessary-lambda-assignment
-            _handler = lambda exc: handler(f"{exc.__class__.__name__}: {exc}")
+            inst.logger = handler
+            return inst
 
-        inst = super().__new__(cls)
-        inst.handler = _handler
-        return inst
-
-    handler: Callable
+        return super().__new__(cls, logger)
 
     def __call__(self, func: Callable):
         """Called when the class instance is used as a decorator"""
@@ -57,7 +42,10 @@ class log_error():
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                self.handler(e)
+                if isinstance(self.logger, Logger):
+                    self.logger.exception(e)
+                else:
+                    self.logger(f"{e.__class__.__name__}: {e}")
                 raise
 
         # https://stackoverflow.com/a/17705456/15436169
