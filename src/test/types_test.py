@@ -2,10 +2,12 @@
 
 # pylint: disable=missing-class-docstring, unused-argument, missing-function-docstring
 
+from typing import Literal
+
 import pytest
 
 from abllib import types
-from abllib.error import WrongTypeError
+from abllib.error import WrongTypeError, WrongValueError
 
 def test_enforce():
     """Ensure that fs.enforce works as expected"""
@@ -262,3 +264,61 @@ def test_enforce_wrapper_class_members():
         m.myfunc(42, 1)
     with pytest.raises(WrongTypeError):
         m.myfunc(None, 15)
+
+def test_enforce_literal():
+    """Ensure that fs.enforce handles literal values correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(myarg: Literal["ok", "cancelled"]):
+        return 42
+
+    assert myfunc("ok") == 42
+    assert myfunc("cancelled") == 42
+    with pytest.raises(WrongValueError):
+        myfunc("notok")
+    with pytest.raises(WrongValueError):
+        myfunc("")
+    with pytest.raises(WrongValueError):
+        myfunc(10)
+    with pytest.raises(WrongValueError):
+        myfunc(None)
+
+def test_enforce_mixed():
+    """Ensure that fs.enforce handles types and literal values mixed correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(myarg: Literal["ok", "cancelled"] | bool | None):
+        return 42
+
+    assert myfunc("ok") == 42
+    assert myfunc("cancelled") == 42
+    assert myfunc(True) == 42
+    assert myfunc(False) == 42
+    assert myfunc(None) == 42
+    with pytest.raises(WrongTypeError):
+        myfunc("notok")
+    with pytest.raises(WrongTypeError):
+        myfunc(10)
+    with pytest.raises(WrongTypeError):
+        myfunc(5.7)
+
+def test_enforce_return():
+    """Ensure that fs.enforce handles return values correctly"""
+
+    assert callable(types.enforce)
+
+    @types.enforce
+    def myfunc(myarg) -> int | float:
+        return myarg
+
+    assert myfunc(42) == 42
+    assert myfunc(-10000) == -10000
+    assert myfunc(1.5) == 1.5
+    with pytest.raises(WrongTypeError):
+        myfunc("test")
+    with pytest.raises(WrongTypeError):
+        myfunc(None)

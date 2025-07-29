@@ -1,12 +1,13 @@
 """A module containing functions to enforce that given values match their type hint."""
 
 import inspect
-from types import GenericAlias, UnionType
 import typing
-from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
+from types import GenericAlias, UnionType
+from typing import (Any, Callable, Concatenate, Literal, ParamSpec, TypeVar,
+                    Union)
 
 from .. import log
-from ..error import WrongTypeError
+from ..error import InvalidTypeHintError, WrongTypeError, WrongValueError
 
 logger = log.get_logger("types.enforce")
 
@@ -20,6 +21,12 @@ class UnionTuple(tuple):
 
     def __repr__(self):
         return f"UnionTuple{super().__repr__()}"
+
+class LiteralTuple(tuple):
+    """An internal class inheriting from tuple which holds all allowed values for a value"""
+
+    def __repr__(self):
+        return f"LiteralTuple{super().__repr__()}"
 
 def enforce(value_or_func: Any | Callable[P, T], target_type_or_None: Any | None = None) \
    -> None | Callable[Concatenate[str, P], T]:
@@ -46,6 +53,8 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
     Wrapper function for type validation.
 
     If an value and annotation mismatch, raise a WrongTypeError.
+
+    If the return value and annotation mismatch, also raise a WrongTypeError.
     """
 
     arg_types: list[type] = []
@@ -76,6 +85,22 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
             # add only kwargs to kwarg_types
             kwarg_types[key] = types_annotation
 
+    # ignore undecorated return
+    # pylint: disable-next=protected-access
+    if sig.return_annotation is inspect._empty:
+        return_type = Any
+    elif isinstance(sig.return_annotation, str):
+        # if 'from __future__ import annotations' is present, all type hints are literal strings
+        # e.g. "str" or "int | None", not <class 'str'> or <class 'types.UnionType'>
+        try:
+            # pylint: disable-next=eval-used
+            return_type = _genericalias_to_types(eval(sig.return_annotation))
+        except NameError:
+            logger.warning(f"recursive type hints are not yet supported, ignoring instead: {sig.return_annotation}")
+            return_type = Any
+    else:
+        return_type = _genericalias_to_types(sig.return_annotation)
+
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         for c, arg in enumerate(args):
             enforce_var(arg, arg_types[c])
@@ -83,7 +108,11 @@ def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
         for key, arg in kwargs.items():
             enforce_var(arg, kwarg_types[key])
 
-        return func(*args, **kwargs)
+        ret = func(*args, **kwargs)
+
+        enforce_var(ret, return_type)
+
+        return ret
 
     return wrapper
 
@@ -124,7 +153,7 @@ def enforce_var(value: Any, target_type: Any) -> None:
         # TODO: cache conversion
         target_type = _genericalias_to_types(target_type)
 
-    if type(target_type) not in (type, list, dict, tuple, set, UnionTuple):
+    if type(target_type) not in (type, list, dict, tuple, set, UnionTuple, LiteralTuple):
         raise WrongTypeError(f"Expected target_type to be a valid type, not '{target_type}'")
 
     valid = _validate(value, target_type)
@@ -132,28 +161,14 @@ def enforce_var(value: Any, target_type: Any) -> None:
         # success
         return
 
+    if isinstance(target_type, LiteralTuple):
+        raise WrongValueError.with_values(value, *target_type[:5])
+
     raise WrongTypeError.with_values(value, target_type)
 
-def _log_io(func):
-    """Log the input and output of the wrapped function"""
-
-    c = 0
-    def wrapper(*args, **kwargs):
-        nonlocal c
-
-        c += 1
-#        logger.info(f"({c})in:  {args} {kwargs}")
-
-        res = func(*args, **kwargs)
-
-#        logger.info(f"({c})out: {res}")
-        c -= 1
-
-        return res
-    return wrapper
-
-@_log_io
-def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list | Any:
+# pylint: disable-next=too-many-return-statements
+def _genericalias_to_types(target_type: GenericAlias | Any) \
+   -> UnionTuple | list | dict | tuple | set | LiteralTuple | Any:
     """
     Converts a GenericAlias
     (e.g. int|str or list[int] or tuple[int, int] or dict[str, Any])
@@ -169,7 +184,7 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
     if main_type is None:
         return target_type
 
-    if main_type == UnionType:
+    if main_type in [UnionType, Union]:
         res_type = []
 
         for arg in typing.get_args(target_type):
@@ -188,8 +203,7 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
     if main_type == dict:
         args = typing.get_args(target_type)
         if len(args) != 2:
-            # TODO: proper exception type
-            raise RuntimeError(f"expected 2 args, not {len(args)}")
+            raise InvalidTypeHintError(f"'dict' type hint expected 2 args, not {len(args)}")
 
         res_type = {
             _genericalias_to_types(args[0]): _genericalias_to_types(args[1])
@@ -213,10 +227,13 @@ def _genericalias_to_types(target_type: GenericAlias | Any) -> UnionTuple | list
 
         return set(res_type)
 
+    if main_type == Literal:
+        return LiteralTuple(typing.get_args(target_type))
+
     raise RuntimeError(f"unhandled GenericAlias inheritent: {target_type}")
 
 # pylint: disable-next=too-many-return-statements
-def _validate(value: Any, target_type: type | UnionTuple | list | dict | tuple | set) -> bool:
+def _validate(value: Any, target_type: type | UnionTuple | LiteralTuple | list | dict | tuple | set) -> bool:
     """Checks if the given values' type matches the given target_type"""
 
     # target_type: None
@@ -232,6 +249,14 @@ def _validate(value: Any, target_type: type | UnionTuple | list | dict | tuple |
         # unpack to check if any type matches
         for target in target_type:
             if _validate(value, target):
+                return True
+        return False
+
+    # target_type: LiteralTuple("ok", "cancel") or LiteralTuple(0, 2, 3)
+    if isinstance(target_type, LiteralTuple):
+        # unpack to check if any value matches
+        for target in target_type:
+            if value == target:
                 return True
         return False
 

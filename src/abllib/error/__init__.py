@@ -7,6 +7,7 @@ from ._general import CalledMultipleTimesError, \
                       InternalCalculationError, \
                       InternalFunctionUsedError, \
                       InvalidKeyError, \
+                      InvalidTypeHintError, \
                       KeyNotFoundError, \
                       LockAcquisitionTimeoutError, \
                       MissingDefaultMessageError, \
@@ -18,7 +19,8 @@ from ._general import CalledMultipleTimesError, \
                       RegisteredMultipleTimesError, \
                       SingletonInstantiationError, \
                       UninitializedFieldError, \
-                      WrongTypeError
+                      WrongTypeError, \
+                      WrongValueError
 
 INTERNAL =  "Internal error, please report it on github!"
 
@@ -30,6 +32,7 @@ __exports__ = [
     InternalCalculationError,
     InternalFunctionUsedError,
     InvalidKeyError,
+    InvalidTypeHintError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,
@@ -42,5 +45,6 @@ __exports__ = [
     SingletonInstantiationError,
     UninitializedFieldError,
     WrongTypeError,
+    WrongValueError,
     INTERNAL
 ]
