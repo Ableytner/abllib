@@ -64,4 +64,6 @@ def capture_logs():
     yield None
 
     log.initialize()
-    os.remove("test.log")
+    # file is created lazily
+    if os.path.isfile("test.log"):
+        os.remove("test.log")
