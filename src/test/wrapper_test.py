@@ -5,6 +5,7 @@
 import re
 import os
 from datetime import datetime
+from time import sleep
 
 import pytest
 
@@ -383,3 +384,72 @@ def test_log_io_custom_logger(capture_logs):
         assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func: func1', content[3])
         assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: in  : "Anna", 77, "no"', content[4])
         assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: out : "Anna: no"', content[5])
+
+def test_timeit_default(capture_logs):
+    """Ensure that timeit uses the root logger by default"""
+
+    @wrapper.timeit
+    def func1():
+        sleep(0.001)
+    @wrapper.timeit
+    def func2():
+        sleep(0.01)
+    @wrapper.timeit
+    def func3():
+        sleep(0.1)
+    @wrapper.timeit
+    def func4():
+        sleep(1)
+    @wrapper.timeit
+    def func5():
+        sleep(10)
+
+
+    func1()
+    func2()
+    func3()
+    func4()
+    func5()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 5
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func1: \d{1}\.\d{2} ms elapsed', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func2: \d{2}\.\d{2} ms elapsed', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func3: \d{3}\.\d{2} ms elapsed', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func4: \d{1}\.\d{2} s elapsed', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func5: \d{2}\.\d{2} s elapsed', content[4])
+
+def test_timeit_loggername(capture_logs):
+    """Ensure that timeit uses the provided logger name"""
+
+    @wrapper.timeit("SpecialLogger")
+    def func1():
+        sleep(0.001)
+
+    func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 1
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])
+
+def test_timeit_custom_logger(capture_logs):
+    """Ensure that timeit uses a custom provided logger"""
+
+    @wrapper.timeit(log.get_logger("ExtraLogger"))
+    def func1():
+        sleep(0.001)
+
+    func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 1
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])

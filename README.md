@@ -1064,7 +1064,7 @@ Instead of logging, a custom handler function can be provided, which will be pas
 RuntimeError: my message
 ```
 
-#### Log arguments and return value (`abllib.wrapper.log_io`)
+#### Log function arguments and return value (`abllib.wrapper.log_io`)
 
 The log_io wrapper can be applied to functions to send all arguments, keyword arguments and return values to the default logger.
 
@@ -1105,4 +1105,47 @@ A custom logger can also be specified by either passing the name or logging.Logg
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: func: my_func
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: in  : 111
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: out : False
+```
+
+#### Log function execution time (`abllib.wrapper.timeit`)
+
+The timeit wrapper can be applied to functions to log the functions' execution time.
+
+First, logging needs to be setup. In this example, this librarys' logging is used.
+We'll also import the sleep function.
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.DEBUG)
+>> log.add_console_handler()
+>> from time import sleep
+```
+
+Example usage using the root logger:
+```py
+>> from abllib.wrapper import timeit
+>> @timeit
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.001)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 1.44 ms elapsed
+>> my_func(0.37)
+[2025-07-30 12:33:50] [DEBUG   ] root: myfunc: 370.71 ms elapsed
+>> my_func(5)
+[2025-07-30 12:33:55] [DEBUG   ] root: myfunc: 5.00 s elapsed
+```
+
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import timeit
+>> @timeit(logger)
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.002)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.25 ms elapsed
+>> @timeit("CustomLogger")
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.002)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.28 ms elapsed
 ```
