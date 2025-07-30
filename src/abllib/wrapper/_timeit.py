@@ -32,7 +32,7 @@ class timeit(BaseLogWrapper):
 
             log_msg = f"{func.__name__}: "
 
-            for unit in ["ns", "us", "ms"]:
+            for unit in ["ns", "μs", "ms"]:
                 if elapsed < 1000:
                     log_msg += f"{elapsed:3.2f} {unit} elapsed"
                     self.logger.debug(log_msg)
