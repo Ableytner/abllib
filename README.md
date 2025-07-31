@@ -19,7 +19,8 @@ The following submodules are available:
 6. Cleanup on exit (`abllib.onexit`)
 7. Parallel processing (`abllib.pproc`)
 8. Storages (`abllib.storage`)
-9. Function wrappers (`abllib.wrapper`)
+9. Type enforcement (`abllib.types`)
+10. Function wrappers (`abllib.wrapper`)
 
 ## Installation
 
@@ -862,7 +863,69 @@ True
 True
 ```
 
-### 9. Function wrappers (`abllib.wrapper`)
+### 9. Type enforcement (`abllib.types`)
+
+This module contains functionality for enforcing types.
+
+#### General-purpose interface ('abllib.types.enforce')
+
+This funtion can either be used as a wrapper on any function or directly with a value una target type.
+
+Example usage:
+```py
+>> from abllib.types import enforce
+>> enforce("test", str)
+>> enforce("test", int)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.WrongTypeError: Expected <class 'int'>, not <class 'str'>
+>> @enforce
+.. def my_func(arg: float | None):
+..   print(arg)
+>> my_func(1.5)
+1.5
+>> my_func(None)
+None
+>> my_func("hello world!")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.WrongTypeError: Expected <class 'float'> or <class 'NoneType'>, not <class 'str'>
+```
+
+#### Enforce a value ('abllib.types.enforce_var')
+
+This function enforces the type of a given value, raising a WrongTypeError on failure.
+
+```py
+>> from abllib.types import enforce_var
+>> enforce_var("test", str)
+>> enforce_var("test", int)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.WrongTypeError: Expected <class 'int'>, not <class 'str'>
+```
+
+#### Enforce a functions' arguments and return type ('abllib.types.enforce_args')
+
+This function wraps around a given function, enforcing the argument and return types.
+Raises a WrongTypeError on failure.
+
+```py
+>> from abllib.types import enforce_args
+>> @enforce_args
+.. def my_func(arg: float | None):
+..   print(arg)
+>> my_func(1.5)
+1.5
+>> my_func(None)
+None
+>> my_func("hello world!")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.WrongTypeError: Expected <class 'float'> or <class 'NoneType'>, not <class 'str'>
+```
+
+### 10. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
@@ -876,7 +939,7 @@ Example usage:
 >> from abllib.wrapper import singleuse
 >> @singleuse
 .. def my_func(arg):
-    print(arg)
+..   print(arg)
 >> my_func("hello world")
 hello world
 >> my_func("hello world")
@@ -890,15 +953,15 @@ If an error occured during function execution, the function can be called again.
 >> from abllib.wrapper import singleuse
 >> @singleuse
 .. def my_func(arg):
-    raise FileNotFoundError()
+..   raise FileNotFoundError()
 >> my_func("hello world")
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-    raise FileNotFoundError()
+     raise FileNotFoundError()
 >> my_func("hello world")
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-    raise FileNotFoundError()
+     raise FileNotFoundError()
 ```
 
 #### Custom lock (`abllib.wrapper.Lock`)
