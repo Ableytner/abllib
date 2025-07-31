@@ -36,7 +36,7 @@ def test_pylint():
             pytest.fail(pylint_output[-1])
     else:
         # logging pylint errors on linux doesn't work
-        pylint_output = os.popen("pylint $(git ls-files '*.py')").read()
+        pylint_output = os.popen("python3 -m pylint $(git ls-files '*.py')").read()
 
         os.chdir(PREV_DIR)
 
