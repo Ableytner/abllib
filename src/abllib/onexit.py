@@ -4,8 +4,8 @@ import atexit
 import signal
 from typing import Callable
 
-from . import error, log
-from ._storage import InternalStorage
+from abllib import error, log
+from abllib._storage import InternalStorage
 
 logger = log.get_logger("onexit")
 

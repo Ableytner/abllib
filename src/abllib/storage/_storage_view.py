@@ -3,9 +3,9 @@
 from __future__ import annotations
 from typing import Any
 
-from .._storage._base_storage import _BaseStorage
+from abllib import error
+from abllib._storage._base_storage import _BaseStorage
 from ._cache_storage import _CacheStorage
-from .. import error
 
 # pylint: disable=protected-access
 

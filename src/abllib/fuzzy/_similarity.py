@@ -3,7 +3,7 @@
 import numpy as np
 
 from abllib import error
-from ..alg import levenshtein_distance
+from abllib.alg import levenshtein_distance
 
 class Similarity():
     """

@@ -4,7 +4,7 @@ import functools
 from logging import Logger
 from typing import Callable
 
-from ..error import ArgumentCombinationError
+from abllib.error import ArgumentCombinationError
 from ._base_log_wrapper import BaseLogWrapper
 
 class log_error(BaseLogWrapper):

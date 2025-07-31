@@ -1,7 +1,7 @@
 """Module containing the _CacheStorage class"""
 
-from .._storage._base_storage import _BaseStorage
-from .. import error
+from abllib import error
+from abllib._storage._base_storage import _BaseStorage
 
 class _CacheStorage(_BaseStorage):
     """Storage used for caching values"""

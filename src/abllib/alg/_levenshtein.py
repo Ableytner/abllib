@@ -2,7 +2,7 @@
 
 import numpy
 
-from ..error import WrongTypeError
+from abllib.error import WrongTypeError
 
 def levenshtein_distance(token1: str, token2: str) -> int:
     """

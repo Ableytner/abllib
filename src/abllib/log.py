@@ -6,8 +6,8 @@ import sys
 from enum import Enum
 from typing import Literal
 
-from . import error, fs
-from ._storage import InternalStorage
+from abllib import error, fs
+from abllib._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
 

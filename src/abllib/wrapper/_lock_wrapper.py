@@ -7,10 +7,10 @@ import traceback
 from datetime import datetime
 from time import sleep
 
+from abllib import error, log
+from abllib._storage import InternalStorage
 from ._lock import Lock, Semaphore
 from ._deprecated import deprecated
-from .. import error, log
-from .._storage import InternalStorage
 
 logger = log.get_logger("LockWrapper")
 

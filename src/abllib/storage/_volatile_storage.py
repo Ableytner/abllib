@@ -1,8 +1,8 @@
 """Module containing the _VolatileStorage class"""
 
+from abllib import error
+from abllib.storage._storage_view import _StorageView
 from ._threadsafe_storage import _ThreadsafeStorage
-from ..storage._storage_view import _StorageView
-from .. import error
 
 class _VolatileStorage(_ThreadsafeStorage):
     """Storage that is not saved across restarts"""

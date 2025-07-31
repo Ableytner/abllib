@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-from ..error import WrongTypeError
+from abllib.error import WrongTypeError
 
 CHARS_TO_REMOVE = "',#^?!\"<>%$%°*"
 CHARS_TO_REPLACE = " /\\|~+:;@\n"
@@ -57,7 +57,7 @@ def _sanitize_letters(filename: str) -> str:
         else:
             # needs to be imported here to prevent circular import
             # pylint: disable-next=cyclic-import, import-outside-toplevel
-            from .. import log
+            from abllib import log
             logger = log.get_logger("sanitize")
             logger.warning("to properly transliterate japanese text to rōmaji, "
                            "you need to install the optional dependency 'pykakasi'")

@@ -4,8 +4,8 @@ import functools
 import traceback
 from typing import Callable
 
-from .. import log
-from ..error import DeprecatedError
+from abllib import log
+from abllib.error import DeprecatedError
 
 class deprecated():
     """
