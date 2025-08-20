@@ -205,6 +205,9 @@ Special characters from unsupported languages and any other non-ascii will be re
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
+> [!TIP]
+> If the performance seems poor, the optional levenshtein package can be installed for a 10x speedup (`pip install levenshtein`).
+
 The source code and documentation use a few words which might be confusing, so they are explained here:
 * target: the word that we want to find.
 * candidate: a word that could match with target.
