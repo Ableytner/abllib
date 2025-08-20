@@ -65,6 +65,16 @@ To always install the latest development version:
 abllib @ git+https://github.com/Ableytner/abllib
 ```
 
+### Optional dependencies
+
+Some modules have optional dependencies which bring various improvements.
+All of them are optional and listed below.
+
+| name | needed in | improvement |
+|------|-----------|-------------|
+| pykakasi | fs.filename | needed to correctly translate japanese kanji |
+| levenshtein | alg.levenshtein_distance | provides a 10x speedup by using the C implementation |
+
 ## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
@@ -85,6 +95,9 @@ Example usage:
 >> levenshtein_distance("thomas", "anna")
 5
 ```
+
+If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
+This provides a 10x speedup, but requires an extra package.
 
 ### 2. Errors (`abllib.error`)
 

@@ -34,7 +34,8 @@ dependencies = [
 
 [project.optional-dependencies]
 all = [
-  "pykakasi"
+  "pykakasi",
+  "levenshtein"
 ]
 dev = [
   "pylint",
