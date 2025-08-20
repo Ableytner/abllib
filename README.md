@@ -65,6 +65,16 @@ To always install the latest development version:
 abllib @ git+https://github.com/Ableytner/abllib
 ```
 
+### Optional dependencies
+
+Some modules have optional dependencies which bring various improvements.
+All of them are optional and listed below.
+
+| name | needed in | improvement |
+|------|-----------|-------------|
+| pykakasi | fs.filename | needed to correctly translate japanese kanji |
+| levenshtein | alg.levenshtein_distance | provides a 10x speedup by using the C implementation |
+
 ## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
@@ -85,6 +95,9 @@ Example usage:
 >> levenshtein_distance("thomas", "anna")
 5
 ```
+
+If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
+This provides a 10x speedup, but requires an extra package.
 
 ### 2. Errors (`abllib.error`)
 
@@ -191,6 +204,9 @@ Special characters from unsupported languages and any other non-ascii will be re
 ### 4. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
+
+> [!TIP]
+> If the performance seems poor, the optional levenshtein package can be installed for a 10x speedup (`pip install levenshtein`).
 
 The source code and documentation use a few words which might be confusing, so they are explained here:
 * target: the word that we want to find.
