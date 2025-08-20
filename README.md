@@ -15,11 +15,12 @@ The following submodules are available:
 2. Errors (`abllib.error`)
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
-5. Logging (`abllib.log`)
-6. Cleanup on exit (`abllib.onexit`)
-7. Parallel processing (`abllib.pproc`)
-8. Storages (`abllib.storage`)
-9. Function wrappers (`abllib.wrapper`)
+5. General (`abllib.general`)
+6. Logging (`abllib.log`)
+7. Cleanup on exit (`abllib.onexit`)
+8. Parallel processing (`abllib.pproc`)
+9. Storages (`abllib.storage`)
+10. Function wrappers (`abllib.wrapper`)
 
 ## Installation
 
@@ -298,7 +299,47 @@ Example usage:
 1.0
 ```
 
-### 5. Logging (`abllib.log`)
+### 5. General (`abllib.general`)
+
+This module contains different general-purpose functions that don't warrant an own module.
+
+#### Try to import a module (`abllib.general.try_import_module`)
+
+This function tries to import and return a given module.
+
+```py
+>> from abllib.general import try_import_module
+>> sys = try_import_module("sys")
+>> sys.modules
+{'sys': <module 'sys' (built-in)>, ...}
+>> non_existent = try_import_module("non_existent")
+>> non_existent
+None
+```
+
+If the optional argument `error_msg` is given and the import fails, the message will be logged.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", "The module 'non_existent' doesn't exist")
+[2025-08-20 10:58:07] [WARNING ] general: The module 'non_existent' doesn't exist
+>> non_existent
+None
+```
+
+If the optional argument `enforce` is given and the import fails, an error is thrown.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The required module 'non_existent' is not installed."
+>> non_existent = try_import_module("non_existent", error_msg="The error message", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The error message"
+```
+
+### 6. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
@@ -371,7 +412,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Cleanup on exit (`abllib.onexit`)
+### 7. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 
@@ -407,7 +448,7 @@ Already registered callbacks can also be deregistered:
 >> exit()
 ```
 
-### 7. Parallel processing (`abllib.pproc`)
+### 8. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functionality, both thread-based and process-based.
 
@@ -515,7 +556,7 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 8. Storages (`abllib.storage`)
+### 9. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
 All data stored in these storages is accessable from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
@@ -862,7 +903,7 @@ True
 True
 ```
 
-### 9. Function wrappers (`abllib.wrapper`)
+### 10. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
