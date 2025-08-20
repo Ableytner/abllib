@@ -12,6 +12,7 @@ from ._general import ArgumentCombinationError, \
                       LockAcquisitionTimeoutError, \
                       MissingDefaultMessageError, \
                       MissingInheritanceError, \
+                      MissingRequiredModuleError, \
                       NameNotFoundError, \
                       NoneTypeError, \
                       NotInitializedError, \
@@ -36,6 +37,7 @@ __exports__ = [
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,
     MissingInheritanceError,
+    MissingRequiredModuleError,
     NameNotFoundError,
     NoneTypeError,
     NotInitializedError,
