@@ -6,7 +6,7 @@ import sys
 from enum import Enum
 from typing import Literal
 
-from abllib import error, fs
+from abllib import error
 from abllib._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
@@ -115,7 +115,10 @@ def add_file_handler(filename: str = "latest.log") -> None:
 
     logging.disable(0)
 
-    file_handler = logging.FileHandler(filename=fs.absolute(filename), encoding="utf-8", mode="w", delay=True)
+    # needs to be imported here to prevent circular import
+    # pylint: disable-next=cyclic-import, import-outside-toplevel
+    from abllib.fs import absolute
+    file_handler = logging.FileHandler(filename=absolute(filename), encoding="utf-8", mode="w", delay=True)
 
     file_handler.setLevel(InternalStorage["_log.level"])
 

@@ -1,18 +1,17 @@
 """A module containing file name-modification functions."""
 
-import sys
 from typing import Generator
 
-try:
-    # optional module for japanese character transliterating
-    import pykakasi
-except ImportError:
-    pass
-
 from abllib.error import WrongTypeError
+from abllib.general import try_import_module
+from abllib.log import get_logger
+
+pykakasi = try_import_module("pykakasi")
 
 CHARS_TO_REMOVE = "',#^?!\"<>%$%°*"
 CHARS_TO_REPLACE = " /\\|~+:;@\n"
+
+logger = get_logger("sanitize")
 
 def sanitize(filename: str) -> str:
     """
@@ -52,13 +51,9 @@ def _sanitize_letters(filename: str) -> str:
 
     # japanese characters
     if _contains_japanese_char(filename):
-        if "pykakasi" in sys.modules:
+        if pykakasi is not None:
             filename = _replace_japanese_chars(filename)
         else:
-            # needs to be imported here to prevent circular import
-            # pylint: disable-next=cyclic-import, import-outside-toplevel
-            from abllib import log
-            logger = log.get_logger("sanitize")
             logger.warning("to properly transliterate japanese text to rōmaji, "
                            "you need to install the optional dependency 'pykakasi'")
 

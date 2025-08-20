@@ -100,6 +100,14 @@ class MissingInheritanceError(CustomException):
 
         return super().with_values(base_class_name, class_name)
 
+class MissingRequiredModuleError(CustomException):
+    """Exception raised when a required module is not installed"""
+
+    default_messages = {
+        0: "A required module is not installed.",
+        1: "The required module '{0}' is not installed."
+    }
+
 class NameNotFoundError(CustomException):
     """Exception raised when the name is not found"""
 
