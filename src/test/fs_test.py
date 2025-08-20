@@ -3,7 +3,6 @@
 # pylint: disable=missing-class-docstring
 
 import pathlib
-import sys
 import os
 
 import pytest

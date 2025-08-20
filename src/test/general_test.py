@@ -7,6 +7,8 @@ import pytest
 
 from abllib import error, general
 
+# pylint: disable=unused-argument
+
 def test_try_import_module():
     """Ensure that try_import_module works as expected"""
 
@@ -20,13 +22,13 @@ def test_try_import_module():
 def test_try_import_module_error_msg(capture_logs):
     """Ensure that try_import_module considers given error messages"""
 
-    assert general.try_import_module("doesnt_exist") == None
+    assert general.try_import_module("doesnt_exist") is None
 
     assert not os.path.isfile("test.log")
 
-    assert general.try_import_module("doesnt_exist", "The doesnt_exist module in fact doesn't exist") == None
+    assert general.try_import_module("doesnt_exist", "The doesnt_exist module in fact doesn't exist") is None
 
-    with open("test.log", "r") as f:
+    with open("test.log", "r", encoding="utf8") as f:
         content = f.readlines()
         assert len(content) == 1
         assert re.match(r"\[.*\] \[WARNING \] general: The doesnt_exist module in fact doesn't exist", content[0])

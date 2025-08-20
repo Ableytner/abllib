@@ -9,6 +9,8 @@ from abllib.log import get_logger
 
 logger = get_logger("general")
 
+# pylint: disable=raise-missing-from
+
 def try_import_module(module_name: str, error_msg: str | None = None, enforce: bool = False) -> ModuleType | None:
     """
     Try to import the given module and return whether importing was successful.
@@ -28,8 +30,8 @@ def try_import_module(module_name: str, error_msg: str | None = None, enforce: b
         if enforce:
             if error_msg is None:
                 raise MissingRequiredModuleError.with_values(module_name)
-            else:
-                raise MissingRequiredModuleError(error_msg)
+
+            raise MissingRequiredModuleError(error_msg)
 
         if error_msg is not None:
             logger.warning(error_msg)
