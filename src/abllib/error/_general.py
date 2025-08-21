@@ -1,10 +1,10 @@
 """Module containing custom exceptions for general usage"""
 
-# pylint: disable=arguments-differ
-
 from typing import Any
 
 from ._custom_exception import CustomException
+
+# pylint: disable=arguments-differ
 
 class ArgumentCombinationError(CustomException):
     """Exception raised when the given combination of arguments is invalid"""

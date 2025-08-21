@@ -1,8 +1,8 @@
 """Module containing tests for the abllib.fuzzy module"""
 
-# pylint: disable=protected-access
-
 from abllib import fuzzy
+
+# pylint: disable=protected-access
 
 def test_all():
     """Ensure that fuzzy.match_all works at all"""

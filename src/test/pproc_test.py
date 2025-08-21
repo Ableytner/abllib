@@ -1,7 +1,5 @@
 """Module containing tests for abllib.thread"""
 
-# pylint: disable=missing-class-docstring
-
 from multiprocessing import Process
 from threading import Thread
 from time import sleep
@@ -9,6 +7,8 @@ from time import sleep
 import pytest
 
 from abllib import pproc, wrapper
+
+# pylint: disable=missing-class-docstring
 
 def test_workerthread_inheritance():
     """Ensure that WorkerThread inherits from Thread"""

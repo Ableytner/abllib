@@ -1,8 +1,6 @@
 """
-    Pytest fixtures
+Pytest fixtures
 """
-
-# pylint: disable=protected-access, missing-class-docstring
 
 import os
 import shutil
@@ -10,6 +8,8 @@ import shutil
 import pytest
 
 from abllib import fs, log, storage, _storage, onexit
+
+# pylint: disable=protected-access
 
 logger = log.get_logger("test")
 
@@ -64,6 +64,7 @@ def capture_logs():
     yield None
 
     log.initialize()
+    log.add_console_handler()
     # file is created lazily
     if os.path.isfile("test.log"):
         os.remove("test.log")

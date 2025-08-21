@@ -1,7 +1,5 @@
 """A module containing the WorkerProcess class"""
 
-# pylint: disable=dangerous-default-value
-
 from multiprocessing import Process, Queue
 from time import sleep
 from typing import Any
@@ -9,6 +7,8 @@ from typing import Any
 import dill
 
 from abllib.log import get_logger
+
+# pylint: disable=dangerous-default-value
 
 class WorkerProcess(Process):
     """Wrapper around `multiprocessing.Process` that stores and returns resulting values and exceptions."""

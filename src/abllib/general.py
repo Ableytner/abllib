@@ -7,9 +7,9 @@ from types import ModuleType
 from abllib.error import MissingRequiredModuleError
 from abllib.log import get_logger
 
-logger = get_logger("general")
-
 # pylint: disable=raise-missing-from
+
+logger = get_logger("general")
 
 def try_import_module(module_name: str, error_msg: str | None = None, enforce: bool = False) -> ModuleType | None:
     """

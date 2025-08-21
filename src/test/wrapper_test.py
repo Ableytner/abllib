@@ -1,7 +1,5 @@
 """Module containing tests for the abllib.wrapper module"""
 
-# pylint: disable=function-redefined, consider-using-with, unused-argument
-
 import re
 import os
 from datetime import datetime
@@ -11,6 +9,8 @@ import pytest
 
 from abllib import error, wrapper, log
 from abllib.pproc import WorkerThread
+
+# pylint: disable=function-redefined, consider-using-with, unused-argument
 
 def test_lock():
     """Ensure that Lock works as expected"""

@@ -1,7 +1,5 @@
 """Module containing tests for the different types of Storage"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
-
 import json
 import os
 
@@ -10,6 +8,8 @@ import pytest
 from abllib import error, _storage
 from abllib.storage import _CacheStorage, _VolatileStorage, _PersistentStorage, _StorageView, _ThreadsafeStorage
 from abllib._storage._base_storage import _BaseStorage
+
+# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
 
 def test_threadsafestorage_name_custom():
     """Ensure that custom storages need to overwrite _STORAGE_NAME"""
