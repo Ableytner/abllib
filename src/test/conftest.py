@@ -1,6 +1,4 @@
-"""
-Pytest configuration
-"""
+"""Pytest configuration"""
 
 # pylint: disable=wrong-import-position, wrong-import-order, missing-function-docstring
 

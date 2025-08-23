@@ -10,6 +10,8 @@ from abllib.log import get_logger
 
 # pylint: disable=dangerous-default-value
 
+logger = get_logger("WorkerProcess")
+
 class WorkerProcess(Process):
     """Wrapper around `multiprocessing.Process` that stores and returns resulting values and exceptions."""
 
@@ -65,7 +67,7 @@ class WorkerProcess(Process):
             if c == 10:
                 # after testing, sleeping for 1 ms takes ~1.9 ms real-time
                 # so the overhead of time.sleep is ~0.9 ms
-                get_logger("abllib").debug(f"queue.put not complete after ~{sum(range(c + 1)) + (0.9 * c)} ms")
+                logger.debug(f"queue.put not complete after ~{sum(range(c + 1)) + (0.9 * c)} ms")
                 break
 
         if reraise and isinstance(return_value, BaseException):

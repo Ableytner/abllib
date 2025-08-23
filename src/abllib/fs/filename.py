@@ -1,17 +1,15 @@
 """A module containing file name-modification functions."""
 
-from typing import Generator
-
 from abllib.error import WrongTypeError
 from abllib.general import try_import_module
 from abllib.log import get_logger
 
 pykakasi = try_import_module("pykakasi")
 
+logger = get_logger("sanitize")
+
 CHARS_TO_REMOVE = "',#^?!\"<>%$%°*"
 CHARS_TO_REPLACE = " /\\|~+:;@\n"
-
-logger = get_logger("sanitize")
 
 def sanitize(filename: str) -> str:
     """
@@ -125,7 +123,7 @@ def _is_japanese_letter(char: str) -> bool:
 
     return False
 
-def _replace_japanese_chars(text: str) -> Generator[str, None, None]:
+def _replace_japanese_chars(text: str) -> str:
     # replace japanese Full stop (https://en.wikipedia.org/wiki/Japanese_punctuation#Full_stop)
     text = text.replace("。", ". ")
 

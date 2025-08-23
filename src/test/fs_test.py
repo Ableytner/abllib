@@ -1,13 +1,13 @@
 """Module containing tests for the abllib.fs module"""
 
-# pylint: disable=missing-class-docstring
-
 import os
 import pathlib
 
 import pytest
 
 from abllib import fs
+
+# pylint: disable=missing-class-docstring
 
 def test_absolute():
     """Ensure that fs.absolute works as expected"""

@@ -7,6 +7,8 @@ from typing import Callable
 from abllib import log
 from abllib.error import DeprecatedError
 
+logger = log.get_logger("deprecated")
+
 class deprecated():
     """
     Mark a function or class as deprecated.
@@ -79,7 +81,7 @@ class _Deprecated():
             if self._raise_exec:
                 raise DeprecatedError(message)
 
-            log.get_logger("deprecated").warning(message)
+            logger.warning(message)
 
             return func(*args, **kwargs)
 

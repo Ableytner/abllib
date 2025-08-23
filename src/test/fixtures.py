@@ -1,6 +1,4 @@
-"""
-Pytest fixtures
-"""
+"""Pytest fixtures"""
 
 import os
 import shutil
