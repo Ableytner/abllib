@@ -1,11 +1,12 @@
 """Module containing the _StorageView class"""
 
 from __future__ import annotations
+
 from typing import Any
 
 from abllib import error
 from abllib._storage._base_storage import _BaseStorage
-from ._cache_storage import _CacheStorage
+from abllib.storage._cache_storage import _CacheStorage
 
 # pylint: disable=protected-access
 

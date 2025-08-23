@@ -2,8 +2,8 @@
 
 # pylint: disable=protected-access
 
-from ._base_storage import _BaseStorage
-from ._internal_storage import _InternalStorage
+from abllib._storage._base_storage import _BaseStorage
+from abllib._storage._internal_storage import _InternalStorage
 
 InternalStorage = _InternalStorage()
 # pylint: disable-next=protected-access

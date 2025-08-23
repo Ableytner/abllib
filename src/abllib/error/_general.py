@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from ._custom_exception import CustomException
+from abllib.error._custom_exception import CustomException
 
 # pylint: disable=arguments-differ
 

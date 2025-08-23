@@ -1,12 +1,13 @@
 """A module containing various wrappers"""
 
-from ._deprecated import deprecated
-from ._lock import Lock, Semaphore
-from ._lock_wrapper import NamedLock, NamedSemaphore, ReadLock, WriteLock
-from ._log_error import log_error
-from ._log_io import log_io
-from ._singleuse_wrapper import singleuse
-from ._timeit import timeit
+from abllib.wrapper._deprecated import deprecated
+from abllib.wrapper._lock import Lock, Semaphore
+from abllib.wrapper._lock_wrapper import (NamedLock, NamedSemaphore, ReadLock,
+                                          WriteLock)
+from abllib.wrapper._log_error import log_error
+from abllib.wrapper._log_io import log_io
+from abllib.wrapper._singleuse_wrapper import singleuse
+from abllib.wrapper._timeit import timeit
 
 __exports__ = [
     Lock,

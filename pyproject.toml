@@ -46,3 +46,13 @@ dev = [
 [project.urls]
 Repository = "https://github.com/Ableytner/abllib"
 Issues = "https://github.com/Ableytner/abllib/issues"
+
+[tool.ruff.lint]
+select = ["TID252"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.isort]
+lines_after_imports=1

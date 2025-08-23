@@ -7,7 +7,7 @@ from typing import Any
 from abllib import error, fs, onexit
 from abllib._storage import InternalStorage
 from abllib.storage._storage_view import _StorageView
-from ._threadsafe_storage import _ThreadsafeStorage
+from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
 # pylint: disable=protected-access
 

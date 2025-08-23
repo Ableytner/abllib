@@ -7,7 +7,7 @@ import shutil
 
 import pytest
 
-from abllib import fs, log, storage, _storage, onexit
+from abllib import _storage, fs, log, onexit, storage
 
 # pylint: disable=protected-access
 

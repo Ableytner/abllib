@@ -4,7 +4,7 @@ import functools
 from time import perf_counter_ns
 from typing import Callable
 
-from ._base_log_wrapper import BaseLogWrapper
+from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class timeit(BaseLogWrapper):
     """

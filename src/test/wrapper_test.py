@@ -1,13 +1,13 @@
 """Module containing tests for the abllib.wrapper module"""
 
-import re
 import os
+import re
 from datetime import datetime
 from time import sleep
 
 import pytest
 
-from abllib import error, wrapper, log
+from abllib import error, log, wrapper
 from abllib.pproc import WorkerThread
 
 # pylint: disable=function-redefined, consider-using-with, unused-argument

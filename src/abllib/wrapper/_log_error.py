@@ -5,7 +5,7 @@ from logging import Logger
 from typing import Callable
 
 from abllib.error import ArgumentCombinationError
-from ._base_log_wrapper import BaseLogWrapper
+from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class log_error(BaseLogWrapper):
     """
