@@ -125,7 +125,7 @@ def test_error_defaultmessage():
     with pytest.raises(error.DeprecatedError):
         func1()
 
-def test_error_custommessage():
+def test_custommessage_as_error():
     """Ensure that wrapper.deprecated as error with a custom message uses that message"""
 
     @wrapper.deprecated("A custom deprecation message", True)
