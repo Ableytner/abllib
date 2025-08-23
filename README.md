@@ -1206,3 +1206,51 @@ A custom logger can also be specified by either passing the name or logging.Logg
 >> my_func(0.002)
 [2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.28 ms elapsed
 ```
+
+## Development environment setup
+
+If you want to contribute to this project, you need to set up your local environment.
+
+### Clone the repository
+
+Run the command
+```bash
+git clone https://github.com/Ableytner/abllib
+cd abllib
+```
+in your terminal.
+
+### Install pip packages
+
+To install all optional as well as development python packages, run the following commands in the project root.
+
+Windows:
+```bash
+py -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
+Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Git pre-commit hooks
+
+Pre-commit hooks are used to check and autofix formatting issues and typos before you commit your changes.
+Once installed, they run automatically if you run `git commit ...`.
+
+Using these is optional, but encouraged.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To verify the installation and run all checks:
+```bash
+pre-commit run --all-files
+```
