@@ -159,7 +159,7 @@ This module contains various file system-related functionality. All provided fun
 
 #### Absolute path (`abllib.fs.absolute`)
 
-A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended. 
+A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended.
 
 Example usage:
 ```py
@@ -213,7 +213,7 @@ The source code and documentation use a few words which might be confusing, so t
 * candidate: a word that could match with target.
 * score: the similarity score, which is a float value between 0 and 1, rounded down to two digits.
 
-Note that target and candidate can be a single word, multiple words seperated by ' ', or a sentence.
+Note that target and candidate can be a single word, multiple words separated by ' ', or a sentence.
 
 Furthermore, it is possible to pass an [iterable](https://docs.python.org/3/glossary.html#term-iterable) as the candidate.
 This will try to match the target against all of its items.
@@ -281,7 +281,7 @@ To achieve this, two different strategies are used:
 * calculate the edit distance between the whole target and candidate.
 * split target / candidate at ' ' and calculate the edit distance between each word.
 
-After that, a list of MatchResults which are withing a certain threshold are returned.
+After that, a list of MatchResults which are within a certain threshold are returned.
 
 Example usage:
 ```py
@@ -359,7 +359,7 @@ abllib.error._general.MissingRequiredModuleError: "The error message"
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
-If it isn't initialized, the currently set `logging` modules setttings are used.
+If it isn't initialized, the currently set `logging` modules settings are used.
 
 Example usage without setup:
 ```py
@@ -492,8 +492,8 @@ TLDR: If you are not sure what to use, use thread-based processing.
 
 #### WorkerThread (`abllib.pproc.WorkerThread`)
 
-This class represents a seperate thread that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -510,7 +510,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerThread
 >> def not_the_answer():
@@ -533,8 +533,8 @@ ValueError: The answer is not yet calculated!
 
 #### WorkerProcess (`abllib.pproc.WorkerProcess`)
 
-This class represents a seperate process that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate process that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -551,7 +551,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerProcess
 >> def not_the_answer():
@@ -575,7 +575,7 @@ ValueError: The answer is not yet calculated!
 ### 9. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
-All data stored in these storages is accessable from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+All data stored in these storages is accessible from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
 Multithreaded access is also allowed.
 
 The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
@@ -942,7 +942,7 @@ Traceback (most recent call last):
 abllib.error._general.CalledMultipleTimesError: The function can only be called once
 ```
 
-If an error occured during function execution, the function can be called again.
+If an error occurred during function execution, the function can be called again.
 ```py
 >> from abllib.wrapper import singleuse
 >> @singleuse
@@ -1022,7 +1022,7 @@ If a deprecated function is called, a deprecation warning is logged using the cu
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 ```
@@ -1034,7 +1034,7 @@ It can also be applied explicitly as a warning or error:
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 >> @deprecated.error
@@ -1066,7 +1066,7 @@ abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func 
 
 #### Log function error (`abllib.wrapper.log_error`)
 
-The log_error wrapper can be applied to functions to send any occured exception to the default logger.
+The log_error wrapper can be applied to functions to send any occurred exception to the default logger.
 
 First, logging needs to be setup. In this example, this librarys' logging is used.
 ```py
