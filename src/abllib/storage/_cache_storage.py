@@ -17,4 +17,4 @@ class _CacheStorage(_BaseStorage):
 
     def _ensure_initialized(self):
         # the storage is always initialized
-        return True
+        pass

@@ -1,7 +1,5 @@
 """Module containing the _PersistentStorage class"""
 
-# pylint: disable=protected-access
-
 import json
 import os
 from typing import Any
@@ -9,7 +7,9 @@ from typing import Any
 from abllib import error, fs, onexit
 from abllib._storage import InternalStorage
 from abllib.storage._storage_view import _StorageView
-from ._threadsafe_storage import _ThreadsafeStorage
+from abllib.storage._threadsafe_storage import _ThreadsafeStorage
+
+# pylint: disable=protected-access
 
 class _PersistentStorage(_ThreadsafeStorage):
     """Storage that persists across restarts"""

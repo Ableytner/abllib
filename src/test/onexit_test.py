@@ -37,7 +37,7 @@ def test_deregister():
         onexit.deregister("func1")
 
 def test_register_single():
-    """Ensure that registering the callbacks seperately works correctly"""
+    """Ensure that registering the callbacks separately works correctly"""
 
     def func1():
         pass
@@ -56,7 +56,7 @@ def test_register_single():
     onexit.deregister("func1")
 
 def test_deregister_single():
-    """Ensure that deregistering the callbacks seperately works correctly"""
+    """Ensure that deregistering the callbacks separately works correctly"""
 
     def func1():
         pass

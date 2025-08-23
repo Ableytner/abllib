@@ -16,7 +16,7 @@ class Lock():
     def acquire(self, blocking: bool = True, timeout: float | None = None):
         """
         Try to acquire the Lock.
-        
+
         If blocking is disabled, it doesn't wait for the timeout.
 
         If timeout is set, wait for n seconds before returning.

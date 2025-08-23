@@ -9,8 +9,8 @@ from time import sleep
 
 from abllib import error, log
 from abllib._storage import InternalStorage
-from ._lock import Lock, Semaphore
-from ._deprecated import deprecated
+from abllib.wrapper._deprecated import deprecated
+from abllib.wrapper._lock import Lock, Semaphore
 
 logger = log.get_logger("LockWrapper")
 

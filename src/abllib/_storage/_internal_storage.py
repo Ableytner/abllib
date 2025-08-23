@@ -3,8 +3,7 @@
 from typing import Any
 
 from abllib import error
-from ._base_storage import _BaseStorage
-
+from abllib._storage._base_storage import _BaseStorage
 
 class _InternalStorage(_BaseStorage):
     """Internal storage that is not saved across restarts"""

@@ -1,7 +1,7 @@
 """A module containing the fuzzy search function"""
 
-from ._matchresult import MatchResult
-from ._similarity import Similarity
+from abllib.fuzzy._matchresult import MatchResult
+from abllib.fuzzy._similarity import Similarity
 
 def match_all(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> list[MatchResult]:
     """
