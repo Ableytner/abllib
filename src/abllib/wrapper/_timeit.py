@@ -9,7 +9,7 @@ from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 class timeit(BaseLogWrapper):
     """
     Decorate a function, which logs the execution time of this function.
-    The values are logged with log level DEBUG, so make soure you configured your logger properly.
+    The values are logged with log level DEBUG, so make sure you configured your logger properly.
 
     If the optional argument logger is set and of type logging.Logger, log the time to that logger.
 

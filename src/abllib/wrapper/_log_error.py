@@ -9,7 +9,7 @@ from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class log_error(BaseLogWrapper):
     """
-    Decorate a function, which logs any exception occuring during execution.
+    Decorate a function, which logs any exception occurring during execution.
 
     If the optional argument logger is set and of type logging.Logger, log the error to that logger.
 

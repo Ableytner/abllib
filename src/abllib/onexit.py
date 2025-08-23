@@ -119,7 +119,7 @@ def deregister_sigterm(name: str) -> None:
         signal.signal(signal.SIGTERM, InternalStorage["_onexit.orig.signal"])
 
 def reset() -> None:
-    """Reset all regsitered callbacks"""
+    """Reset all registered callbacks"""
 
     if "_onexit.atexit" in InternalStorage:
         for name in list(InternalStorage["_onexit.atexit"].keys()):

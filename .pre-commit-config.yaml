@@ -9,8 +9,12 @@ repos:
   rev: v2.4.1
   hooks:
   - id: codespell
-    types_or: [rst, markdown]
-    files: README.md
+    files: ^.*\.(py|md|yml)$
+    exclude: >
+      (?x)^(
+        src/test/fuzzy_test.py|
+        src/test/alg_test.py
+      )$
     additional_dependencies:
     - tomli
 - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -32,3 +36,4 @@ repos:
   - id: pylint
     args:
       - -d import-error
+      - -sn

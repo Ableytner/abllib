@@ -10,7 +10,7 @@ class ArgumentCombinationError(CustomException):
     """Exception raised when the given combination of arguments is invalid"""
 
     default_messages = {
-        0: "This combination of argumetns is invalid"
+        0: "This combination of arguments is invalid"
     }
 
 class CalledMultipleTimesError(CustomException):

@@ -2,7 +2,7 @@
 
 # TODO:
 # UP NEXT
-# replace all TypeError occurances with WrongTypeError
+# replace all TypeError occurrences with WrongTypeError
 
 # IMPORTANT BUT ANNOYING
 # add tests for threaded storage access
