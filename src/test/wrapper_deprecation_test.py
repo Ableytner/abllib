@@ -1,10 +1,10 @@
 """Module containing tests for the abllib.wrapper.deprecated functionality"""
 
-# pylint: disable=function-redefined, consider-using-with, unused-argument, missing-class-docstring
-
 import pytest
 
 from abllib import error, wrapper
+
+# pylint: disable=function-redefined, consider-using-with, unused-argument, missing-class-docstring
 
 def test_callable():
     """Ensure that wrapper.deprecated is callable"""

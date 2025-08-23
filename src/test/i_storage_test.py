@@ -1,15 +1,14 @@
 """Module containing tests for the different types of Storage"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
-
 import pytest
 
-from abllib.error import InternalFunctionUsedError, \
-                         InvalidKeyError, \
-                         KeyNotFoundError, \
-                         SingletonInstantiationError, \
-                         WrongTypeError
 from abllib._storage import _BaseStorage, _InternalStorage
+from abllib.error import (InternalFunctionUsedError, InvalidKeyError,
+                          KeyNotFoundError, ReadonlyError,
+                          SingletonInstantiationError, UninitializedFieldError,
+                          WrongTypeError)
+
+# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
 
 def test_basestorage_instantiation():
     """Ensure that BaseStorage cannot be initialized"""
@@ -266,6 +265,47 @@ def test_basestorage_delitem_wrong_key():
     with pytest.raises(KeyNotFoundError):
         del BaseStorage["key1.key2.key3.key4.key5.key6"]
 
+def test_basestorage_keys():
+    """Test the Storage.keys() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.keys()) == 0
+    assert "key1" not in BaseStorage.keys()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.keys()) == 1
+    assert "key1" in BaseStorage.keys()
+    assert list(BaseStorage.keys())[0] == "key1"
+
+def test_basestorage_values():
+    """Test the Storage.values() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.values()) == 0
+    assert "value" not in BaseStorage.values()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.values()) == 1
+    assert "value" in BaseStorage.values()
+    assert list(BaseStorage.values())[0] == "value"
+
+def test_basestorage_items():
+    """Test the Storage.items() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert len(BaseStorage.items()) == 0
+    assert ("key1", "value") not in BaseStorage.items()
+
+    BaseStorage["key1"] = "value"
+    assert len(BaseStorage.items()) == 1
+    assert ("key1", "value") in BaseStorage.items()
+
 def test_basestorage_pop():
     """Test the Storage.pop() method"""
 
@@ -452,6 +492,150 @@ def test_basestorage_contains_item_valuetype():
 
     BaseStorage["key1"] = ["1", 2, None]
     assert BaseStorage.contains_item("key1", ["1", 2, None])
+
+def test_basestorage_get():
+    """Test the Storage.get() method"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") is None
+
+    BaseStorage["key1"] = "value"
+    assert BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") == "value"
+
+def test_basestorage_get_multi():
+    """Test the Storage.get() method with subdicts specified in the key"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1.key2")
+    assert BaseStorage.get("key1.key2") is None
+
+    BaseStorage["key1.key2"] = "value2"
+    assert BaseStorage.contains("key1.key2")
+    assert BaseStorage.get("key1.key2") == "value2"
+
+    del BaseStorage["key1"]
+
+    assert not BaseStorage.contains("key1.key2.key3.key4.key5.key6")
+    assert BaseStorage.get("key1.key2.key3.key4.key5.key6") is None
+
+    BaseStorage["key1.key2.key3.key4.key5.key6"] = "values"
+    assert BaseStorage.get("key1.key2.key3.key4.key5.key6") == "values"
+
+def test_basestorage_get_keytype():
+    """Test the Storage.get() methods' protection against incorrect key types"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(None)
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(10)
+    with pytest.raises(WrongTypeError):
+        BaseStorage.get(list(("1",)))
+
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get(".some.key")
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get("some.key.")
+    with pytest.raises(InvalidKeyError):
+        BaseStorage.get("some..key")
+
+def test_basestorage_get_default():
+    """Test the Storage.get() methods' optional default argument"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert not BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") is None
+
+    assert BaseStorage.get("key1", None) is None
+    assert BaseStorage.get("key1", default=None) is None
+
+    assert BaseStorage.get("key1", 45) == 45
+    assert BaseStorage.get("key1", default=45) == 45
+
+    assert BaseStorage.get("key1", "test") == "test"
+    assert BaseStorage.get("key1", default="test") == "test"
+
+    BaseStorage["key1"] = "value"
+    assert BaseStorage.contains("key1")
+    assert BaseStorage.get("key1") == "value"
+
+    assert BaseStorage.get("key1", None) == "value"
+    assert BaseStorage.get("key1", default=None) == "value"
+
+    assert BaseStorage.get("key1", 45) == "value"
+    assert BaseStorage.get("key1", default=45) == "value"
+
+    assert BaseStorage.get("key1", "test") == "value"
+    assert BaseStorage.get("key1", default="test") == "value"
+
+def test_basestorage_name():
+    """Test the Storage.name member"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    assert hasattr(BaseStorage, "name")
+    assert isinstance(BaseStorage.name, str)
+    assert BaseStorage.name == "BaseStorage"
+
+def test_basestorage_name_readonly():
+    """Ensure that Storage.name is readonly"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(ReadonlyError):
+        BaseStorage.name = "AnotherName"
+
+def test_basestorage_name_custom():
+    """Ensure that custom storages need to overwrite _STORAGE_NAME"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    with pytest.raises(UninitializedFieldError):
+        class _TestStorage(_BaseStorage):
+            def __init__(self):
+                pass
+
+    with pytest.raises(WrongTypeError):
+        class _TestStorage2(_BaseStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = 42
+
+    with pytest.raises(UninitializedFieldError):
+        class _TestStorage3(_BaseStorage):
+            def __init__(self):
+                pass
+            _STORAGE_NAME = "BaseStorage"
+
+    class _TestStorage4(_BaseStorage):
+        def __init__(self):
+            pass
+        _STORAGE_NAME = "TestStorage4"
+
+def test_basestorage_non_ascii():
+    """Ensure that non-ascii characters work correctly"""
+
+    BaseStorage = _BaseStorage.__new__(_BaseStorage)
+    BaseStorage._store = {}
+
+    BaseStorage["testkey"] = "ÄöÜ"
+    assert BaseStorage["testkey"] == "ÄöÜ"
+
+    BaseStorage["testkey2"] = "ハウルの動く城"
+    assert BaseStorage["testkey2"] == "ハウルの動く城"
 
 def test_internalstorage_inheritance():
     """Ensure the InternalStorage inherits from _BaseStorage"""

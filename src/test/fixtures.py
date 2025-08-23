@@ -1,15 +1,13 @@
-"""
-    Pytest fixtures
-"""
-
-# pylint: disable=protected-access, missing-class-docstring
+"""Pytest fixtures"""
 
 import os
 import shutil
 
 import pytest
 
-from abllib import fs, log, storage, _storage, onexit
+from abllib import _storage, fs, log, onexit, storage
+
+# pylint: disable=protected-access
 
 logger = log.get_logger("test")
 
@@ -18,21 +16,19 @@ def setup():
     """Setup the PersistentStorage, VolatileStorage and StorageView for test usage"""
 
     # setup testing dirs
-    STORAGE_DIR = fs.absolute(os.path.dirname(__file__), "..", "..", "test_run")
-    shutil.rmtree(STORAGE_DIR, ignore_errors=True)
-    os.makedirs(STORAGE_DIR, exist_ok=True)
+    TESTING_DIR = fs.absolute(os.path.dirname(__file__), "..", "..", "test_run")
+    shutil.rmtree(TESTING_DIR, ignore_errors=True)
+    os.makedirs(TESTING_DIR, exist_ok=True)
+    os.chdir(TESTING_DIR)
 
     #  setup logging
     log.initialize(log.LogLevel.DEBUG)
     log.add_console_handler()
-    log.add_file_handler(os.path.join(STORAGE_DIR, "test.log"))
 
-    STORAGE_FILE = fs.absolute(STORAGE_DIR, "test.json")
+    if os.path.isfile("test.json"):
+        os.remove("test.json")
 
-    if os.path.isfile(STORAGE_FILE):
-        os.remove(STORAGE_FILE)
-
-    storage.initialize(STORAGE_FILE)
+    storage.initialize("test.json")
 
     yield None
 
@@ -66,4 +62,7 @@ def capture_logs():
     yield None
 
     log.initialize()
-    os.remove("test.log")
+    log.add_console_handler()
+    # file is created lazily
+    if os.path.isfile("test.log"):
+        os.remove("test.log")

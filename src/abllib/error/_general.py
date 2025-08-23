@@ -1,10 +1,17 @@
 """Module containing custom exceptions for general usage"""
 
-# pylint: disable=arguments-differ
-
 from typing import Any
 
-from ._custom_exception import CustomException
+from abllib.error._custom_exception import CustomException
+
+# pylint: disable=arguments-differ
+
+class ArgumentCombinationError(CustomException):
+    """Exception raised when the given combination of arguments is invalid"""
+
+    default_messages = {
+        0: "This combination of arguments is invalid"
+    }
 
 class CalledMultipleTimesError(CustomException):
     """Exception raised when a single-use function is called twice"""
@@ -93,6 +100,14 @@ class MissingInheritanceError(CustomException):
 
         return super().with_values(base_class_name, class_name)
 
+class MissingRequiredModuleError(CustomException):
+    """Exception raised when a required module is not installed"""
+
+    default_messages = {
+        0: "A required module is not installed.",
+        1: "The required module '{0}' is not installed."
+    }
+
 class NameNotFoundError(CustomException):
     """Exception raised when the name is not found"""
 
@@ -123,6 +138,14 @@ class RegisteredMultipleTimesError(CustomException):
         1: "{0} is already registered"
     }
 
+class ReadonlyError(CustomException):
+    """Exception raised when a read-only object is changed"""
+
+    default_messages = {
+        0: "This object is read-only and cannot be changed",
+        1: "{0} is read-only and cannot be changed"
+    }
+
 class SingletonInstantiationError(CustomException):
     """Exception raised when a singleton class is instantiated twice"""
 
@@ -137,6 +160,15 @@ class SingletonInstantiationError(CustomException):
             class_name = type(class_name)
 
         return super().with_values(class_name)
+
+class UninitializedFieldError(CustomException):
+    """Exception raised when a subclass doesn't initialize a mandatory field"""
+
+    default_messages = {
+        0: "The subclass doesn't initialize a mandatory field",
+        1: "The subclass doesn't initialize the mandatory field {0}",
+        2: "{0} doesn't initialize the mandatory field {1}"
+    }
 
 class WrongTypeError(CustomException):
     """Exception raised when a value wasn't of an expected type"""

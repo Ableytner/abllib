@@ -5,7 +5,7 @@ from typing import Any
 class CustomException(Exception):
     """
     The base class for all custom exceptions
-    
+
     If no arguments are provided at instantiation, the default error message is used.
     Otherwise, the provided argument is used as the error message.
     """
@@ -57,4 +57,5 @@ class CustomException(Exception):
                 raise TypeError()
 
         if hasattr(cls, "default_message"):
+            # TODO: handle legacy classes, as default_message is deprecated
             pass

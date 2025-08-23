@@ -1,18 +1,15 @@
 """A module containing the fuzzy search function"""
 
-from ._matchresult import MatchResult
-from ._similarity import Similarity
-from .. import log
+from abllib.fuzzy._matchresult import MatchResult
+from abllib.fuzzy._similarity import Similarity
 
-logger = log.get_logger("test")
-
-def match_all(target: str, candidates: list[str | tuple[str]], threshold: int = 5) -> list[MatchResult]:
+def match_all(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> list[MatchResult]:
     """
     Search for all candidates matching the target. Applies fuzzy logic when comparing.
 
     In order to successfully find a candidate, at least one of two conditions need to be true:
-    * the edit distance (levenshtein distance) needs to be smaller than >threshold<
-    * a single word (>target< split at ' ') needs to have an edit distance smaller than (len(>word<) / 3) + 1
+    * the edit distance (levenshtein distance) needs to be smaller than *threshold*
+    * a single word (*target* split at ' ') needs to have an edit distance smaller than (len(*word*) / 3) + 1
 
     Returns a list of MatchResults.
     """
@@ -30,7 +27,7 @@ def match_all(target: str, candidates: list[str | tuple[str]], threshold: int = 
 
     return results
 
-def _match_single_candidate(target: str, candidate: str | tuple[str], threshold: int) -> MatchResult | None:
+def _match_single_candidate(target: str, candidate: str | tuple[str, ...], threshold: int) -> MatchResult | None:
     if isinstance(candidate, str):
         score = Similarity(target, candidate, threshold).calculate()
         return MatchResult(score, candidate) if score > 0.0 else None

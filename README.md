@@ -6,20 +6,76 @@ Supports Python versions 3.10 - 3.13.
 
 ## Overview
 
-This project contains many submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
+This project is a collection of many small helper modules that can be used for all kinds of projects.
+
+It is structured into small submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
 2. Errors (`abllib.error`)
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
-5. Logging (`abllib.log`)
-6. Cleanup on exit (`abllib.onexit`)
-7. Parallel processing (`abllib.pproc`)
-8. Storages (`abllib.storage`)
-9. Function wrappers (`abllib.wrapper`)
+5. General (`abllib.general`)
+6. Logging (`abllib.log`)
+7. Cleanup on exit (`abllib.onexit`)
+8. Parallel processing (`abllib.pproc`)
+9. Storages (`abllib.storage`)
+10. Function wrappers (`abllib.wrapper`)
 
-## Submodules
+## Installation
+
+### PyPI
+
+All stable versions get released on [PyPI](https://pypi.org/project/abllib). To download the newest version, run the following command:
+```bash
+pip install abllib
+```
+This will automatically install all other dependencies.
+
+Alternatively, a specific version can be installed as follows:
+```bash
+pip install abllib==1.3.6
+```
+where 1.3.6 is the version you want to install.
+
+### Github
+
+To install the latest development version directly from Github, run the following command:
+```bash
+pip install git+https://github.com/Ableytner/abllib
+```
+
+Additionally, a [wheel](https://peps.python.org/pep-0427/) is added to every [stable release](https://github.com/Ableytner/abllib/releases), which can be manually downloaded and installed.
+
+### requirements.txt
+
+If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
+```text
+abllib==1.3.6
+```
+where 1.3.6 is the version that you want to install.
+
+To always use the latest stable version:
+```text
+abllib
+```
+
+To always install the latest development version:
+```text
+abllib @ git+https://github.com/Ableytner/abllib
+```
+
+### Optional dependencies
+
+Some modules have optional dependencies which bring various improvements.
+All of them are optional and listed below.
+
+| name | needed in | improvement |
+|------|-----------|-------------|
+| pykakasi | fs.filename | needed to correctly translate japanese kanji |
+| levenshtein | alg.levenshtein_distance | provides a 10x speedup by using the C implementation |
+
+## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
 
@@ -40,6 +96,9 @@ Example usage:
 5
 ```
 
+If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
+This provides a 10x speedup, but requires an extra package.
+
 ### 2. Errors (`abllib.error`)
 
 This module contains a custom exception system, which supports default messages for different errors.
@@ -48,31 +107,51 @@ This module contains a custom exception system, which supports default messages 
 
 The base class to all custom exceptions. This class cannot be invoked on its own, but should be subclassed to create your own error classes.
 
-Note that all deriving classes should end with 'Error', not 'Exception', to stay consistent with the python naming scheme.
+Note that all deriving classes' names should end with 'Error', not 'Exception', to stay consistent with the python naming scheme.
 
 Example usage:
 ```py
 >> from abllib.error import CustomException
 >> class MySpecialError(CustomException):
-..     default_message = "This error has a default message!"
+..     default_messages = {0: "This error shows a default message!", 1: "This error shows {0}!"}
 >> raise MySpecialError()
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-MySpecialError: This error has a default message!
+    raise MySpecialError()
+MySpecialError: This error shows a default message!
+>> raise MySpecialError.with_values("a customizable message")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    raise MySpecialError.with_values("a customizable message")
+MySpecialError: This error shows a customizable message!
 ```
+
+Note that custom error classes need to define the class member `default_messages`, which contains the default error messages.
+The keys (0 in this example) refer to the number of arguments that will be auto-filled.
+
+A default message for 0 arguments is mandatory.
 
 #### General purpose errors
 
-This module also contains some premade general-purpose error types, which all derive from `CustomException`. The following error classes are provided:
+This module also contains some premade general-purpose error classes, which all derive from `CustomException`. The following classes are provided:
 * CalledMultipleTimesError
+* DeprecatedError
 * DirNotFoundError
+* InternalCalculationError
 * InternalFunctionUsedError
+* InvalidKeyError
 * KeyNotFoundError
 * LockAcquisitionTimeoutError
+* MissingDefaultMessageError
 * MissingInheritanceError
+* NameNotFoundError
 * NoneTypeError
 * NotInitializedError
+* ReadonlyError
+* RegisteredMultipleTimesError
 * SingletonInstantiationError
+* UninitializedFieldError
+* WrongTypeError
 
 ### 3. File system (`abllib.fs`)
 
@@ -80,7 +159,7 @@ This module contains various file system-related functionality. All provided fun
 
 #### Absolute path (`abllib.fs.absolute`)
 
-A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended. 
+A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended.
 
 Example usage:
 ```py
@@ -93,16 +172,48 @@ Example usage:
 'C:\\MyUser\\Some\\image.png'
 ```
 
+#### Filename sanitization (`abllib.fs.sanitize`)
+
+A function which accepts any text and sanitizes it for use as a file name / folder name.
+The resulting text only contains ascii characters.
+
+Example usage:
+```py
+>> from abllib.fs import sanitize
+>> sanitize("myfilename.txt")
+'myfilename.txt'
+>> sanitize("This sentence gets converted..txt")
+'This_sentence_gets_converted.txt'
+>> sanitize("special' char/act\\ers ar|e i*gnor;ed")
+'special_char_act_ers_ar_e_ignor_ed'
+>> sanitize("Die grüne Böschung")
+'Die_grune_Boschung'
+>> sanitize("ハウルの動く城")
+'hauru_no_ugoku_shiro'
+```
+
+Currently supported language-specific text transliterations:
+| language   | supported | additional notes                                                                                                                           |
+| ---------- | :-------: | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| english    | yes       |                                                                                                                                            |
+| german     | yes       |                                                                                                                                            |
+| japanese   | partial   | needs optional library [pykakasi](https://pypi.org/project/pykakasi/) (`pip install pykakasi`), otherwise removes japanese characters      |
+
+Special characters from unsupported languages and any other non-ascii will be removed from the resulting text.
+
 ### 4. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
+
+> [!TIP]
+> If the performance seems poor, the optional levenshtein package can be installed for a 10x speedup (`pip install levenshtein`).
 
 The source code and documentation use a few words which might be confusing, so they are explained here:
 * target: the word that we want to find.
 * candidate: a word that could match with target.
 * score: the similarity score, which is a float value between 0 and 1, rounded down to two digits.
 
-Note that target and candidate can be a single word, multiple words seperated by ' ', or a sentence.
+Note that target and candidate can be a single word, multiple words separated by ' ', or a sentence.
 
 Furthermore, it is possible to pass an [iterable](https://docs.python.org/3/glossary.html#term-iterable) as the candidate.
 This will try to match the target against all of its items.
@@ -170,7 +281,7 @@ To achieve this, two different strategies are used:
 * calculate the edit distance between the whole target and candidate.
 * split target / candidate at ' ' and calculate the edit distance between each word.
 
-After that, a list of MatchResults which are withing a certain threshold are returned.
+After that, a list of MatchResults which are within a certain threshold are returned.
 
 Example usage:
 ```py
@@ -204,11 +315,51 @@ Example usage:
 1.0
 ```
 
-### 5. Logging (`abllib.log`)
+### 5. General (`abllib.general`)
+
+This module contains different general-purpose functions that don't warrant an own module.
+
+#### Try to import a module (`abllib.general.try_import_module`)
+
+This function tries to import and return a given module.
+
+```py
+>> from abllib.general import try_import_module
+>> sys = try_import_module("sys")
+>> sys.modules
+{'sys': <module 'sys' (built-in)>, ...}
+>> non_existent = try_import_module("non_existent")
+>> non_existent
+None
+```
+
+If the optional argument `error_msg` is given and the import fails, the message will be logged.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", "The module 'non_existent' doesn't exist")
+[2025-08-20 10:58:07] [WARNING ] general: The module 'non_existent' doesn't exist
+>> non_existent
+None
+```
+
+If the optional argument `enforce` is given and the import fails, an error is thrown.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The required module 'non_existent' is not installed."
+>> non_existent = try_import_module("non_existent", error_msg="The error message", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The error message"
+```
+
+### 6. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
-If it isn't initialized, the currently set `logging` modules setttings are used.
+If it isn't initialized, the currently set `logging` modules settings are used.
 
 Example usage without setup:
 ```py
@@ -240,7 +391,8 @@ Logging to a file is supported as follows:
 >> logger = log.get_logger()
 >> logger.info("this is written to the file")
 ```
-The logfile will automatically be closed on program exit.
+The logfile will be created once the first message with a high enough log level is logged.
+The file is closed at program exit or handler removal.
 
 Multiple handlers can also be added simultaneously.
 In this case, the logged message is sent to all of them.
@@ -276,7 +428,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Cleanup on exit (`abllib.onexit`)
+### 7. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 
@@ -312,7 +464,7 @@ Already registered callbacks can also be deregistered:
 >> exit()
 ```
 
-### 7. Parallel processing (`abllib.pproc`)
+### 8. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functionality, both thread-based and process-based.
 
@@ -340,8 +492,8 @@ TLDR: If you are not sure what to use, use thread-based processing.
 
 #### WorkerThread (`abllib.pproc.WorkerThread`)
 
-This class represents a seperate thread that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -358,7 +510,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerThread
 >> def not_the_answer():
@@ -381,8 +533,8 @@ ValueError: The answer is not yet calculated!
 
 #### WorkerProcess (`abllib.pproc.WorkerProcess`)
 
-This class represents a seperate process that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate process that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -399,7 +551,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerProcess
 >> def not_the_answer():
@@ -420,17 +572,17 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 8. Storages (`abllib.storage`)
+### 9. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
-All data stored in these storages is accessable from anywhere within the program, as each storage is a [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+All data stored in these storages is accessible from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
 Multithreaded access is also allowed.
 
 The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
 
 #### Initialize storages
 
-The storage can be initialized (enabled) in two different ways:
+The storages can be initialized (enabled) in two different ways:
 
 Enable all storages:
 ```py
@@ -480,15 +632,33 @@ Items can be retrieved in multiple ways:
 ```py
 >> VolatileStorage["mykey"]
 'myvalue'
+>> VolatileStorage.get("mykey")
+'myvalue'
 >> VolatileStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> VolatileStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> VolatileStorage["toplevelkey.sublevelkey"]
 'another value'
+>> VolatileStorage.get("toplevelkey.sublevelkey")
+'another value'
 >> type(VolatileStorage["specialvalue"])
 <class '_thread.lock'>
+>> VolatileStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> VolatileStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> VolatileStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> VolatileStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> VolatileStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -500,8 +670,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del VolatileStorage["mykey"]
+>> VolatileStorage.pop("mykey")
+'myvalue'
 >> del VolatileStorage["toplevelkey"]["sublevelkey"]
 >> del VolatileStorage["toplevelkey.sublevelkey"]
+>> VolatileStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises a KeyNotFoundError.
 
@@ -550,13 +724,31 @@ Items can be retrieved in multiple ways:
 ```py
 >> PersistentStorage["mykey"]
 'myvalue'
+>> PersistentStorage.get("mykey")
+'myvalue'
 >> PersistentStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> PersistentStorage.get("toplevelkey")["sublevelkey"]
 'another value'
 >> PersistentStorage["toplevelkey.sublevelkey"]
 'another value'
+>> PersistentStorage.get("toplevelkey.sublevelkey")
+'another value'
+>> PersistentStorage.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> PersistentStorage.keys()
+dict_keys(['mykey', 'toplevelkey'])
+>> PersistentStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}])
+>> PersistentStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'})])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> PersistentStorage.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -568,8 +760,12 @@ True
 Items can be deleted in multiple ways:
 ```py
 >> del PersistentStorage["mykey"]
+>> PersistentStorage.pop("mykey")
+'myvalue'
 >> del PersistentStorage["toplevelkey"]["sublevelkey"]
 >> del PersistentStorage["toplevelkey.sublevelkey"]
+>> PersistentStorage.pop("toplevelkey.sublevelkey")
+'another value'
 ```
 Trying to delete non-existent items raises an KeyNotFoundError.
 
@@ -578,6 +774,90 @@ All storage data can be loaded and saved manually:
 >> PersistentStorage.load_from_disk()
 >> PersistentStorage.save_to_disk()
 ```
+
+#### CacheStorage (`abllib.CacheStorage`)
+
+This storage is specialized for caching things. It can hold any type of value. The stored data is reset after each program restart.
+
+Important: All stored data could be lost at any time, if a cache reset is forced.
+
+Example usage:
+
+First the storage needs to be imported:
+```py
+>> from abllib import CacheStorage
+```
+Initialization is not needed.
+
+Items can be assigned in multiple ways:
+```py
+>> CacheStorage["mykey"] = "myvalue"
+>> CacheStorage["toplevelkey.sublevelkey"] = "another value"
+>> CacheStorage["specialvalue"] = threading.Lock()
+```
+
+Presence of keys can be checked in multiple ways:
+```py
+>> "toplevelkey" in CacheStorage
+True
+>> "toplevelkey.sublevelkey" in CacheStorage
+True
+>> CacheStorage.contains("toplevelkey")
+True
+>> in CacheStorage.contains("toplevelkey.sublevelkey")
+True
+```
+
+Items can be retrieved in multiple ways:
+```py
+>> CacheStorage["mykey"]
+'myvalue'
+>> CacheStorage.get("mykey")
+'myvalue'
+>> CacheStorage["toplevelkey"]["sublevelkey"]
+'another value'
+>> CacheStorage.get("toplevelkey")["sublevelkey"]
+'another value'
+>> CacheStorage["toplevelkey.sublevelkey"]
+'another value'
+>> CacheStorage.get("toplevelkey.sublevelkey")
+'another value'
+>> type(CacheStorage["specialvalue"])
+<class '_thread.lock'>
+>> CacheStorage.get("nonexistent.key", default=42)
+42
+```
+
+Multiple items can also be retrieved at once:
+```py
+>> CacheStorage.keys()
+dict_keys(['mykey', 'toplevelkey', 'specialvalue'])
+>> CacheStorage.values()
+dict_values(['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>])
+>> CacheStorage.items()
+dict_items([('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)])
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
+```py
+>> CacheStorage.contains_item("toplevelkey.sublevelkey", "another value")
+True
+>> # is equal to:
+>> CacheStorage["toplevelkey.sublevelkey"] == "another value"
+True
+```
+
+Items can be deleted in multiple ways:
+```py
+>> del CacheStorage["mykey"]
+>> CacheStorage.pop("mykey")
+'myvalue'
+>> del CacheStorage["toplevelkey"]["sublevelkey"]
+>> del CacheStorage["toplevelkey.sublevelkey"]
+>> CacheStorage.pop("toplevelkey.sublevelkey")
+'another value'
+```
+Trying to delete non-existent items raises a KeyNotFoundError.
 
 #### StorageView (`abllib.StorageView`)
 
@@ -608,13 +888,29 @@ Items can be retrieved in multiple ways:
 ```py
 >> StorageView["mykey"]
 'myvalue'
+>> StorageView.get("mykey")
+'myvalue'
 >> StorageView["toplevelkey"]["sublevelkey"]
 'another value'
 >> StorageView["toplevelkey.sublevelkey"]
 'another value'
+>> StorageView.get("toplevelkey.sublevelkey")
+'another value'
+>> StorageView.get("nonexistent.key", default=42)
+42
 ```
 
-There also exists a way to check whether an item at a key matches a certain value:
+Multiple items can also be retrieved at once:
+```py
+>> StorageView.keys()
+['mykey', 'toplevelkey', 'specialvalue']
+>> StorageView.values()
+['myvalue', {'sublevelkey': 'another value'}, <unlocked _thread.lock object at 0x000002831830E980>]
+>> StorageView.items()
+[('mykey', 'myvalue'), ('toplevelkey', {'sublevelkey': 'another value'}), ('specialvalue', <unlocked _thread.lock object at 0x000002831830E980>)]
+```
+
+There also exists a way to check whether an item and a key matches a certain value:
 ```py
 >> StorageView.contains_item("toplevelkey.sublevelkey", "another value")
 True
@@ -623,7 +919,7 @@ True
 True
 ```
 
-### 9. Function wrappers (`abllib.wrapper`)
+### 10. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
@@ -646,7 +942,7 @@ Traceback (most recent call last):
 abllib.error._general.CalledMultipleTimesError: The function can only be called once
 ```
 
-If an error occured during function execution, the function can be called again.
+If an error occurred during function execution, the function can be called again.
 ```py
 >> from abllib.wrapper import singleuse
 >> @singleuse
@@ -726,7 +1022,7 @@ If a deprecated function is called, a deprecation warning is logged using the cu
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 ```
@@ -738,7 +1034,7 @@ It can also be applied explicitly as a warning or error:
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 >> @deprecated.error
@@ -768,25 +1064,193 @@ Traceback (most recent call last):
 abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func instead
 ```
 
-## Installation
+#### Log function error (`abllib.wrapper.log_error`)
 
-### PyPi
+The log_error wrapper can be applied to functions to send any occurred exception to the default logger.
 
-Not yet available
+First, logging needs to be setup. In this example, this librarys' logging is used.
+```py
+>> from abllib import log
+>> log.initialize()
+>> log.add_console_handler()
+```
 
-### Github
+Example usage:
+```py
+>> from abllib.wrapper import log_error
+>> @log_error
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+[2025-07-29 11:58:54] [ERROR   ] root: my message
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+RuntimeError: my message
+```
 
-To install the latest version directly from Github, run the following command:
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import log_error
+>> @log_error(logger)
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: my message
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+RuntimeError: my message
+```
+
+Instead of logging, a custom handler function can be provided, which will be passed the error message.
+```py
+>> from abllib.wrapper import log_error
+>> @log_error(handler=lambda exc: print(exc))
+.. def my_func(arg):
+..   raise RuntimeError("my message")
+>> try:
+..   my_func("hello world")
+.. except:
+..   pass
+RuntimeError: my message
+```
+
+#### Log function arguments and return value (`abllib.wrapper.log_io`)
+
+The log_io wrapper can be applied to functions to send all arguments, keyword arguments and return values to the default logger.
+
+First, logging needs to be setup. In this example, this librarys' logging is used.
+```py
+>> from abllib import log
+>> log.initialize()
+>> log.add_console_handler()
+```
+
+Example usage:
+```py
+>> from abllib.wrapper import log_io
+>> @log_io
+.. def my_func(arg):
+..   return False
+>> _ = my_func("hello world")
+[2025-07-29 11:58:54] [ERROR   ] root: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] root: in  : "hello world"
+[2025-07-29 11:58:54] [ERROR   ] root: out : False
+```
+
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import log_io
+>> @log_io(logger)
+.. def my_func(arg):
+..   return False
+>> _ = my_func(arg="Test")
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: in  : arg="hello world"
+[2025-07-29 11:58:54] [ERROR   ] mymodulelogger: out : False
+>> @log_io("CustomLogger")
+.. def my_func(arg):
+..   return False
+>> _ = my_func(111)
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: func: my_func
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: in  : 111
+[2025-07-29 11:58:54] [ERROR   ] CustomLogger: out : False
+```
+
+#### Log function execution time (`abllib.wrapper.timeit`)
+
+The timeit wrapper can be applied to functions to log the functions' execution time.
+
+First, logging needs to be setup. In this example, this librarys' logging is used.
+We'll also import the sleep function.
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.DEBUG)
+>> log.add_console_handler()
+>> from time import sleep
+```
+
+Example usage using the root logger:
+```py
+>> from abllib.wrapper import timeit
+>> @timeit
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.001)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 1.44 ms elapsed
+>> my_func(0.37)
+[2025-07-30 12:33:50] [DEBUG   ] root: myfunc: 370.71 ms elapsed
+>> my_func(5)
+[2025-07-30 12:33:55] [DEBUG   ] root: myfunc: 5.00 s elapsed
+```
+
+A custom logger can also be specified by either passing the name or logging.Logger object.
+```py
+>> logger = log.get_logger("mymodulelogger")
+>> from abllib.wrapper import timeit
+>> @timeit(logger)
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.002)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.25 ms elapsed
+>> @timeit("CustomLogger")
+.. def my_func(delay):
+..   sleep(delay)
+>> my_func(0.002)
+[2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.28 ms elapsed
+```
+
+## Development environment setup
+
+If you want to contribute to this project, you need to set up your local environment.
+
+### Clone the repository
+
+Run the command
 ```bash
-pip install git+https://github.com/Ableytner/abllib.git
+git clone https://github.com/Ableytner/abllib
+cd abllib
+```
+in your terminal.
+
+### Install pip packages
+
+To install all optional as well as development python packages, run the following commands in the project root.
+
+Windows:
+```bash
+py -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
 ```
 
-This will automatically install all other dependencies.
-
-### requirements.txt
-
-If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
-```text
-abllib @ git+https://github.com/Ableytner/abllib@1.3.4
+Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
-whereas 1.3.4 is the version that you want to install.
+
+### Git pre-commit hooks
+
+Pre-commit hooks are used to check and autofix formatting issues and typos before you commit your changes.
+Once installed, they run automatically if you run `git commit ...`.
+
+Using these is optional, but encouraged.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To verify the installation and run all checks:
+```bash
+pre-commit run --all-files
+```

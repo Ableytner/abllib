@@ -1,17 +1,17 @@
 """Module containing the _PersistentStorage class"""
 
-# pylint: disable=protected-access
-
 import json
 import os
 from typing import Any
 
-from .._storage import InternalStorage
-from .._storage._base_storage import _BaseStorage
-from ..storage._storage_view import _StorageView
-from .. import error, fs, onexit, wrapper
+from abllib import error, fs, onexit
+from abllib._storage import InternalStorage
+from abllib.storage._storage_view import _StorageView
+from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
-class _PersistentStorage(_BaseStorage):
+# pylint: disable=protected-access
+
+class _PersistentStorage(_ThreadsafeStorage):
     """Storage that persists across restarts"""
 
     def __init__(self) -> None:
@@ -69,25 +69,8 @@ class _PersistentStorage(_BaseStorage):
         if save_on_exit:
             onexit.register("PersistentStorage.save", self.save_to_disk)
 
-    _LOCK_NAME = "_PersistentStorage"
+    _STORAGE_NAME = "PersistentStorage"
 
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains_item(self, key, item):
-        return super().contains_item(key, item)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def contains(self, key):
-        return super().contains(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def pop(self, key) -> Any:
-        return super().pop(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __getitem__(self, key):
-        return super().__getitem__(key)
-
-    @wrapper.NamedLock(_LOCK_NAME)
     def __setitem__(self, key: str, item: Any) -> None:
         # TODO: type check list / dict content types
 
@@ -95,14 +78,6 @@ class _PersistentStorage(_BaseStorage):
             raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
-
-    @wrapper.NamedLock(_LOCK_NAME)
-    def __delitem__(self, key):
-        return super().__delitem__(key)
-
-    @wrapper.NamedSemaphore(_LOCK_NAME)
-    def __contains__(self, key):
-        return super().__contains__(key)
 
     def load_from_disk(self) -> None:
         """Load the data from the storage file"""

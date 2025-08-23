@@ -1,4 +1,7 @@
 dill
 numpy
+pykakasi
+levenshtein
 pylint
 pytest
+pre-commit

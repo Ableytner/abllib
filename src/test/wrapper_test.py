@@ -1,13 +1,16 @@
 """Module containing tests for the abllib.wrapper module"""
 
-# pylint: disable=function-redefined, consider-using-with
-
+import os
+import re
 from datetime import datetime
+from time import sleep
 
 import pytest
 
-from abllib import error, wrapper
+from abllib import error, log, wrapper
 from abllib.pproc import WorkerThread
+
+# pylint: disable=function-redefined, consider-using-with, unused-argument
 
 def test_lock():
     """Ensure that Lock works as expected"""
@@ -220,3 +223,233 @@ def test_singleuse_exception():
 
     with pytest.raises(error.CalledMultipleTimesError):
         func1()
+
+def test_log_error_default(capture_logs):
+    """Ensure that log_error uses the root logger by default"""
+
+    @wrapper.log_error
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] root: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_loggername(capture_logs):
+    """Ensure that log_error uses the provided logger name"""
+
+    @wrapper.log_error("mycustomlogger")
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_customlogger(capture_logs):
+    """Ensure that log_error uses the provided custom logger"""
+
+    @wrapper.log_error(log.get_logger("mycustomlogger"))
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        # remove "pointer" lines only present in python 3.12
+        content = list(filter(lambda x: x.strip().strip("^") != "", content))
+
+        assert len(content) == 7
+        assert re.match(r"\[.*\] \[ERROR   \] mycustomlogger: my message", content[0])
+        assert re.match(r"Traceback \(most recent call last\):", content[1])
+        assert re.match(r"  File \".*_log_error.py\", line \d+, in wrapper", content[2])
+        assert re.match(r"    return func\(\*args, \*\*kwargs\)", content[3])
+        assert re.match(r"  File \".*wrapper_test.py\", line \d+, in func1", content[4])
+        assert re.match(r"    raise RuntimeError\(\"my message\"\)", content[5])
+        assert re.match(r"RuntimeError: my message", content[6])
+
+def test_log_error_handler():
+    """Ensure that log_error uses the provided handler"""
+
+    results = []
+    def myhandler(exc_text):
+        results.append(exc_text)
+
+    @wrapper.log_error(handler=myhandler)
+    def func1():
+        raise RuntimeError("my message")
+
+    with pytest.raises(RuntimeError):
+        func1()
+
+    assert len(results) == 1
+    assert results[0] == "RuntimeError: my message"
+
+def test_log_io_default(capture_logs):
+    """Ensure that log_io uses the root logger by default"""
+
+    @wrapper.log_io
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, message="no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: in  : "Anna", 77, message="no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: out : "Anna: no"', content[5])
+
+def test_log_io_loggername(capture_logs):
+    """Ensure that log_io uses the provided logger name"""
+
+    @wrapper.log_io("SpecialLogger")
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, "no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: in  : "Anna", 77, "no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: out : "Anna: no"', content[5])
+
+def test_log_io_custom_logger(capture_logs):
+    """Ensure that log_io uses a custom provided logger"""
+
+    @wrapper.log_io(log.get_logger("ExtraLogger"))
+    def func1(name, age, message = ""):
+        return f"{name}: {message}"
+
+    assert func1("Tom", 46) == "Tom: "
+    assert func1("Anna", 77, "no") == "Anna: no"
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 6
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func: func1', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: in  : "Tom", 46', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: out : "Tom: "', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func: func1', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: in  : "Anna", 77, "no"', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: out : "Anna: no"', content[5])
+
+def test_timeit_default(capture_logs):
+    """Ensure that timeit uses the root logger by default"""
+
+    @wrapper.timeit
+    def func1():
+        sleep(0.001)
+    @wrapper.timeit
+    def func2():
+        sleep(0.01)
+    @wrapper.timeit
+    def func3():
+        sleep(0.1)
+    @wrapper.timeit
+    def func4():
+        sleep(1)
+    @wrapper.timeit
+    def func5():
+        sleep(10)
+
+
+    func1()
+    func2()
+    func3()
+    func4()
+    func5()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 5
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func1: \d{1}\.\d{2} ms elapsed', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func2: \d{2}\.\d{2} ms elapsed', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func3: \d{3}\.\d{2} ms elapsed', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func4: \d{1}\.\d{2} s elapsed', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func5: \d{2}\.\d{2} s elapsed', content[4])
+
+def test_timeit_loggername(capture_logs):
+    """Ensure that timeit uses the provided logger name"""
+
+    @wrapper.timeit("SpecialLogger")
+    def func1():
+        sleep(0.001)
+
+    func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 1
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])
+
+def test_timeit_custom_logger(capture_logs):
+    """Ensure that timeit uses a custom provided logger"""
+
+    @wrapper.timeit(log.get_logger("ExtraLogger"))
+    def func1():
+        sleep(0.001)
+
+    func1()
+
+    assert os.path.isfile("test.log")
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+
+        assert len(content) == 1
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])

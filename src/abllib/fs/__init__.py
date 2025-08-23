@@ -1,7 +1,9 @@
 """A module containing file system-related functionality"""
 
-from .path import absolute
+from abllib.fs.filename import sanitize
+from abllib.fs.path import absolute
 
 __exports__ = [
-    absolute
+    absolute,
+    sanitize
 ]

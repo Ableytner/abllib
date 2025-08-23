@@ -2,8 +2,8 @@
 
 from typing import Any
 
-from ._base_storage import _BaseStorage
-from .. import error
+from abllib import error
+from abllib._storage._base_storage import _BaseStorage
 
 class _InternalStorage(_BaseStorage):
     """Internal storage that is not saved across restarts"""
@@ -17,6 +17,8 @@ class _InternalStorage(_BaseStorage):
 
         _InternalStorage._store = self._store = {}
         _InternalStorage._instance = self
+
+    _STORAGE_NAME = "InternalStorage"
 
     def __setitem__(self, key: str, item: Any) -> None:
         if not key.startswith("_"):

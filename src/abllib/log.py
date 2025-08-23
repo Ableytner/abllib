@@ -6,8 +6,8 @@ import sys
 from enum import Enum
 from typing import Literal
 
-from . import error, fs
-from ._storage import InternalStorage
+from abllib import error
+from abllib._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
 
@@ -15,10 +15,8 @@ class LogLevel(Enum):
     """An enum holding log levels"""
 
     CRITICAL = logging.CRITICAL
-    FATAL = logging.FATAL
     ERROR = logging.ERROR
     WARNING = logging.WARNING
-    WARN = logging.WARN
     INFO = logging.INFO
     DEBUG = logging.DEBUG
     ALL = 1
@@ -41,6 +39,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.INFO]
                           | Literal[LogLevel.DEBUG]
                           | Literal[LogLevel.ALL]
+                          | int
                           | None = None):
     """
     Initialize the custom logging module.
@@ -75,10 +74,6 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
 
     if log_level == LogLevel.NOTSET:
         raise ValueError("LogLevel.NOTSET is not allowed.")
-    if log_level == LogLevel.WARN:
-        raise error.DeprecatedError("LogLevel.WARN is deprecated, use LogLevel.WARNING instead.")
-    if log_level == LogLevel.FATAL:
-        raise ValueError("Loglevel.FATAL should not be used, use LogLevel.CRITICAL instead.")
 
     InternalStorage["_log.level"] = log_level
     get_logger().setLevel(log_level)
@@ -120,7 +115,10 @@ def add_file_handler(filename: str = "latest.log") -> None:
 
     logging.disable(0)
 
-    file_handler = logging.FileHandler(filename=fs.absolute(filename), encoding="utf-8", mode="w")
+    # needs to be imported here to prevent circular import
+    # pylint: disable-next=cyclic-import, import-outside-toplevel
+    from abllib.fs import absolute
+    file_handler = logging.FileHandler(filename=absolute(filename), encoding="utf-8", mode="w", delay=True)
 
     file_handler.setLevel(InternalStorage["_log.level"])
 

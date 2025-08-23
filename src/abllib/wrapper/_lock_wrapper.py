@@ -7,10 +7,10 @@ import traceback
 from datetime import datetime
 from time import sleep
 
-from ._lock import Lock, Semaphore
-from ._deprecated import deprecated
-from .. import error, log
-from .._storage import InternalStorage
+from abllib import error, log
+from abllib._storage import InternalStorage
+from abllib.wrapper._deprecated import deprecated
+from abllib.wrapper._lock import Lock, Semaphore
 
 logger = log.get_logger("LockWrapper")
 
@@ -40,6 +40,7 @@ class _BaseNamedLock():
     _lock: Lock | Semaphore
     _timeout: float | None
     _allocation_lock: Lock
+    _other_lock: _BaseNamedLock | None = None
 
     @property
     def name(self) -> str:
@@ -150,8 +151,13 @@ class NamedLock(_BaseNamedLock):
         return super().release()
 
     def _get_other(self):
+        if self._other_lock is not None:
+            return self._other_lock
+
         if f"_locks.{self.name}.s" in InternalStorage:
-            return InternalStorage[f"_locks.{self.name}.s"]
+            self._other_lock = InternalStorage[f"_locks.{self.name}.s"]
+            return self._other_lock
+
         return None
 
 class NamedSemaphore(_BaseNamedLock):
@@ -181,8 +187,13 @@ class NamedSemaphore(_BaseNamedLock):
         return super().release()
 
     def _get_other(self):
+        if self._other_lock is not None:
+            return self._other_lock
+
         if f"_locks.{self.name}.l" in InternalStorage:
-            return InternalStorage[f"_locks.{self.name}.l"]
+            self._other_lock = InternalStorage[f"_locks.{self.name}.l"]
+            return self._other_lock
+
         return None
 
 def _log_callstack(message: str):
