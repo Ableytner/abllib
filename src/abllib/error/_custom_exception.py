@@ -5,7 +5,7 @@ from typing import Any
 class CustomException(Exception):
     """
     The base class for all custom exceptions
-    
+
     If no arguments are provided at instantiation, the default error message is used.
     Otherwise, the provided argument is used as the error message.
     """

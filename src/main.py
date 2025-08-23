@@ -11,7 +11,7 @@
 # optimize _lock_wrapper._log_callstack (takes half of the runtime when assigning storage item)
 
 # TAKES A LOT OF TIME / NEEDED IN THE FUTURE
-# construct target type-specific function at runtime in types.enforce 
+# construct target type-specific function at runtime in types.enforce
 
 # pylint: skip-file
 

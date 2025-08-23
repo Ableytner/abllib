@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [closed, synchronize]
 
-permissions: 
+permissions:
   contents: read
   id-token: write
   pull-requests: write

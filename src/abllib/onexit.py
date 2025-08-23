@@ -12,7 +12,7 @@ logger = log.get_logger("onexit")
 def register(name: str, callback: Callable) -> None:
     """
     Run the given callback regardless of how the application exits.
-    
+
     Does not work if the application is killed with SIGKILL.
     """
 
@@ -35,7 +35,7 @@ def register(name: str, callback: Callable) -> None:
 def register_normal_exit(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application exits normally or with an exception.
-    
+
     Does not work if the application is killed with SIGTERM or SIGKILL.
     """
 
@@ -50,7 +50,7 @@ def register_normal_exit(name: str, callback: Callable) -> None:
 def register_sigterm(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application is killed with SIGTERM.
-    
+
     Does not work if the application exits normally, exits with an exception or is killed with SIGKILL.
     """
 
@@ -71,7 +71,7 @@ def register_sigterm(name: str, callback: Callable) -> None:
 def deregister(name: str) -> None:
     """
     Deregister the callback with the given name.
-    
+
     Raises an NameNotFoundError if the name is not yet registered.
     """
 
@@ -91,7 +91,7 @@ def deregister(name: str) -> None:
 def deregister_normal_exit(name: str) -> None:
     """
     Deregister the callback with the given name.
-    
+
     Raises an NameNotFoundError if the name is not yet registered.
     """
 
@@ -103,7 +103,7 @@ def deregister_normal_exit(name: str) -> None:
 def deregister_sigterm(name: str) -> None:
     """
     Deregister the callback with the given name.
-    
+
     Raises an NameNotFoundError if the name is not yet registered.
     """
 

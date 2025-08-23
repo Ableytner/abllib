@@ -40,6 +40,7 @@ all = [
 dev = [
   "pylint",
   "pytest",
+  "pre-commit"
 ]
 
 [project.urls]
