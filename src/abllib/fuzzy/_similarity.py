@@ -3,7 +3,7 @@
 import numpy as np
 
 from abllib import error
-from ..alg import levenshtein_distance
+from abllib.alg import levenshtein_distance
 
 class Similarity():
     """
@@ -209,7 +209,7 @@ def _contains_duplicates(arr: np.ndarray) -> bool:
 def _alg_with_index(data: np.ndarray, combined_score: float) -> tuple[float, list[int]]:
     """
     I have no idea what to call this algorithm.
-    
+
     It generates all unique combinations of a 2d input array such that in each combination,
     each row and each column only occurs once.
 

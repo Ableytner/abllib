@@ -2,7 +2,7 @@
 
 import functools
 
-from ..error import CalledMultipleTimesError
+from abllib.error import CalledMultipleTimesError
 
 def singleuse(func):
     """

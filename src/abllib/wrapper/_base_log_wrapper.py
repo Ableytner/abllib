@@ -4,8 +4,8 @@ import functools
 from logging import Logger
 from typing import Callable
 
-from .. import log
-from ..error import WrongTypeError
+from abllib import log
+from abllib.error import WrongTypeError
 
 class BaseLogWrapper():
     """

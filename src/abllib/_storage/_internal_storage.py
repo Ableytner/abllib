@@ -2,8 +2,8 @@
 
 from typing import Any
 
-from ._base_storage import _BaseStorage
-from .. import error
+from abllib import error
+from abllib._storage._base_storage import _BaseStorage
 
 class _InternalStorage(_BaseStorage):
     """Internal storage that is not saved across restarts"""

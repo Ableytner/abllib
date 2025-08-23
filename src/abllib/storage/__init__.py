@@ -1,10 +1,10 @@
 """A module containing json-like storages"""
 
-from ._cache_storage import _CacheStorage
-from ._persistent_storage import _PersistentStorage
-from ._storage_view import _StorageView
-from ._threadsafe_storage import _ThreadsafeStorage
-from ._volatile_storage import _VolatileStorage
+from abllib.storage._cache_storage import _CacheStorage
+from abllib.storage._persistent_storage import _PersistentStorage
+from abllib.storage._storage_view import _StorageView
+from abllib.storage._threadsafe_storage import _ThreadsafeStorage
+from abllib.storage._volatile_storage import _VolatileStorage
 
 # pylint: disable=protected-access
 

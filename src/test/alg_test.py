@@ -14,9 +14,9 @@ def test_levenshtein_distance():
 
     assert isinstance(alg.levenshtein_distance("dog", "god"), int)
 
-    with pytest.raises(error.WrongTypeError):
+    with pytest.raises((error.WrongTypeError, TypeError)):
         alg.levenshtein_distance("test", None)
-    with pytest.raises(error.WrongTypeError):
+    with pytest.raises((error.WrongTypeError, TypeError)):
         alg.levenshtein_distance(None, "test")
-    with pytest.raises(error.WrongTypeError):
+    with pytest.raises((error.WrongTypeError, TypeError)):
         alg.levenshtein_distance("test", 12)

@@ -1,9 +1,9 @@
 """Module containing the log_io wrapper"""
 
 import functools
-from typing import Callable, Any
+from typing import Any, Callable
 
-from ._base_log_wrapper import BaseLogWrapper
+from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class log_io(BaseLogWrapper):
     """

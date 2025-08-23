@@ -2,8 +2,8 @@
 
 from typing import Any
 
-from .._storage._base_storage import _BaseStorage
-from .. import error, wrapper
+from abllib import error, wrapper
+from abllib._storage._base_storage import _BaseStorage
 
 class _ThreadsafeStorage(_BaseStorage):
     def __init__(self):

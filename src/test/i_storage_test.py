@@ -1,17 +1,14 @@
 """Module containing tests for the different types of Storage"""
 
-# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
-
 import pytest
 
-from abllib.error import InternalFunctionUsedError, \
-                         InvalidKeyError, \
-                         KeyNotFoundError, \
-                         ReadonlyError, \
-                         SingletonInstantiationError, \
-                         UninitializedFieldError, \
-                         WrongTypeError
 from abllib._storage import _BaseStorage, _InternalStorage
+from abllib.error import (InternalFunctionUsedError, InvalidKeyError,
+                          KeyNotFoundError, ReadonlyError,
+                          SingletonInstantiationError, UninitializedFieldError,
+                          WrongTypeError)
+
+# pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
 
 def test_basestorage_instantiation():
     """Ensure that BaseStorage cannot be initialized"""

@@ -15,12 +15,13 @@ The following submodules are available:
 2. Errors (`abllib.error`)
 3. File system operations (`abllib.fs`)
 4. Fuzzy matching (`abllib.fuzzy`)
-5. Logging (`abllib.log`)
-6. Cleanup on exit (`abllib.onexit`)
-7. Parallel processing (`abllib.pproc`)
-8. Storages (`abllib.storage`)
-9. Type enforcement (`abllib.types`)
-10. Function wrappers (`abllib.wrapper`)
+5. General (`abllib.general`)
+6. Logging (`abllib.log`)
+7. Cleanup on exit (`abllib.onexit`)
+8. Parallel processing (`abllib.pproc`)
+9. Storages (`abllib.storage`)
+10. Type enforcement (`abllib.types`)
+11. Function wrappers (`abllib.wrapper`)
 
 ## Installation
 
@@ -65,6 +66,16 @@ To always install the latest development version:
 abllib @ git+https://github.com/Ableytner/abllib
 ```
 
+### Optional dependencies
+
+Some modules have optional dependencies which bring various improvements.
+All of them are optional and listed below.
+
+| name | needed in | improvement |
+|------|-----------|-------------|
+| pykakasi | fs.filename | needed to correctly translate japanese kanji |
+| levenshtein | alg.levenshtein_distance | provides a 10x speedup by using the C implementation |
+
 ## Documentation
 
 ### 1. Algorithms (`abllib.alg`)
@@ -85,6 +96,9 @@ Example usage:
 >> levenshtein_distance("thomas", "anna")
 5
 ```
+
+If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
+This provides a 10x speedup, but requires an extra package.
 
 ### 2. Errors (`abllib.error`)
 
@@ -146,7 +160,7 @@ This module contains various file system-related functionality. All provided fun
 
 #### Absolute path (`abllib.fs.absolute`)
 
-A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended. 
+A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended.
 
 Example usage:
 ```py
@@ -192,12 +206,15 @@ Special characters from unsupported languages and any other non-ascii will be re
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
+> [!TIP]
+> If the performance seems poor, the optional levenshtein package can be installed for a 10x speedup (`pip install levenshtein`).
+
 The source code and documentation use a few words which might be confusing, so they are explained here:
 * target: the word that we want to find.
 * candidate: a word that could match with target.
 * score: the similarity score, which is a float value between 0 and 1, rounded down to two digits.
 
-Note that target and candidate can be a single word, multiple words seperated by ' ', or a sentence.
+Note that target and candidate can be a single word, multiple words separated by ' ', or a sentence.
 
 Furthermore, it is possible to pass an [iterable](https://docs.python.org/3/glossary.html#term-iterable) as the candidate.
 This will try to match the target against all of its items.
@@ -265,7 +282,7 @@ To achieve this, two different strategies are used:
 * calculate the edit distance between the whole target and candidate.
 * split target / candidate at ' ' and calculate the edit distance between each word.
 
-After that, a list of MatchResults which are withing a certain threshold are returned.
+After that, a list of MatchResults which are within a certain threshold are returned.
 
 Example usage:
 ```py
@@ -299,11 +316,51 @@ Example usage:
 1.0
 ```
 
-### 5. Logging (`abllib.log`)
+### 5. General (`abllib.general`)
+
+This module contains different general-purpose functions that don't warrant an own module.
+
+#### Try to import a module (`abllib.general.try_import_module`)
+
+This function tries to import and return a given module.
+
+```py
+>> from abllib.general import try_import_module
+>> sys = try_import_module("sys")
+>> sys.modules
+{'sys': <module 'sys' (built-in)>, ...}
+>> non_existent = try_import_module("non_existent")
+>> non_existent
+None
+```
+
+If the optional argument `error_msg` is given and the import fails, the message will be logged.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", "The module 'non_existent' doesn't exist")
+[2025-08-20 10:58:07] [WARNING ] general: The module 'non_existent' doesn't exist
+>> non_existent
+None
+```
+
+If the optional argument `enforce` is given and the import fails, an error is thrown.
+```py
+>> from abllib.general import try_import_module
+>> non_existent = try_import_module("non_existent", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The required module 'non_existent' is not installed."
+>> non_existent = try_import_module("non_existent", error_msg="The error message", enforce=True)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.MissingRequiredModuleError: "The error message"
+```
+
+### 6. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
-If it isn't initialized, the currently set `logging` modules setttings are used.
+If it isn't initialized, the currently set `logging` modules settings are used.
 
 Example usage without setup:
 ```py
@@ -372,7 +429,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 6. Cleanup on exit (`abllib.onexit`)
+### 7. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 
@@ -408,7 +465,7 @@ Already registered callbacks can also be deregistered:
 >> exit()
 ```
 
-### 7. Parallel processing (`abllib.pproc`)
+### 8. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functionality, both thread-based and process-based.
 
@@ -436,8 +493,8 @@ TLDR: If you are not sure what to use, use thread-based processing.
 
 #### WorkerThread (`abllib.pproc.WorkerThread`)
 
-This class represents a seperate thread that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate thread that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -454,7 +511,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerThread
 >> def not_the_answer():
@@ -477,8 +534,8 @@ ValueError: The answer is not yet calculated!
 
 #### WorkerProcess (`abllib.pproc.WorkerProcess`)
 
-This class represents a seperate process that runs a given function until completion.
-If .join() is called, the functions return value or any occured exception is returned.
+This class represents a separate process that runs a given function until completion.
+If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
 
 Example usage:
@@ -495,7 +552,7 @@ Example usage:
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
 
-Optionally, if reraise is provided, any caught excpetion will be raised automatically.
+Optionally, if reraise is provided, any caught exception will be raised automatically.
 ```py
 >> from abllib.pproc import WorkerProcess
 >> def not_the_answer():
@@ -516,10 +573,10 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 8. Storages (`abllib.storage`)
+### 9. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
-All data stored in these storages is accessable from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
+All data stored in these storages is accessible from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
 Multithreaded access is also allowed.
 
 The data is stored as key:value pairs. The key needs to be of type `<class 'str'>`, the allowed value types are storage-specific.
@@ -863,13 +920,13 @@ True
 True
 ```
 
-### 9. Type enforcement (`abllib.types`)
+### 10. Type enforcement (`abllib.types`)
 
 This module contains functionality for enforcing types.
 
 #### General-purpose interface ('abllib.types.enforce')
 
-This funtion can either be used as a wrapper on any function or directly with a value una target type.
+This function can either be used as a wrapper on any function or directly with a value una target type.
 
 Example usage:
 ```py
@@ -925,7 +982,7 @@ Traceback (most recent call last):
 abllib.error._general.WrongTypeError: Expected <class 'float'> or <class 'NoneType'>, not <class 'str'>
 ```
 
-### 10. Function wrappers (`abllib.wrapper`)
+### 11. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
@@ -948,7 +1005,7 @@ Traceback (most recent call last):
 abllib.error._general.CalledMultipleTimesError: The function can only be called once
 ```
 
-If an error occured during function execution, the function can be called again.
+If an error occurred during function execution, the function can be called again.
 ```py
 >> from abllib.wrapper import singleuse
 >> @singleuse
@@ -1028,7 +1085,7 @@ If a deprecated function is called, a deprecation warning is logged using the cu
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 ```
@@ -1040,7 +1097,7 @@ It can also be applied explicitly as a warning or error:
 .. def my_func(arg):
     print(arg)
 >> my_func("hello world")
-The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py", 
+The functionality my_func is deprecated but used here: File "c:\Users\youruser\abllib\src\main.py",
 line 27, in <module>
 hello world
 >> @deprecated.error
@@ -1072,7 +1129,7 @@ abllib.error._general.DeprecatedError: my_func is deprecated, use my_other_func 
 
 #### Log function error (`abllib.wrapper.log_error`)
 
-The log_error wrapper can be applied to functions to send any occured exception to the default logger.
+The log_error wrapper can be applied to functions to send any occurred exception to the default logger.
 
 First, logging needs to be setup. In this example, this librarys' logging is used.
 ```py
@@ -1211,4 +1268,52 @@ A custom logger can also be specified by either passing the name or logging.Logg
 ..   sleep(delay)
 >> my_func(0.002)
 [2025-07-30 12:33:49] [DEBUG   ] root: myfunc: 2.28 ms elapsed
+```
+
+## Development environment setup
+
+If you want to contribute to this project, you need to set up your local environment.
+
+### Clone the repository
+
+Run the command
+```bash
+git clone https://github.com/Ableytner/abllib
+cd abllib
+```
+in your terminal.
+
+### Install pip packages
+
+To install all optional as well as development python packages, run the following commands in the project root.
+
+Windows:
+```bash
+py -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+```
+
+Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Git pre-commit hooks
+
+Pre-commit hooks are used to check and autofix formatting issues and typos before you commit your changes.
+Once installed, they run automatically if you run `git commit ...`.
+
+Using these is optional, but encouraged.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To verify the installation and run all checks:
+```bash
+pre-commit run --all-files
 ```

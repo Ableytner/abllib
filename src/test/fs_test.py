@@ -1,12 +1,13 @@
 """Module containing tests for the abllib.fs module"""
 
-import pathlib
-import sys
 import os
+import pathlib
 
 import pytest
 
 from abllib import fs
+
+# pylint: disable=missing-class-docstring
 
 def test_absolute():
     """Ensure that fs.absolute works as expected"""
@@ -79,12 +80,13 @@ def test_sanitize():
     assert fs.sanitize("Hello 世界!") == "Hello_sekai"
 
     # pykakasi is optional
-    mod = sys.modules.pop("pykakasi")
+    mod = fs.filename.pykakasi
+    fs.filename.pykakasi = None
     assert fs.sanitize("ハウルの動く城") == ""
     assert fs.sanitize("葬送のフリーレン      ") == ""
     assert fs.sanitize("こんにちは World!") == "_World"
     assert fs.sanitize("Hello 世界!") == "Hello_"
-    sys.modules["pykakasi"] = mod
+    fs.filename.pykakasi = mod
 
     # mixed sentences
     assert fs.sanitize("最初の文。The second sentence.") == "saisho_no_bun_The_second_sentence."

@@ -6,10 +6,12 @@ from __future__ import annotations
 import json
 import os
 
-from .._storage import InternalStorage
-from ._threadsafe_storage import _ThreadsafeStorage
-from ..storage._storage_view import _StorageView
-from .. import error, fs, onexit, types
+from abllib import error, fs, onexit, types
+from abllib._storage import InternalStorage
+from abllib.storage._storage_view import _StorageView
+from abllib.storage._threadsafe_storage import _ThreadsafeStorage
+
+# pylint: disable=protected-access
 
 VALID_ITEM_TYPES = bool | int | float | str | list["VALID_ITEM_TYPES"] \
                    | dict["VALID_ITEM_TYPES", "VALID_ITEM_TYPES"] | tuple["VALID_ITEM_TYPES", ...]

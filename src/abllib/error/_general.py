@@ -1,16 +1,16 @@
 """Module containing custom exceptions for general usage"""
 
-# pylint: disable=arguments-differ
-
 from typing import Any
 
-from ._custom_exception import CustomException
+from abllib.error._custom_exception import CustomException
+
+# pylint: disable=arguments-differ
 
 class ArgumentCombinationError(CustomException):
     """Exception raised when the given combination of arguments is invalid"""
 
     default_messages = {
-        0: "This combination of argumetns is invalid"
+        0: "This combination of arguments is invalid"
     }
 
 class CalledMultipleTimesError(CustomException):
@@ -107,6 +107,14 @@ class MissingInheritanceError(CustomException):
             base_class_name = type(base_class_name)
 
         return super().with_values(base_class_name, class_name)
+
+class MissingRequiredModuleError(CustomException):
+    """Exception raised when a required module is not installed"""
+
+    default_messages = {
+        0: "A required module is not installed.",
+        1: "The required module '{0}' is not installed."
+    }
 
 class NameNotFoundError(CustomException):
     """Exception raised when the name is not found"""

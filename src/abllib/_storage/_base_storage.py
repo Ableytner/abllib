@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .. import error
+from abllib import error
 
 class _AutoremoveDict(dict):
     """An internal class representing auto-removable subdicts within the storage"""

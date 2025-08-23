@@ -2,7 +2,7 @@
 
 from typing import Any, Callable
 
-from ._enforce import enforce, enforce_var, enforce_args
+from abllib.types._enforce import enforce, enforce_args, enforce_var
 
 __exports__ = [
     Any,

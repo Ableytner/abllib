@@ -6,8 +6,8 @@ from types import GenericAlias, UnionType
 from typing import (Any, Callable, Concatenate, Literal, ParamSpec, TypeVar,
                     Union)
 
-from .. import log
-from ..error import InvalidTypeHintError, WrongTypeError, WrongValueError
+from abllib import log
+from abllib.error import InvalidTypeHintError, WrongTypeError, WrongValueError
 
 logger = log.get_logger("types.enforce")
 
@@ -304,7 +304,7 @@ def _validate(value: Any, target_type: type | UnionTuple | LiteralTuple | list |
         if len(target_type) == 0:
             return True
 
-        # tuple should be variable length with homogenous types
+        # tuple should be variable length with homogeneous types
         if len(target_type) == 2 and target_type[1] == Ellipsis:
             for item in value:
                 if not _validate(item, target_type[0]):

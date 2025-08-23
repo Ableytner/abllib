@@ -1,8 +1,8 @@
 """A module containing the fuzzy match function"""
 
-from .. import types
-from ._matchresult import MatchResult
-from ._similarity import Similarity
+from abllib import types
+from abllib.fuzzy._matchresult import MatchResult
+from abllib.fuzzy._similarity import Similarity
 
 @types.enforce
 def match_closest(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> MatchResult:
