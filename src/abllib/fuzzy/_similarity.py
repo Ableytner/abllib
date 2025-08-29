@@ -224,19 +224,12 @@ def _alg_with_index(data: np.ndarray, combined_score: float) -> tuple[float, lis
             return (combined_score + data[0][index], [index])
         return (combined_score, [-1])
 
-    max_score = 0.0
-    max_indexes = None
-    max_row_index = None
-
-    for row_index in range(data.shape[0]):
+    max_score, max_indexes = _alg_with_index(_reduce(data, 0), combined_score + data[0][0])
+    max_row_index = 0
+    for row_index in range(1, data.shape[0]):
         reduced_data = _reduce(data, row_index)
 
         score, indexes = _alg_with_index(reduced_data, combined_score + data[row_index][0])
-
-        # we have to initialize at least once
-        if max_indexes is None:
-            max_indexes = indexes
-            max_row_index = row_index
 
         # branching with if is much faster than max, because max_score only rarely changes
         # pylint: disable-next=consider-using-max-builtin

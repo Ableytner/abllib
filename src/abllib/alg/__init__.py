@@ -6,6 +6,8 @@ from abllib.general import try_import_module
 
 Levenshtein = try_import_module("Levenshtein")
 
+# mypy: disable-error-code="no-redef"
+
 if Levenshtein is None:
     from abllib.alg._levenshtein import levenshtein_distance
 else:

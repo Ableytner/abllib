@@ -75,6 +75,8 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if isinstance(log_level, LogLevel):
         log_level = log_level.value
 
+    assert isinstance(log_level, int)
+
     InternalStorage["_log.level"] = log_level
     get_logger().setLevel(log_level)
 
