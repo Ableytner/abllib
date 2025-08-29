@@ -444,6 +444,8 @@ The registered functions are NOT called if the application:
 * calls os._exit
 * encounters an unrecoverable interpreter exception
 
+Note that this module can only be used from the main thread, as that is what the `signal` module demants.
+
 Example usage:
 ```py
 >> from abllib import onexit

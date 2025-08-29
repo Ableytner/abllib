@@ -1,7 +1,9 @@
 """Module for running code on application exit"""
 
 import atexit
+import functools
 import signal
+import threading
 from typing import Callable
 
 from abllib import error, log
@@ -9,6 +11,20 @@ from abllib._storage import InternalStorage
 
 logger = log.get_logger("onexit")
 
+def _ensure_is_main_thread(func):
+    """Ensure that function is only callable from main thread"""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if threading.current_thread() is not threading.main_thread():
+            logger.warning("Tried to use onexit module from non-main thread")
+            return None
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+@_ensure_is_main_thread
 def register(name: str, callback: Callable) -> None:
     """
     Run the given callback regardless of how the application exits.
@@ -32,6 +48,7 @@ def register(name: str, callback: Callable) -> None:
     if not registered:
         raise error.RegisteredMultipleTimesError.with_values(name)
 
+@_ensure_is_main_thread
 def register_normal_exit(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application exits normally or with an exception.
@@ -47,6 +64,7 @@ def register_normal_exit(name: str, callback: Callable) -> None:
 
     InternalStorage[f"_onexit.atexit.{name}"] = callback
 
+@_ensure_is_main_thread
 def register_sigterm(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application is killed with SIGTERM.
@@ -68,6 +86,7 @@ def register_sigterm(name: str, callback: Callable) -> None:
     if len(InternalStorage["_onexit.signal"]) == 1:
         signal.signal(signal.SIGTERM, _signal_func)
 
+@_ensure_is_main_thread
 def deregister(name: str) -> None:
     """
     Deregister the callback with the given name.
@@ -88,6 +107,7 @@ def deregister(name: str) -> None:
         # no callback was deleted
         raise error.NameNotFoundError.with_values(name)
 
+@_ensure_is_main_thread
 def deregister_normal_exit(name: str) -> None:
     """
     Deregister the callback with the given name.
@@ -100,6 +120,7 @@ def deregister_normal_exit(name: str) -> None:
 
     del InternalStorage[f"_onexit.atexit.{name}"]
 
+@_ensure_is_main_thread
 def deregister_sigterm(name: str) -> None:
     """
     Deregister the callback with the given name.

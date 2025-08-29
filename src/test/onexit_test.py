@@ -1,10 +1,13 @@
 """Module containing tests for the abllib.onexit module"""
 
+import re
+
 import pytest
 
 from abllib import error, onexit
+from abllib.pproc import WorkerThread
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, unused-argument
 
 def test_register():
     """Ensure that registering the same callback multiple times raises an error"""
@@ -124,3 +127,26 @@ def test_dotname():
     onexit._atexit_func()
 
     assert data[0]
+
+def test_register_otherthread(capture_logs):
+    """Ensure that registering from another thread logs a warning"""
+
+    def func1():
+        pass
+
+    t = WorkerThread(target=lambda: onexit.register("func1", func1))
+    t.start()
+
+    res = t.join()
+
+    assert res is None
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 1
+        assert re.match(r"\[.*\] \[WARNING \] onexit: Tried to use onexit module from non-main thread", content[0])
+
+    # function should not have be registered
+    onexit.register("func1", func1)
+    with pytest.raises(error.RegisteredMultipleTimesError):
+        onexit.register("func1", func1)
