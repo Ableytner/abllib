@@ -40,4 +40,4 @@ def test_mypy():
 
         os.chdir(PREV_DIR)
 
-        assert "Your code has been rated at 10.00/10" in mypy_output
+        assert "Success: no issues found" in mypy_output
