@@ -3,7 +3,10 @@
 import os
 import re
 
+import pytest
+
 from abllib import log
+from abllib.error import NameNotFoundError
 
 def test_initialize():
     """Ensure that log initialization works as expected"""
@@ -128,3 +131,28 @@ def test_initialize_invalidtypes():
     """Ensure that initialize only accepts valid arguments"""
 
     # to be added when abllib.type module is implemented
+
+def test_loglevel_fromstr():
+    """Ensure that LogLevel.from_str works correctly"""
+
+    assert callable(log.LogLevel.from_str)
+    assert log.LogLevel.from_str("CRITICAL") is log.LogLevel.CRITICAL
+    assert log.LogLevel.from_str("ERROR") is log.LogLevel.ERROR
+    assert log.LogLevel.from_str("WARNING") is log.LogLevel.WARNING
+    assert log.LogLevel.from_str("INFO") is log.LogLevel.INFO
+    assert log.LogLevel.from_str("DEBUG") is log.LogLevel.DEBUG
+    assert log.LogLevel.from_str("ALL") is log.LogLevel.ALL
+
+    with pytest.raises(NameNotFoundError):
+        log.LogLevel.from_str("INVALID")
+
+def test_loglevel_fromstr_mixedcase():
+    """Ensure that LogLevel.from_str ignores text case"""
+
+    assert callable(log.LogLevel.from_str)
+    assert log.LogLevel.from_str("crITiCaL") is log.LogLevel.CRITICAL
+    assert log.LogLevel.from_str("error") is log.LogLevel.ERROR
+    assert log.LogLevel.from_str("Warning") is log.LogLevel.WARNING
+    assert log.LogLevel.from_str("iNFO") is log.LogLevel.INFO
+    assert log.LogLevel.from_str("deBuG") is log.LogLevel.DEBUG
+    assert log.LogLevel.from_str("alL") is log.LogLevel.ALL
