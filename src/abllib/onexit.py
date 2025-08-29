@@ -12,7 +12,7 @@ from abllib._storage import InternalStorage
 logger = log.get_logger("onexit")
 
 def _ensure_is_main_thread(func):
-    """Ensure that function is only called in main thread"""
+    """Ensure that function is only callable from main thread"""
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
