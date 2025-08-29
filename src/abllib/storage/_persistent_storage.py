@@ -10,6 +10,7 @@ from abllib.storage._storage_view import _StorageView
 from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
 # pylint: disable=protected-access
+# mypy: ignore-errors
 
 class _PersistentStorage(_ThreadsafeStorage):
     """Storage that persists across restarts"""

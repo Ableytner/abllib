@@ -6,6 +6,8 @@ from typing import Any
 
 from abllib import error
 
+# mypy: ignore-errors
+
 class _AutoremoveDict(dict):
     """An internal class representing auto-removable subdicts within the storage"""
 

@@ -29,7 +29,7 @@ def test_mypy():
         if len(mypy_output) == 0:
             pytest.fail("Detected error during test. Is mypy installed?")
 
-        if not "Your code has been rated at 10.00/10" in mypy_output[-1]:
+        if not "Success: no issues found" in mypy_output[-1]:
             for line in mypy_output:
                 logger.warning(line)
 

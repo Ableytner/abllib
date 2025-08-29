@@ -52,8 +52,7 @@ class WorkerProcess(Process):
         else:
             self._return_queue.put(None)
 
-    def join(self, timeout: float | None = None, reraise: bool = False) \
-       -> Any | BaseException: # type: ignore[override]
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException: # type: ignore[override]
         """Wait until the child process terminates."""
 
         super().join(timeout)
