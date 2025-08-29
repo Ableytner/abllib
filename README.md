@@ -368,6 +368,7 @@ Example usage without setup:
 >> logger.info("this is a test log")
 this is a test log
 ```
+In this example, the returned logger is a `logging.Logger` object from the Python standard library.
 
 The module can be customized as follows:
 ```py
@@ -405,6 +406,23 @@ In this case, the logged message is sent to all of them.
 >> logger = log.get_logger()
 >> logger.info("this is written to both files")
 [2025-04-08 23:09:31] [INFO    ] root: this is written to both files
+```
+
+#### Parsing the log level from a string
+
+The libaries' LogLevel enum also contains a convenience function for parsing a log level.
+
+Example coe:
+```py
+>> from abllib import log
+>> log.LogLevel.from_str("DEBUG")
+LogLevel.DEBUG
+>> log.LogLevel.from_str("critical")
+LogLevel.CRITICAL
+>> log.LogLevel.from_str("NONEXISTENT")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+abllib.error._general.NameNotFoundError: "'NONEXISTENT' isn't a known log level"
 ```
 
 #### Using the logging module in another library

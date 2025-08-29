@@ -18,4 +18,5 @@
 # pylint: skip-file
 
 if __name__ == "__main__":
-    pass
+    from abllib import log
+    print(log.LogLevel.from_str("critical"))

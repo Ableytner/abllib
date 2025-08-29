@@ -1,5 +1,7 @@
 """A module containing the logger creation"""
 
+from __future__ import annotations
+
 import atexit
 import logging
 import sys
@@ -21,6 +23,26 @@ class LogLevel(Enum):
     DEBUG = logging.DEBUG
     ALL = 1
     NOTSET = logging.NOTSET
+
+    @staticmethod
+    def from_str(log_level: str) -> LogLevel:
+        """Return the matching LogLevel enum value from the given string"""
+
+        match log_level.lower():
+            case "all":
+                return LogLevel.ALL
+            case "debug":
+                return LogLevel.DEBUG
+            case "info":
+                return LogLevel.INFO
+            case "warning":
+                return LogLevel.WARNING
+            case "error":
+                return LogLevel.ERROR
+            case "critical":
+                return LogLevel.CRITICAL
+            case _:
+                raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
 
     def __eq__(self, other):
         return self is other or self.value == other
