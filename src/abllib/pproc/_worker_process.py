@@ -30,6 +30,12 @@ class WorkerProcess(Process):
         self._return_queue = Queue(maxsize=1)
         self._failed_queue = Queue(maxsize=1)
 
+    _target: bytes
+    _return_queue: Queue
+    _failed_queue: Queue
+    _args: tuple
+    _kwargs: dict
+
     def run(self) -> None:
         """Invoke the callable object."""
 

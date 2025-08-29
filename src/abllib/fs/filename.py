@@ -1,6 +1,6 @@
 """A module containing file name-modification functions."""
 
-from abllib.error import WrongTypeError
+from abllib.error import MissingRequiredModuleError, WrongTypeError
 from abllib.general import try_import_module
 from abllib.log import get_logger
 
@@ -124,6 +124,9 @@ def _is_japanese_letter(char: str) -> bool:
     return False
 
 def _replace_japanese_chars(text: str) -> str:
+    if pykakasi is None:
+        raise MissingRequiredModuleError.with_values("pykakasi")
+
     # replace japanese Full stop (https://en.wikipedia.org/wiki/Japanese_punctuation#Full_stop)
     text = text.replace("。", ". ")
 

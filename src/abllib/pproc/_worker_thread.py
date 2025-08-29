@@ -1,7 +1,7 @@
 """A module containing the WorkerThread class"""
 
 from threading import Thread
-from typing import Any
+from typing import Any, Callable
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
@@ -17,6 +17,11 @@ class WorkerThread(Thread):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
 
         self._return = None
+
+    _target: Callable | None
+    _return: Any | None
+    _args: Any
+    _kwargs: Any
 
     def run(self) -> None:
         """Invoke the callable object."""

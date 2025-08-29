@@ -69,11 +69,11 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if not isinstance(log_level, (int, LogLevel)):
         raise TypeError(f"Expected log_level to be of type {int | LogLevel}, but got {type(log_level)}")
 
-    if isinstance(log_level, LogLevel):
-        log_level = log_level.value
-
     if log_level == LogLevel.NOTSET:
         raise ValueError("LogLevel.NOTSET is not allowed.")
+
+    if isinstance(log_level, LogLevel):
+        log_level = log_level.value
 
     InternalStorage["_log.level"] = log_level
     get_logger().setLevel(log_level)

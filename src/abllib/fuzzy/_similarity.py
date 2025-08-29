@@ -71,7 +71,7 @@ class Similarity():
             self._calculate_simple(),
             self._calculate_complex()
         )
-        score = np.round(score, 2)
+        score = np.round(score, 2).item()
 
         if score < 0.0 or score > 1.0:
             raise error.InternalCalculationError(f"Score {score} is not in acceptable range 0.0 <= score <= 1.0")
@@ -122,10 +122,10 @@ class Similarity():
         return indexes
 
     def _construct_overlapping_indexes(self) -> dict[int, list[int]]:
-        indexes = {}
+        indexes: dict[int, list[int]] = {}
 
         for row_i, row in enumerate(self.scores_array):
-            index = np.argmax(row)
+            index = np.argmax(row).item()
             if row[index] == 0.0:
                 index = -1
 
@@ -180,7 +180,7 @@ class Similarity():
                     if item == -1:
                         optimal_indexes[i] = target_i
 
-        return optimal_indexes
+        return optimal_indexes.tolist()
 
     def _optional_calc_is_done(self, indexes: dict[int, list[int]]) -> bool:
         for i, l in indexes.items():
@@ -195,7 +195,7 @@ class Similarity():
 
         raise RuntimeError()
 
-def _contains_duplicates(arr: np.ndarray) -> bool:
+def _contains_duplicates(arr: list[np.intp]) -> bool:
     seen = set()
 
     for item in arr:

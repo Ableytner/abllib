@@ -13,8 +13,8 @@ class _BaseStorage():
     def __init__(self) -> None:
         raise NotImplementedError()
 
-    _instance: _BaseStorage = None
-    _store: dict[str, Any] = None
+    _instance: _BaseStorage | None = None
+    _store: dict[str, Any] | None = None
 
     _STORAGE_NAME = "BaseStorage"
 
