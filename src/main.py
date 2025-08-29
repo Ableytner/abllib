@@ -10,7 +10,6 @@
 # document fuzzy score calculation
 # optimize _lock_wrapper._log_callstack (takes half of the runtime when assigning storage item)
 # better implement functools.update_wrapper for Deprecated class
-# remove multiple get_logger calls in log.initialize
 
 # TAKES A LOT OF TIME / NEEDED IN THE FUTURE
 # construct target type-specific function at runtime in types.enforce
@@ -18,5 +17,4 @@
 # pylint: skip-file
 
 if __name__ == "__main__":
-    from abllib import log
-    print(log.LogLevel.from_str("critical"))
+    pass

@@ -73,10 +73,12 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
 
     logging.disable()
 
+    root_logger = get_logger()
+
     # remove existing handlers
     if "_log.handlers" in InternalStorage:
         for handler in InternalStorage["_log.handlers"]:
-            get_logger().removeHandler(handler)
+            root_logger.removeHandler(handler)
 
             # remove atexit function
             if isinstance(handler, logging.FileHandler):
@@ -85,7 +87,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
 
     if log_level is None:
         InternalStorage["_log.level"] = DEFAULT_LOG_LEVEL
-        get_logger().setLevel(DEFAULT_LOG_LEVEL)
+        root_logger.setLevel(DEFAULT_LOG_LEVEL)
         return
 
     if not isinstance(log_level, (int, LogLevel)):
@@ -100,7 +102,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     assert isinstance(log_level, int)
 
     InternalStorage["_log.level"] = log_level
-    get_logger().setLevel(log_level)
+    root_logger.setLevel(log_level)
 
 def add_console_handler() -> None:
     """
