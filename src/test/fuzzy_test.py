@@ -2,7 +2,7 @@
 
 from abllib import fuzzy
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, unidiomatic-typecheck
 
 def test_all():
     """Ensure that fuzzy.match_all works at all"""
@@ -147,6 +147,7 @@ def test_similarity():
 
     similarity = fuzzy.similarity
     assert callable(similarity)
+    assert type(similarity("test", "test")) == float
 
     assert similarity("fox", "the quick fox") == 0.33
     assert similarity("foy", "the quick fox") == 0.22
@@ -173,6 +174,27 @@ def test_similarity():
                      "a long pretty sentence is given as a candidate candidate") == 0.5
     assert similarity("first first second",
                       "first secon") == 0.61
+    assert similarity("sentene word sentnc",
+                      "se sen sent sente sentence") == 0.18
+
+def test_similarity_same_words():
+    """Ensure that passing many identical words return the correct score"""
+
+    similarity = fuzzy.similarity
+    assert similarity("word word word word word word word",
+                      "wor word word word word word word") == 0.97
+    assert similarity("word word word word word word word",
+                      "word word word wor word word word") == 0.97
+    assert similarity("word word word word word word word",
+                      "word word word word word wor word") == 0.97
+    assert similarity("word word word word word word word",
+                      "word word word word word word wor") == 0.97
+    assert similarity("word word wor word word word word",
+                      "word word word word word word word") == 0.97
+    assert similarity("wor word word word word word word",
+                      "word word word word word word word") == 0.97
+    assert similarity("word word word word word word wor",
+                      "word word word word word word word") == 0.97
 
 def test_similarity_swappable():
     """Ensure that swapping the arguments for similarity calculation returns the same score"""

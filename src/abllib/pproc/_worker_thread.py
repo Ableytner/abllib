@@ -1,7 +1,7 @@
 """A module containing the WorkerThread class"""
 
 from threading import Thread
-from typing import Any
+from typing import Any, Callable
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
@@ -18,6 +18,11 @@ class WorkerThread(Thread):
 
         self._return = None
 
+    _target: Callable | None
+    _return: Any | None
+    _args: Any
+    _kwargs: Any
+
     def run(self) -> None:
         """Invoke the callable object."""
 
@@ -28,7 +33,7 @@ class WorkerThread(Thread):
             except BaseException as e:
                 self._return = e
 
-    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException:
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException: # type:ignore[override]
         """Wait until the thread terminates and return any stored values."""
 
         super().join(timeout)

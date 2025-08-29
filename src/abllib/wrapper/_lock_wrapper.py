@@ -27,7 +27,7 @@ class _BaseNamedLock():
         if not isinstance(lock_name, str):
             raise error.WrongTypeError.with_values(lock_name, str)
         if not isinstance(timeout, float) and timeout is not None:
-            raise error.WrongTypeError.with_values(timeout, float, None)
+            raise error.WrongTypeError.with_values(timeout, (float, None))
 
         self._name = lock_name
         self._timeout = timeout

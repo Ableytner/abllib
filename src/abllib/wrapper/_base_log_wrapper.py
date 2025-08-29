@@ -35,7 +35,7 @@ class BaseLogWrapper():
         elif logger is None:
             _logger = None
         else:
-            raise WrongTypeError.with_values(logger, str, Logger, Callable, None)
+            raise WrongTypeError.with_values(logger, (str, Logger, Callable, None))
 
         inst.logger = _logger
         return inst

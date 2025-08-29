@@ -15,8 +15,18 @@ jobs:
       python-version: ${{ matrix.python-version }}
     secrets: inherit
 
+  mypy:
+    if: github.event.label.name == 'ready to merge'
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    uses: ./.github/workflows/define-mypy.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+    secrets: inherit
+
   pytest:
-    needs: pylint
+    if: github.event.label.name == 'ready to merge'
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]

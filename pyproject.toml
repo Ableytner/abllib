@@ -40,6 +40,7 @@ all = [
 dev = [
   "pylint",
   "pytest",
+  "mypy",
   "pre-commit"
 ]
 
@@ -56,3 +57,10 @@ ban-relative-imports = "all"
 
 [tool.isort]
 lines_after_imports=1
+
+[tool.mypy]
+strict = false
+
+[[tool.mypy.overrides]]
+module = ["dill.*"]
+ignore_missing_imports = true

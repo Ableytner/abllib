@@ -31,7 +31,7 @@ class Similarity():
 
         self.scores_array = self._construct_scores_array()
 
-    def _construct_scores_array(self) -> np.ndarray:
+    def _construct_scores_array(self) -> np.typing.NDArray[np.float64]:
         """
         The returned 2D scores_array is structured as follows:
                     candidate1  candidate2  candidate3  candidate4
@@ -71,7 +71,7 @@ class Similarity():
             self._calculate_simple(),
             self._calculate_complex()
         )
-        score = np.round(score, 2)
+        score = np.round(score, 2).item()
 
         if score < 0.0 or score > 1.0:
             raise error.InternalCalculationError(f"Score {score} is not in acceptable range 0.0 <= score <= 1.0")
@@ -111,7 +111,7 @@ class Similarity():
 
         return total_score / score_divisor
 
-    def _construct_primitive_indexes(self) -> list[int]:
+    def _construct_primitive_indexes(self) -> list[np.intp]:
         indexes = []
 
         for row in self.scores_array:
@@ -122,10 +122,10 @@ class Similarity():
         return indexes
 
     def _construct_overlapping_indexes(self) -> dict[int, list[int]]:
-        indexes = {}
+        indexes: dict[int, list[int]] = {}
 
         for row_i, row in enumerate(self.scores_array):
-            index = np.argmax(row)
+            index = np.argmax(row).item()
             if row[index] == 0.0:
                 index = -1
 
@@ -152,7 +152,9 @@ class Similarity():
             curr_target_indexes = indexes[curr_index]
             del indexes[curr_index]
 
-            curr_scores = np.ndarray((len(curr_target_indexes), self.scores_array.shape[1]), dtype=np.ndarray)
+            curr_scores: np.typing.NDArray[np.float64] = np.ndarray((len(curr_target_indexes),
+                                                                     self.scores_array.shape[1]),
+                                                                    dtype=np.ndarray)
 
             scores_i = 0
             for row_i, row in enumerate(self.scores_array):
@@ -169,9 +171,9 @@ class Similarity():
 
         number_of_targets = sum((len(item) for item in indexes.values()))
         optimal_indexes = np.full(number_of_targets, dtype=int, fill_value=-1)
-        for candidate_i, target_i in indexes.items():
+        for candidate_i, target_is in indexes.items():
             if candidate_i != -1:
-                optimal_indexes[target_i[0]] = candidate_i
+                optimal_indexes[target_is[0]] = candidate_i
 
         if -1 in indexes:
             # fill up remaining slots with target_i which didn't match (candidate_1 == -1)
@@ -180,7 +182,7 @@ class Similarity():
                     if item == -1:
                         optimal_indexes[i] = target_i
 
-        return optimal_indexes
+        return optimal_indexes.tolist()
 
     def _optional_calc_is_done(self, indexes: dict[int, list[int]]) -> bool:
         for i, l in indexes.items():
@@ -195,7 +197,7 @@ class Similarity():
 
         raise RuntimeError()
 
-def _contains_duplicates(arr: np.ndarray) -> bool:
+def _contains_duplicates(arr: list[np.intp]) -> bool:
     seen = set()
 
     for item in arr:
@@ -224,19 +226,12 @@ def _alg_with_index(data: np.ndarray, combined_score: float) -> tuple[float, lis
             return (combined_score + data[0][index], [index])
         return (combined_score, [-1])
 
-    max_score = 0.0
-    max_indexes = None
-    max_row_index = None
-
-    for row_index in range(data.shape[0]):
+    max_score, max_indexes = _alg_with_index(_reduce(data, 0), combined_score + data[0][0])
+    max_row_index = 0
+    for row_index in range(1, data.shape[0]):
         reduced_data = _reduce(data, row_index)
 
         score, indexes = _alg_with_index(reduced_data, combined_score + data[row_index][0])
-
-        # we have to initialize at least once
-        if max_indexes is None:
-            max_indexes = indexes
-            max_row_index = row_index
 
         # branching with if is much faster than max, because max_score only rarely changes
         # pylint: disable-next=consider-using-max-builtin

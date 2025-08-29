@@ -52,6 +52,9 @@ class Semaphore(threading.BoundedSemaphore):
     This makes it equivalent to threading.Lock method signature-wise.
     """
 
+    _value: int
+    _initial_value: int
+
     def locked(self) -> bool:
         """Returns whether the Semaphore is held at least once"""
 
