@@ -31,7 +31,7 @@ class Similarity():
 
         self.scores_array = self._construct_scores_array()
 
-    def _construct_scores_array(self) -> np.ndarray:
+    def _construct_scores_array(self) -> np.typing.NDArray[np.float64]:
         """
         The returned 2D scores_array is structured as follows:
                     candidate1  candidate2  candidate3  candidate4
@@ -152,7 +152,9 @@ class Similarity():
             curr_target_indexes = indexes[curr_index]
             del indexes[curr_index]
 
-            curr_scores = np.ndarray((len(curr_target_indexes), self.scores_array.shape[1]), dtype=np.ndarray)
+            curr_scores: np.typing.NDArray[np.float64] = np.ndarray((len(curr_target_indexes),
+                                                                     self.scores_array.shape[1]),
+                                                                    dtype=np.ndarray)
 
             scores_i = 0
             for row_i, row in enumerate(self.scores_array):

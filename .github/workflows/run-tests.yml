@@ -16,8 +16,16 @@ jobs:
       python-version: ${{ matrix.python-version }}
     secrets: inherit
 
+  mypy:
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+    uses: ./.github/workflows/define-mypy.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+    secrets: inherit
+
   pytest:
-    needs: pylint
     strategy:
       matrix:
         python-version: ["3.10", "3.13"]

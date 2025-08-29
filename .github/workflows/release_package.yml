@@ -16,6 +16,15 @@ jobs:
       python-version: ${{ matrix.python-version }}
     secrets: inherit
 
+  mypy:
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    uses: ./.github/workflows/define-mypy.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+    secrets: inherit
+
   pytest:
     strategy:
       matrix:
@@ -81,7 +90,7 @@ jobs:
         path: dist/*
 
   release:
-    needs: [pylint, pytest, build, tag]
+    needs: [pylint, mypy, pytest, build, tag]
     runs-on: self-hosted
     environment:
       name: pypi

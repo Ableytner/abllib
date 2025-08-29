@@ -25,7 +25,7 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--skip-linting"):
         skip_pylint = pytest.mark.skip(reason="skipping code linting due to --skip-linting arg")
         for item in items:
-            if item.name == "test_pylint":
+            if item.name in ["test_pylint", "test_mypy"]:
                 item.add_marker(skip_pylint)
 
 # pylint: disable-next=unused-wildcard-import, wildcard-import, wrong-import-order
