@@ -1,8 +1,10 @@
 """A module containing the fuzzy search function"""
 
+from abllib import types
 from abllib.fuzzy._matchresult import MatchResult
 from abllib.fuzzy._similarity import Similarity
 
+@types.enforce
 def match_all(target: str, candidates: list[str | tuple[str, ...]], threshold: int = 5) -> list[MatchResult]:
     """
     Search for all candidates matching the target. Applies fuzzy logic when comparing.
@@ -13,8 +15,6 @@ def match_all(target: str, candidates: list[str | tuple[str, ...]], threshold: i
 
     Returns a list of MatchResults.
     """
-
-    # TODO: type checking with abllib.type module
 
     if threshold < 0:
         raise ValueError("Threshold needs to be >= 0")
