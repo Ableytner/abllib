@@ -156,3 +156,50 @@ def test_loglevel_fromstr_mixedcase():
     assert log.LogLevel.from_str("iNFO") is log.LogLevel.INFO
     assert log.LogLevel.from_str("deBuG") is log.LogLevel.DEBUG
     assert log.LogLevel.from_str("alL") is log.LogLevel.ALL
+
+def test_file_handler_filemodes():
+    """Ensure that file handler works with different file modes"""
+
+    # cleanup if file is left from previous run
+    if os.path.isfile("test.log"):
+        os.remove("test.log")
+
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
+    logger = log.get_logger()
+
+    logger.debug("the debug message")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 1
+        assert re.match(r"\[.*\] \[DEBUG   \] root: the debug message", content[0])
+
+    # initialize to overwrite logfile
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log", filemode="w")
+    logger = log.get_logger()
+
+    logger.critical("this is critical")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 1
+        assert re.match(r"\[.*\] \[CRITICAL\] root: this is critical", content[0])
+
+    # initialize to append to logfile
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log", filemode="a")
+    logger = log.get_logger()
+
+    logger.debug("the debug message")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 2
+        assert re.match(r"\[.*\] \[CRITICAL\] root: this is critical", content[0])
+        assert re.match(r"\[.*\] \[DEBUG   \] root: the debug message", content[1])
+
+    # cleanup and remove the file handler
+    log.initialize()
+    os.remove("test.log")
