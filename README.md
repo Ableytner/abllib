@@ -395,6 +395,10 @@ Logging to a file is supported as follows:
 The logfile will be created once the first message with a high enough log level is logged.
 The file is closed at program exit or handler removal.
 
+`log.add_file_handler` also supports an optional filemode parameter, which specifies how the logfile should be opened, with the following options:
+* w : overwrite
+* a : append
+
 Multiple handlers can also be added simultaneously.
 In this case, the logged message is sent to all of them.
 ```py

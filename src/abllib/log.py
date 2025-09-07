@@ -129,7 +129,7 @@ def add_console_handler() -> None:
         InternalStorage["_log.handlers"] = []
     InternalStorage["_log.handlers"].append(stream_handler)
 
-def add_file_handler(filename: str = "latest.log") -> None:
+def add_file_handler(filename: str = "latest.log", filemode: Literal["w"] | Literal["a"] = "w") -> None:
     """
     Add a file handler to the root logger.
 
@@ -144,7 +144,7 @@ def add_file_handler(filename: str = "latest.log") -> None:
     # needs to be imported here to prevent circular import
     # pylint: disable-next=cyclic-import, import-outside-toplevel
     from abllib.fs import absolute
-    file_handler = logging.FileHandler(filename=absolute(filename), encoding="utf-8", mode="w", delay=True)
+    file_handler = logging.FileHandler(filename=absolute(filename), encoding="utf-8", mode=filemode, delay=True)
 
     file_handler.setLevel(InternalStorage["_log.level"])
 
