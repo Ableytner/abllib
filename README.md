@@ -416,7 +416,7 @@ In this case, the logged message is sent to all of them.
 
 The libaries' LogLevel enum also contains a convenience function for parsing a log level.
 
-Example coe:
+Example code:
 ```py
 >> from abllib import log
 >> log.LogLevel.from_str("DEBUG")
