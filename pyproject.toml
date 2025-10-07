@@ -28,20 +28,20 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
-  "dill",
-  "numpy"
+  "dill==0.4.0",
+  "numpy==2.3.3"
 ]
 
 [project.optional-dependencies]
 all = [
-  "pykakasi",
-  "levenshtein"
+  "levenshtein==0.27.1",
+  "pykakasi==2.3.0"
 ]
 dev = [
-  "pylint",
-  "pytest",
-  "mypy",
-  "pre-commit"
+  "pylint==3.3.9",
+  "pytest==8.4.2",
+  "mypy==1.18.2",
+  "pre-commit==4.3.0"
 ]
 
 [project.urls]
