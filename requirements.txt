@@ -1,8 +1,8 @@
-dill
-numpy
-pykakasi
-levenshtein
-pylint
-pytest
-mypy
-pre-commit
+dill==0.4.0
+levenshtein==0.27.1
+mypy==1.18.2
+numpy==2.2.6
+pre-commit==4.3.0
+pykakasi==2.3.0
+pylint==3.3.9
+pytest==8.4.2
