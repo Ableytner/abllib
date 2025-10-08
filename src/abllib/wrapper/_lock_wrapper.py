@@ -7,7 +7,7 @@ import traceback
 from datetime import datetime
 from time import sleep
 
-from abllib import error, log
+from abllib import error, log, types
 from abllib._storage import InternalStorage
 from abllib.wrapper._deprecated import deprecated
 from abllib.wrapper._lock import Lock, Semaphore
@@ -19,11 +19,11 @@ class _BaseNamedLock():
     The base class for the NamedLock and NamedSemaphore classes.
     """
 
+    @types.enforce
     def __init__(self, lock_name: str, timeout: int | float | None = None):
         if isinstance(timeout, int):
             timeout = float(timeout)
 
-        # TODO: add type validation
         if not isinstance(lock_name, str):
             raise error.WrongTypeError.with_values(lock_name, str)
         if not isinstance(timeout, float) and timeout is not None:
