@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "abllib"
-version = "1.4.1rc8"
+version = "1.4.2rc2"
 authors = [
   { name="Ableytner", email="ableytner@gmx.at" },
 ]
