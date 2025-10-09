@@ -10,7 +10,7 @@ jobs:
   pylint:
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     uses: ./.github/workflows/define-pylint.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -19,7 +19,7 @@ jobs:
   mypy:
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     uses: ./.github/workflows/define-mypy.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -28,7 +28,7 @@ jobs:
   pytest:
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     uses: ./.github/workflows/define-pytest.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -39,7 +39,7 @@ jobs:
     outputs:
       release-tag: ${{ steps.read-tag.outputs.release-tag }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Read tag from __init__.py
       id: read-tag
       run: |
@@ -65,11 +65,11 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -99,9 +99,9 @@ jobs:
       contents: write # mandatory to create release
       id-token: write  # mandatory for pypi 'trusted publishing'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Load persisted builds
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: build-dist-*
         path: dist/

@@ -2,7 +2,7 @@
 
 Ableytners' general-purpose python library.
 
-Supports Python versions 3.10 - 3.13.
+Supports Python versions 3.11 - 3.14.
 
 ## Overview
 
