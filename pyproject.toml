@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "abllib"
-version = "1.4.1rc7"
+version = "1.4.1rc8"
 authors = [
   { name="Ableytner", email="ableytner@gmx.at" },
 ]
@@ -14,22 +14,22 @@ license = "GPL-3.0"
 license-files = [
   "LICENSE",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
   "dill==0.4.0",
-  "numpy==2.2.6"
+  "numpy==2.3.3"
 ]
 
 [project.optional-dependencies]

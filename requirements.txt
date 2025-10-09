@@ -1,7 +1,7 @@
 dill==0.4.0
 levenshtein==0.27.1
 mypy==1.18.2
-numpy==2.2.6
+numpy==2.3.3
 pre-commit==4.3.0
 pykakasi==2.3.0
 pylint==3.3.9
