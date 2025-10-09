@@ -39,7 +39,7 @@ jobs:
     outputs:
       release-tag: ${{ steps.read-tag.outputs.release-tag }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Read tag from __init__.py
       id: read-tag
       run: |
@@ -67,9 +67,9 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -99,9 +99,9 @@ jobs:
       contents: write # mandatory to create release
       id-token: write  # mandatory for pypi 'trusted publishing'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Load persisted builds
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: build-dist-*
         path: dist/
