@@ -987,6 +987,8 @@ Traceback (most recent call last):
 The wrapper module contains a modified version of threading.Lock.
 The .acquire method now accepts None for a timeout.
 
+Additionally, releasing the lock while it is not locked does not raise an error.
+
 #### Custom Semaphore (`abllib.wrapper.Semaphore`)
 
 The wrapper module also contains a custom Semaphore class based on threading.BoundedSemaphore.
@@ -994,6 +996,9 @@ It now contains a .locked method which returns whether it is held at least once.
 
 The semaphore is initialized with the maximum number of times it can be acquired simultaneously.
 After that, future acquisitions result in an LockAcquisitionTimeoutError.
+Releasing the semaphore while it is not locked does not raise an error.
+
+The semaphore can be blocked, which halts all new acquisitions.
 
 #### Lock wrappers
 
@@ -1003,10 +1008,10 @@ There are two classes which help with multi-threaded synchronisation:
 
 NamedLock works like a normal [lock](https://en.wikipedia.org/wiki/Lock_(computer_science)), while NamedSemaphore works like a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
 
-Constructing a NamedLock and NamedSemaphore with the same name links them.
+Creating a NamedLock and NamedSemaphore with the same name links them.
 If the NamedLock is acquired and after that the NamedSemaphore gets acquired, it has to wait until the NamedLock is released.
 
-Multiple NamedLock or NamedSemaphore can also be constructed with the same name.
+Multiple NamedLock or NamedSemaphore can also be created with the same name.
 This lets them share the same global state, so if one of them is acquired, all the others are acquired too.
 
 If a NamedLock or NamedSemaphore is applied to a function, its lock is acquired before the function executes and is released afterwards.
