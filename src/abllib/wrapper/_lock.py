@@ -1,6 +1,9 @@
 """A module containing a custom Lock and Semaphore class"""
 
 import threading
+from time import sleep
+
+from abllib import error
 
 class Lock():
     """
@@ -32,6 +35,9 @@ class Lock():
     def release(self):
         """Release the lock if it is currently held"""
 
+        if not self.locked():
+            return
+
         self._lock.release()
 
     def __enter__(self):
@@ -52,10 +58,61 @@ class Semaphore(threading.BoundedSemaphore):
     This makes it equivalent to threading.Lock method signature-wise.
     """
 
+    def __init__(self, value: int = 1) -> None:
+        super().__init__(value)
+        self._blocked = False
+
     _value: int
     _initial_value: int
+    _blocked: bool
+
+    def acquire(self, blocking: bool = True, timeout: float | None = None) -> bool:
+        if timeout is None:
+            while self._blocked:
+                sleep(0.025)
+
+            return super().acquire(blocking, timeout)
+
+        elapsed_time = 0.0
+        while self._blocked:
+            sleep(0.025)
+            elapsed_time += 0.025
+            if elapsed_time > timeout:
+                raise error.LockAcquisitionTimeoutError()
+
+        return super().acquire(blocking, timeout)
+
+    def acquire_unsafe(self, blocking: bool = True, timeout: float | None = None) -> bool:
+        """Acquire this semaphore without checking if it's blocked"""
+
+        return super().acquire(blocking, timeout)
+
+    def release(self, n: int = 1) -> None:
+        if not self.locked():
+            return None
+
+        # release all remaining
+        if self._value + n > self._initial_value:
+            n = self._initial_value - self._value
+
+        return super().release(n)
 
     def locked(self) -> bool:
         """Returns whether the Semaphore is held at least once"""
 
         return self._value != self._initial_value
+
+    def block(self) -> None:
+        """Prevent this semaphore from being acquired"""
+
+        self._blocked = True
+
+    def unblock(self) -> None:
+        """Allow this semaphore to be acquired again"""
+
+        self._blocked = False
+
+    def blocked(self) -> bool:
+        """Return whether this semaphore is blocked"""
+
+        return self._blocked
