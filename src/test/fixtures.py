@@ -36,9 +36,20 @@ def setup():
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_after_function():
-    """Clean up the PersistentStorage, VolatileStorage and StorageView, removing all keys"""
+    """
+    Release all held locks / semaphores.
+
+    Clean up the PersistentStorage, VolatileStorage and StorageView, removing all keys.
+
+    Remove all onexit callbacks.
+    """
 
     yield None
+
+    if "_locks" in _storage.InternalStorage:
+        for name in _storage.InternalStorage["_locks"]:
+            for lock in _storage.InternalStorage[f"_locks.{name}"].values():
+                lock.release()
 
     for key in list(storage.PersistentStorage._store.keys()):
         del storage.PersistentStorage[key]
