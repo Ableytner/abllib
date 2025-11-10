@@ -713,6 +713,7 @@ It can only hold values of the following types:
 * int
 * float
 * str
+* bytes
 * list
 * dict
 * tuple
