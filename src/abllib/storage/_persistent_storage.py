@@ -1,11 +1,13 @@
 """Module containing the _PersistentStorage class"""
 
+import base64
 import json
 import os
 from typing import Any
 
-from abllib import error, fs, onexit
+from abllib import error, fs, onexit, wrapper
 from abllib._storage import InternalStorage
+from abllib._storage._base_storage import _AutoremoveDict
 from abllib.storage._storage_view import _StorageView
 from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
@@ -75,11 +77,30 @@ class _PersistentStorage(_ThreadsafeStorage):
     def __setitem__(self, key: str, item: Any) -> None:
         # TODO: type check list / dict content types
 
-        if not isinstance(item, (bool, int, float, str, list, dict, tuple)) and item is not None:
+        if not isinstance(item, (bool, int, float, str, list, dict, tuple, bytes)) and item is not None:
             raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
 
+    @wrapper.NamedLock(_STORAGE_NAME)
+    def save_to_disk(self) -> None:
+        """Save the data to the storage file"""
+
+        if "_storage_file" not in InternalStorage:
+            raise error.KeyNotFoundError()
+
+        path = InternalStorage["_storage_file"]
+        if len(self._store) == 0 and os.path.isfile(path):
+            return
+
+        data = {}
+        for key in self._store.keys():
+            data[key] = self._encode_data(self._store[key])
+
+        with open(path, "w", encoding="utf8") as f:
+            json.dump(data, f)
+
+    @wrapper.NamedLock(_STORAGE_NAME)
     def load_from_disk(self) -> None:
         """Load the data from the storage file"""
 
@@ -91,20 +112,67 @@ class _PersistentStorage(_ThreadsafeStorage):
             return
 
         with open(path, "r", encoding="utf8") as f:
-            self._store = json.load(f)
+            data = json.load(f)
 
-    def save_to_disk(self) -> None:
-        """Save the data to the storage file"""
+        self._store = {}
+        for key in data.keys():
+            self._store[key] = self._decode_data(data[key])
 
-        if "_storage_file" not in InternalStorage:
-            raise error.KeyNotFoundError()
+    def _encode_data(self, data: Any) -> Any:
+        """Encode the given data item, replacing all type / value combinations"""
 
-        path = InternalStorage["_storage_file"]
-        if len(self._store) == 0 and os.path.isfile(path):
-            return
+        item = data
+        if isinstance(item, dict):
+            if isinstance(item, _AutoremoveDict):
+                item = {
+                    "_t": "_AutoremoveDict",
+                    "_v": {key: self._encode_data(item[key]) for key in item}
+                }
+            else:
+                item = {
+                    "_t": "dict",
+                    "_v": {key: self._encode_data(item[key]) for key in item}
+                }
+        elif isinstance(item, list):
+            item = {
+                "_t": "list",
+                "_v": [self._encode_data(i) for i in item]
+            }
+        elif isinstance(item, tuple):
+            item = {
+                "_t": "tuple",
+                "_v": [self._encode_data(i) for i in item]
+            }
+        elif isinstance(item, bytes):
+            item = {
+                "_t": "bytes",
+                "_v": base64.b64encode(item).decode("ascii")
+            }
 
-        with open(path, "w", encoding="utf8") as f:
-            json.dump(self._store, f)
+        return item
+
+    def _decode_data(self, data: Any) -> Any:
+        """Decode the given data item, replacing all type / value combinations"""
+
+        if not isinstance(data, dict):
+            return data
+
+        if len(data) == 2 and "_t" in data and "_v" in data:
+            if data["_t"] == "_AutoremoveDict":
+                data = _AutoremoveDict({key: self._decode_data(item) for key, item in data["_v"].items()})
+            elif data["_t"] == "dict":
+                data = {key: self._decode_data(item) for key, item in data["_v"].items()}
+            elif data["_t"] == "list":
+                data = [self._decode_data(i) for i in (data["_v"])]
+            elif data["_t"] == "tuple":
+                data = tuple(self._decode_data(i) for i in (data["_v"]))
+            elif data["_t"] == "bytes":
+                data = base64.b64decode(data["_v"], validate=True)
+
+            return data
+
+        # handle legacy format, which doesn't need any conversion
+        return data
 
     def _ensure_initialized(self):
         try:

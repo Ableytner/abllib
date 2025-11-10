@@ -144,21 +144,29 @@ def test_persistentstorage_valuetype():
     PersistentStorage._store = {}
 
     PersistentStorage["key1"] = True
+    PersistentStorage["key2"] = 10
+    PersistentStorage["key3"] = 10.1
+    PersistentStorage["key4"] = "value"
+    PersistentStorage["key5"] = ["1", "2"]
+    PersistentStorage["key6"] = {"key": "item"}
+    PersistentStorage["key7"] = None
+    PersistentStorage["key8"] = b"bytes work as well"
+    PersistentStorage["key9"] = "b64test"
+    PersistentStorage["key10"] = ("1", "2")
+
+    PersistentStorage.save_to_disk()
+    PersistentStorage.load_from_disk()
+
     assert PersistentStorage["key1"] is True
-    PersistentStorage["key1"] = 10
-    assert PersistentStorage["key1"] == 10
-    PersistentStorage["key1"] = 10.1
-    assert PersistentStorage["key1"] == 10.1
-    PersistentStorage["key1"] = "value"
-    assert PersistentStorage["key1"] == "value"
-    PersistentStorage["key1"] = ["1", "2"]
-    assert PersistentStorage["key1"] == ["1", "2"]
-    PersistentStorage["key1"] = {"key": "item"}
-    assert PersistentStorage["key1"] == {"key": "item"}
-    PersistentStorage["key1"] = ("1", "2")
-    assert PersistentStorage["key1"] == ("1", "2")
-    PersistentStorage["key1"] = None
-    assert PersistentStorage["key1"] is None
+    assert PersistentStorage["key2"] == 10
+    assert PersistentStorage["key3"] == 10.1
+    assert PersistentStorage["key4"] == "value"
+    assert PersistentStorage["key5"] == ["1", "2"]
+    assert PersistentStorage["key6"] == {"key": "item"}
+    assert PersistentStorage["key7"] is None
+    assert PersistentStorage["key8"] == b"bytes work as well"
+    assert PersistentStorage["key9"] == "b64test"
+    assert PersistentStorage["key10"] == ("1", "2")
 
     class CustomType():
         pass
@@ -211,7 +219,10 @@ def test_persistentstorage_save_file():
     with open(filepath, "r", encoding="utf8") as f:
         data = json.load(f)
     assert data["key1"] == "value"
-    assert data["key2"] == ["value21", "value22", "value23"]
+    assert data["key2"] == {
+        "_t": "list",
+        "_v": ["value21", "value22", "value23"]
+    }
     assert data["key4"] == 10
 
     os.remove(filepath)
