@@ -6,7 +6,7 @@ import os
 import pytest
 
 from abllib import _storage, error
-from abllib._storage._base_storage import _BaseStorage
+from abllib._storage._base_storage import _AutoremoveDict, _BaseStorage
 from abllib.storage import (_CacheStorage, _PersistentStorage, _StorageView,
                             _ThreadsafeStorage, _VolatileStorage)
 
@@ -153,6 +153,8 @@ def test_persistentstorage_valuetype():
     PersistentStorage["key8"] = b"bytes work as well"
     PersistentStorage["key9"] = "b64test"
     PersistentStorage["key10"] = ("1", "2")
+    PersistentStorage["key11.1"] = "subvalue"
+    PersistentStorage["key12.1.2.3.4.5.6.7.8.9"] = "subsubvalue"
 
     PersistentStorage.save_to_disk()
     PersistentStorage.load_from_disk()
@@ -167,6 +169,9 @@ def test_persistentstorage_valuetype():
     assert PersistentStorage["key8"] == b"bytes work as well"
     assert PersistentStorage["key9"] == "b64test"
     assert PersistentStorage["key10"] == ("1", "2")
+    assert isinstance(PersistentStorage["key11"], _AutoremoveDict)
+    assert PersistentStorage["key11.1"] == "subvalue"
+    assert PersistentStorage["key12.1.2.3.4.5.6.7.8.9"] == "subsubvalue"
 
     class CustomType():
         pass
