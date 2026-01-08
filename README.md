@@ -1138,9 +1138,10 @@ RuntimeError: my message
 ```
 
 Instead of logging, a custom handler function can be provided, which will be passed the error message.
+The custom handler function is expected to take one string argument.
 ```py
 >> from abllib.wrapper import log_error
->> @log_error(handler=lambda exc: print(exc))
+>> @log_error(handler=lambda exc_str: print(exc_str))
 .. def my_func(arg):
 ..   raise RuntimeError("my message")
 >> try:
@@ -1191,6 +1192,18 @@ A custom logger can also be specified by either passing the name or logging.Logg
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: func: my_func
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: in  : 111
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: out : False
+```
+
+Instead of logging, a custom handler function can be provided, which will be passed the function name / in / out messages.
+The custom handler function is expected to take one string argument.
+```py
+>> @log_io(handler=lambda exc_str: print(exc_str))
+.. def my_func(arg):
+..   return False
+>> _ = my_func(111)
+func: my_func
+in  : 111
+out : False
 ```
 
 #### Log function execution time (`abllib.wrapper.timeit`)
