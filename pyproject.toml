@@ -81,4 +81,4 @@ ignore_missing_imports = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-abllib = ["abllib/py.typed"]
+abllib = ["py.typed"]
