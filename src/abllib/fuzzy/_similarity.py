@@ -76,7 +76,7 @@ class Similarity():
         if score < 0.0 or score > 1.0:
             raise error.InternalCalculationError(f"Score {score} is not in acceptable range 0.0 <= score <= 1.0")
 
-        return score
+        return float(score)
 
     def _calculate_simple(self) -> float:
         edit_dist = levenshtein_distance(self._target, self._candidate)

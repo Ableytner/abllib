@@ -2,6 +2,7 @@
 
 import threading
 from time import sleep
+from types import TracebackType
 
 from abllib import error
 
@@ -13,10 +14,10 @@ class Lock():
     https://stackoverflow.com/a/6781398
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._lock = threading.Lock()
 
-    def acquire(self, blocking: bool = True, timeout: float | None = None):
+    def acquire(self, blocking: bool = True, timeout: float | None = None) -> bool:
         """
         Try to acquire the Lock.
 
@@ -32,7 +33,7 @@ class Lock():
 
         return self._lock.locked()
 
-    def release(self):
+    def release(self) -> None:
         """Release the lock if it is currently held"""
 
         if not self.locked():
@@ -40,12 +41,15 @@ class Lock():
 
         self._lock.release()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
     # keep signature the same as threading.Lock
     # pylint: disable-next=redefined-builtin
-    def __exit__(self, type, value, traceback):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
 # we can't use the default threading.Semaphore
