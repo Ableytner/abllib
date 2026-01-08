@@ -76,3 +76,9 @@ show_error_codes = true
 [[tool.mypy.overrides]]
 module = ["dill.*"]
 ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+abllib = ["abllib/py.typed"]
