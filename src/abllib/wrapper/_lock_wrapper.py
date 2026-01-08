@@ -5,6 +5,8 @@ from __future__ import annotations
 import functools
 import traceback
 from time import sleep
+from types import TracebackType
+from typing import Any, Callable
 
 from abllib import error, log
 from abllib._storage import InternalStorage
@@ -106,16 +108,19 @@ class NamedLock():
 
         return self._lock.locked()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Callable:
         """Called when instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             with self:
@@ -239,16 +244,19 @@ class NamedSemaphore():
 
         self._semaphore.unblock()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Callable:
         """Called when instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             with self:
@@ -271,7 +279,7 @@ class NamedSemaphore():
 
         return None
 
-def _log_callstack(message: str):
+def _log_callstack(message: str) -> None:
     """Log the current callstack"""
 
     if log.get_loglevel() != log.LogLevel.ALL:

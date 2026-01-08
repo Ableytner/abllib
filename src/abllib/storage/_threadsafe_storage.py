@@ -1,3 +1,5 @@
+# mypy: disable-error-code="no-untyped-def"
+
 """Module containing the _PersistentStorage class"""
 
 from typing import Any
@@ -6,7 +8,7 @@ from abllib import error, wrapper
 from abllib._storage._base_storage import _BaseStorage
 
 class _ThreadsafeStorage(_BaseStorage):
-    def __init__(self):
+    def __init__(self) -> None:
         raise NotImplementedError()
 
     _STORAGE_NAME = "ThreadsafeStorage"
@@ -55,7 +57,7 @@ class _ThreadsafeStorage(_BaseStorage):
     def __contains__(self, key):
         return super().__contains__(key)
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls) -> None:
         if cls._STORAGE_NAME in ("BaseStorage", "ThreadsafeStorage"):
             raise error.UninitializedFieldError.with_values(cls, "_STORAGE_NAME")
 

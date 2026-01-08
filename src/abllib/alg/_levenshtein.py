@@ -46,4 +46,4 @@ def levenshtein_distance(token1: str, token2: str) -> int:
 
     final_dist = distances[len(token1)][len(token2)]
     # cast np.int64 to int
-    return final_dist.item()
+    return int(final_dist.item())

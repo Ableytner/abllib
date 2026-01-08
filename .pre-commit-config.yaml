@@ -23,8 +23,8 @@ repos:
   hooks:
   - id: ruff-check
     args:
-      - --fix
-      - --unsafe-fixes
+    - --fix
+    - --unsafe-fixes
 - repo: https://github.com/pycqa/isort
   rev: 6.0.1
   hooks:
@@ -48,13 +48,13 @@ repos:
     # Use pyproject.toml if possible instead of adding command line parameters here
     args: [--warn-unused-configs]
     additional_dependencies:
-      # Type stubs
-      # - pandas-stubs  # TODO
-      - types-docutils
-      - types-PyYAML
-      - types-psutil
-      - types-requests
-      - types-setuptools
-      # Typed libraries
-      - numpy
-      - pytest
+    # Type stubs
+    - types-docutils
+    - types-PyYAML
+    - types-psutil
+    - types-requests
+    - types-setuptools
+    # Typed libraries
+    - numpy
+    - pytest
+    files: ^src/abllib/

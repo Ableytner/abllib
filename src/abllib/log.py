@@ -44,15 +44,15 @@ class LogLevel(Enum):
             case _:
                 raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return self is other or self.value == other
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return self is not other and self.value != other
 
     # for more details look here:
     # https://stackoverflow.com/a/72664895/15436169
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.value)
 
 def initialize(log_level: Literal[LogLevel.CRITICAL]
@@ -62,7 +62,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.DEBUG]
                           | Literal[LogLevel.ALL]
                           | int
-                          | None = None):
+                          | None = None) -> None:
     """
     Initialize the custom logging module.
 
@@ -185,7 +185,7 @@ def get_loglevel() -> Literal[LogLevel.CRITICAL] \
 
     return InternalStorage["_log.level"] if "_log.level" in InternalStorage else None
 
-def _get_formatter():
+def _get_formatter() -> logging.Formatter:
     dt_fmt = r"%Y-%m-%d %H:%M:%S"
     formatter = logging.Formatter("[{asctime}] [{levelname:<8}] {name}: {message}", dt_fmt, style="{")
     return formatter

@@ -106,7 +106,7 @@ japanese_char_ranges = [
     {"from": ord("\U0002b820"), "to": ord("\U0002ceaf")}  # included as of Unicode 8.0
 ]
 
-def _contains_japanese_char(text) -> bool:
+def _contains_japanese_char(text: str) -> bool:
     for char in text:
         if _is_japanese_letter(char):
             return True

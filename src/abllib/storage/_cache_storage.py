@@ -15,6 +15,6 @@ class _CacheStorage(_BaseStorage):
 
     _STORAGE_NAME = "CacheStorage"
 
-    def _ensure_initialized(self):
+    def _ensure_initialized(self) -> None:
         # the storage is always initialized
         pass

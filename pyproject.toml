@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "abllib"
-version = "1.4.3rc1"
+version = "1.4.4rc1"
 authors = [
   { name="Ableytner", email="ableytner@gmx.at" },
 ]
@@ -25,6 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3 :: Only",
+  "Typing :: Typed",
   "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
@@ -59,8 +60,26 @@ ban-relative-imports = "all"
 lines_after_imports=1
 
 [tool.mypy]
-strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = ["dill.*"]
 ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+abllib = ["py.typed"]

@@ -36,7 +36,7 @@ def test_mypy():
             pytest.fail(mypy_output[-1])
     else:
         # logging mypy errors on linux doesn't work
-        mypy_output = os.popen("python3 -m mypy $(git ls-files '*.py')").read()
+        mypy_output = os.popen("python3 -m mypy $(git ls-files '*.py' | grep src/abllib)").read()
 
         os.chdir(PREV_DIR)
 

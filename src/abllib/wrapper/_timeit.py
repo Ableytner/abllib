@@ -2,8 +2,9 @@
 
 import functools
 from time import perf_counter_ns
-from typing import Callable
+from typing import Any, Callable
 
+from abllib.log import LogLevel
 from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class timeit(BaseLogWrapper):
@@ -16,26 +17,28 @@ class timeit(BaseLogWrapper):
     If the optional argument logger is set and of type str, request that logger and log the time.
 
     Otherwise, the time is logged to the root logger.
+
+    Can also be directly used as a wrapper.
     """
 
-    def __call__(self, func: Callable):
+    def __call__(self, func: Callable) -> Callable:
         """Called when the class instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             start = perf_counter_ns()
 
             res = func(*args, **kwargs)
 
-            elapsed = perf_counter_ns() - start
+            elapsed = float(perf_counter_ns() - start)
 
             log_msg = f"{func.__name__}: "
 
             for unit in ["ns", "μs", "ms"]:
                 if elapsed < 1000:
                     log_msg += f"{elapsed:3.2f} {unit} elapsed"
-                    self.logger.debug(log_msg)
+                    self.log(log_msg, LogLevel.DEBUG)
                     return res
 
                 elapsed /= 1000
@@ -43,19 +46,19 @@ class timeit(BaseLogWrapper):
             for unit in ["s", "min"]:
                 if elapsed < 60:
                     log_msg += f"{elapsed:2.2f} {unit} elapsed"
-                    self.logger.debug(log_msg)
+                    self.log(log_msg, LogLevel.DEBUG)
                     return res
 
                 elapsed /= 60
 
             if elapsed < 24:
                 log_msg += f"{elapsed:2.2f} hours elapsed"
-                self.logger.debug(log_msg)
+                self.log(log_msg, LogLevel.DEBUG)
                 return res
 
             elapsed /= 24
             log_msg += f"{elapsed:.2f} days elapsed"
-            self.logger.debug(log_msg)
+            self.log(log_msg, LogLevel.DEBUG)
             return res
 
         # https://stackoverflow.com/a/17705456/15436169
