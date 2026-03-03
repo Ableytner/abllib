@@ -12,6 +12,10 @@ from abllib import error
 from abllib._storage import InternalStorage
 
 DEFAULT_LOG_LEVEL = logging.INFO
+CURRENT_LOG_LEVEL_CACHE = None
+
+# pylint: disable=global-statement
+# mypy: disable-error-code="return-value"
 
 class LogLevel(Enum):
     """An enum holding log levels"""
@@ -83,6 +87,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     assert isinstance(log_level, int) or log_level is None
 
     logging.disable()
+    global CURRENT_LOG_LEVEL_CACHE
 
     root_logger = get_logger()
 
@@ -99,10 +104,12 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if log_level is None:
         InternalStorage["_log.level"] = DEFAULT_LOG_LEVEL
         root_logger.setLevel(DEFAULT_LOG_LEVEL)
+        CURRENT_LOG_LEVEL_CACHE = DEFAULT_LOG_LEVEL
         return
 
     InternalStorage["_log.level"] = log_level
     root_logger.setLevel(log_level)
+    CURRENT_LOG_LEVEL_CACHE = log_level
 
 def add_console_handler() -> None:
     """
@@ -183,7 +190,18 @@ def get_loglevel() -> Literal[LogLevel.CRITICAL] \
                       | None:
     """Return the current LogLevel"""
 
-    return InternalStorage["_log.level"] if "_log.level" in InternalStorage else None
+    return LogLevel(InternalStorage["_log.level"]) if "_log.level" in InternalStorage else None
+
+def get_loglevel_fast() -> int | None:
+    """
+    Return the cached current LogLevel.
+
+    The returned value can be compared to log.LogLevel.SOME_LEVEL.value
+
+    This will be wrong if the log level was changed without calling log.initialize
+    """
+
+    return CURRENT_LOG_LEVEL_CACHE
 
 def _get_formatter() -> logging.Formatter:
     dt_fmt = r"%Y-%m-%d %H:%M:%S"

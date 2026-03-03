@@ -16,4 +16,14 @@
 # pylint: skip-file
 
 if __name__ == "__main__":
-    pass
+    from time import perf_counter_ns
+
+    from abllib import VolatileStorage, log
+
+    VolatileStorage.initialize()
+
+    start = perf_counter_ns()
+    for c in range(100000):
+        VolatileStorage[str(c)] = "test"
+    end = perf_counter_ns() - start
+    print(end)

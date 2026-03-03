@@ -412,6 +412,25 @@ In this case, the logged message is sent to all of them.
 [2025-04-08 23:09:31] [INFO    ] root: this is written to both files
 ```
 
+The current log level can be read as follows:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.get_loglevel()
+LogLevel.INFO
+>> log.get_loglevel().value
+20
+```
+
+If the current log level is requested frequently (e.g. for checking if some part of the code should run), it's recommended to instead use:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.get_loglevel_fast()
+20
+```
+Note, however, that this value will be out of sync if the current log level wasn't changed through `log.initialize()`.
+
 #### Parsing the log level from a string
 
 The libaries' LogLevel enum also contains a convenience function for parsing a log level.
