@@ -48,7 +48,7 @@ def test_comparison():
 def test_hashable():
     """Ensure that enum objects are hashable"""
 
-    class MyEnum(original_enum.Enum):
+    class MyEnum(enum.Enum):
         TRUE = 1
         FALSE = 0
 

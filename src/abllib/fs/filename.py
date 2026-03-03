@@ -4,6 +4,7 @@ from abllib.error import MissingRequiredModuleError, WrongTypeError
 from abllib.general import try_import_module
 from abllib.log import get_logger
 
+# optional module for japanese character transliterating
 pykakasi = try_import_module("pykakasi")
 
 logger = get_logger("sanitize")
