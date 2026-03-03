@@ -2,6 +2,8 @@
 
 import pathlib
 
+from abllib.error import WrongTypeError
+
 def absolute(*paths: str | pathlib.Path) -> str:
     """
     Return an absolute path, regardless of what is input.
@@ -13,7 +15,7 @@ def absolute(*paths: str | pathlib.Path) -> str:
         raise ValueError()
     for item in paths:
         if not isinstance(item, (str, pathlib.Path)):
-            raise TypeError()
+            raise WrongTypeError().with_values(item, (str, pathlib.Path))
 
     path = pathlib.Path(*paths)
 

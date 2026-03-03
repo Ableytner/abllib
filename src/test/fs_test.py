@@ -6,6 +6,7 @@ import pathlib
 import pytest
 
 from abllib import fs
+from abllib.error import WrongTypeError
 
 # pylint: disable=missing-class-docstring
 
@@ -21,11 +22,11 @@ def test_absolute():
            == os.path.join(_uppercase_path(os.getcwd()), "subdir", "another", "test.txt")
     assert fs.absolute("subdir", "..", "test.txt") == os.path.join(_uppercase_path(os.getcwd()), "test.txt")
 
-    with pytest.raises(TypeError):
+    with pytest.raises(WrongTypeError):
         fs.absolute(None)
-    with pytest.raises(TypeError):
+    with pytest.raises(WrongTypeError):
         fs.absolute(1)
-    with pytest.raises(TypeError):
+    with pytest.raises(WrongTypeError):
         fs.absolute("one", "two", 3)
     with pytest.raises(ValueError):
         fs.absolute()
