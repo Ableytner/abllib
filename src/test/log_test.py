@@ -6,6 +6,7 @@ import re
 import pytest
 
 from abllib import log
+from abllib._storage import InternalStorage
 from abllib.error import NameNotFoundError, WrongTypeError
 
 def test_initialize():
@@ -159,6 +160,48 @@ def test_get_logger_invalid():
     log.get_logger(None)
     log.get_logger("test")
     log.get_logger()
+
+def test_get_loglevel():
+    """Ensure that get_loglevel works as intended"""
+
+    log_levels = [
+        log.LogLevel.ALL,
+        log.LogLevel.DEBUG,
+        log.LogLevel.INFO,
+        log.LogLevel.WARNING,
+        log.LogLevel.ERROR,
+        log.LogLevel.CRITICAL
+    ]
+    for level in log_levels:
+        log.initialize(level)
+        assert isinstance(log.get_loglevel(), log.LogLevel)
+        assert log.get_loglevel() == level
+        assert log.get_loglevel().value == level.value
+
+    log.initialize(None)
+    assert log.get_loglevel() == log.DEFAULT_LOG_LEVEL
+
+    del InternalStorage["_log.level"]
+    assert log.get_loglevel() is None
+
+def test_get_loglevel_fast():
+    """Ensure that get_loglevel_fast works as intended"""
+
+    log_levels = [
+        log.LogLevel.ALL,
+        log.LogLevel.DEBUG,
+        log.LogLevel.INFO,
+        log.LogLevel.WARNING,
+        log.LogLevel.ERROR,
+        log.LogLevel.CRITICAL
+    ]
+    for level in log_levels:
+        log.initialize(level)
+        assert isinstance(log.get_loglevel_fast(), int)
+        assert log.get_loglevel_fast() == level.value
+
+    log.initialize(None)
+    assert log.get_loglevel_fast() == log.DEFAULT_LOG_LEVEL
 
 def test_loglevel_fromstr():
     """Ensure that LogLevel.from_str works correctly"""
