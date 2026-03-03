@@ -76,7 +76,7 @@ class _PersistentStorage(_ThreadsafeStorage):
         # TODO: type check list / dict content types
 
         if not isinstance(item, (bool, int, float, str, list, dict, tuple)) and item is not None:
-            raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
+            raise error.WrongTypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
 

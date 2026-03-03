@@ -163,7 +163,7 @@ def test_persistentstorage_valuetype():
     class CustomType():
         pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(error.WrongTypeError):
         PersistentStorage["key1"] = CustomType()
 
 def test_persistentstorage_load_file():

@@ -6,7 +6,7 @@ import re
 import pytest
 
 from abllib import log
-from abllib.error import NameNotFoundError
+from abllib.error import NameNotFoundError, WrongTypeError
 
 def test_initialize():
     """Ensure that log initialization works as expected"""
@@ -127,10 +127,38 @@ def test_deprecated_levels():
     assert hasattr(log.LogLevel, "CRITICAL")
     assert not hasattr(log.LogLevel, "FATAL")
 
-def test_initialize_invalidtypes():
+def test_initialize_invalid():
     """Ensure that initialize only accepts valid arguments"""
 
-    # to be added when abllib.type module is implemented
+    with pytest.raises(WrongTypeError):
+        log.initialize("hello")
+    with pytest.raises(WrongTypeError):
+        log.initialize([])
+    with pytest.raises(WrongTypeError):
+        log.initialize(float(10))
+
+    with pytest.raises(ValueError):
+        log.initialize(log.LogLevel.NOTSET)
+
+    log.initialize(log.LogLevel.ALL)
+    log.initialize(log.LogLevel.DEBUG)
+    log.initialize(log.LogLevel.INFO)
+    log.initialize(log.LogLevel.WARNING)
+    log.initialize(log.LogLevel.ERROR)
+    log.initialize(log.LogLevel.CRITICAL)
+    log.initialize()
+
+def test_get_logger_invalid():
+    """Ensure that get_logger only accepts valid arguments"""
+
+    with pytest.raises(WrongTypeError):
+        log.get_logger(1)
+    with pytest.raises(WrongTypeError):
+        log.get_logger([])
+
+    log.get_logger(None)
+    log.get_logger("test")
+    log.get_logger()
 
 def test_loglevel_fromstr():
     """Ensure that LogLevel.from_str works correctly"""

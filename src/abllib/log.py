@@ -71,6 +71,17 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     This function removes any previous logging setup, also overwriting the root logger formatter.
     """
 
+    if not isinstance(log_level, (int, LogLevel)) and log_level is not None:
+        raise error.WrongTypeError.with_values(log_level, int | LogLevel)
+
+    if log_level == LogLevel.NOTSET:
+        raise ValueError("LogLevel.NOTSET is not allowed.")
+
+    if isinstance(log_level, LogLevel):
+        log_level = log_level.value
+
+    assert isinstance(log_level, int) or log_level is None
+
     logging.disable()
 
     root_logger = get_logger()
@@ -89,17 +100,6 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
         InternalStorage["_log.level"] = DEFAULT_LOG_LEVEL
         root_logger.setLevel(DEFAULT_LOG_LEVEL)
         return
-
-    if not isinstance(log_level, (int, LogLevel)):
-        raise TypeError(f"Expected log_level to be of type {int | LogLevel}, but got {type(log_level)}")
-
-    if log_level == LogLevel.NOTSET:
-        raise ValueError("LogLevel.NOTSET is not allowed.")
-
-    if isinstance(log_level, LogLevel):
-        log_level = log_level.value
-
-    assert isinstance(log_level, int)
 
     InternalStorage["_log.level"] = log_level
     root_logger.setLevel(log_level)
@@ -170,7 +170,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
         return logging.getLogger()
 
     if not isinstance(name, str):
-        raise TypeError(f"Expected logger name to be of type {str}, but got {type(name)}")
+        raise error.WrongTypeError.with_values(name, str)
 
     return logging.getLogger(name)
 
