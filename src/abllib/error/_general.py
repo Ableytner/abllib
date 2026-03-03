@@ -59,6 +59,14 @@ class InvalidKeyError(CustomException):
         1: "The key '{0}' has an invalid format"
     }
 
+class InvalidTypeHintError(CustomException):
+    """Exception raised when a type hint has an incorrect format"""
+
+    default_messages = {
+        0: "The type hint is invalid",
+        1: "'{0}' is not a valid type hint"
+    }
+
 class KeyNotFoundError(CustomException):
     """Exception raised when the key is not found in the storage"""
 
@@ -179,7 +187,7 @@ class WrongTypeError(CustomException):
         3: "Expected {1} or {2}, not {0}",
         4: "Expected {1}, {2} or {3}, not {0}",
         5: "Expected {1}, {2}, {3} or {4}, not {0}",
-        6: "Expected {1}, {2}, {3}, {4} or {5}, not {0}",
+        6: "Expected {1}, {2}, {3}, {4} or {5}, not {0}"
     }
 
     @classmethod
@@ -197,3 +205,16 @@ class WrongTypeError(CustomException):
                 expected[c] = type(item)
 
         return super().with_values(received, *expected)
+
+class WrongValueError(CustomException):
+    """Exception raised when a value wasn't of an expected type"""
+
+    default_messages = {
+        0: "Received an unexpected value",
+        1: "Received unexpected value {0}",
+        2: "Expected {1}, not {0}",
+        3: "Expected {1} or {2}, not {0}",
+        4: "Expected {1}, {2} or {3}, not {0}",
+        5: "Expected {1}, {2}, {3} or {4}, not {0}",
+        6: "Expected {1}, {2}, {3}, {4} or {5}, not {0}"
+    }
