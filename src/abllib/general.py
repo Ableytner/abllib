@@ -23,7 +23,6 @@ def try_import_module(module_name: str, error_msg: str | None = None, enforce: b
     module = None
 
     try:
-        # optional module for japanese character transliterating
         module = importlib.import_module(module_name)
         sys.modules[module_name] = module
     except ImportError:

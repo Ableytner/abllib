@@ -5,11 +5,11 @@ from __future__ import annotations
 import atexit
 import logging
 import sys
-from enum import Enum
 from typing import Literal
 
 from abllib import error
 from abllib._storage import InternalStorage
+from abllib.enum import Enum
 
 DEFAULT_LOG_LEVEL = logging.INFO
 CURRENT_LOG_LEVEL_CACHE = None
@@ -47,17 +47,6 @@ class LogLevel(Enum):
                 return LogLevel.CRITICAL
             case _:
                 raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
-
-    def __eq__(self, other: object) -> bool:
-        return self is other or self.value == other
-
-    def __ne__(self, other: object) -> bool:
-        return self is not other and self.value != other
-
-    # for more details look here:
-    # https://stackoverflow.com/a/72664895/15436169
-    def __hash__(self) -> int:
-        return hash(self.value)
 
 def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.ERROR]
