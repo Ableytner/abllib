@@ -21,6 +21,10 @@ def test_absolute():
     assert fs.absolute("subdir", pathlib.Path("another"), "test.txt") \
            == os.path.join(_uppercase_path(os.getcwd()), "subdir", "another", "test.txt")
     assert fs.absolute("subdir", "..", "test.txt") == os.path.join(_uppercase_path(os.getcwd()), "test.txt")
+    assert fs.absolute("~/", "test.txt") == os.path.join(pathlib.Path.home(), "test.txt")
+    assert fs.absolute("~", "test.txt") == os.path.join(pathlib.Path.home(), "test.txt")
+    # pylint: disable-next=line-too-long
+    assert fs.absolute("~/subdir/another/test.txt") == os.path.join(pathlib.Path.home(), "subdir", "another", "test.txt")
 
     with pytest.raises(WrongTypeError):
         fs.absolute(None)

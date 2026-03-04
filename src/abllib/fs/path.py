@@ -11,15 +11,20 @@ def absolute(*paths: str | pathlib.Path) -> str:
     Additionally, the path is resolved, removing any symlinks on the way.
     """
 
-    if len(paths) == 0:
+    paths_list = list(paths)
+
+    if len(paths_list) == 0:
         raise ValueError()
-    for item in paths:
+    for item in paths_list:
         if not isinstance(item, (str, pathlib.Path)):
             raise WrongTypeError().with_values(item, (str, pathlib.Path))
 
-    path = pathlib.Path(*paths)
+    if isinstance(paths_list[0], str):
+        if paths_list[0] == "~":
+            paths_list[0] = pathlib.Path.home()
+        elif paths_list[0].startswith("~/"):
+            paths_list[0] = paths_list[0].replace("~", str(pathlib.Path.home()), count=1)
 
-    if path.is_absolute():
-        return str(path.resolve())
+    path = pathlib.Path(*paths_list)
 
     return str(path.absolute().resolve())
