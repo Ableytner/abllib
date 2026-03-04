@@ -23,7 +23,7 @@ def absolute(*paths: str | pathlib.Path) -> str:
         if paths_list[0] == "~":
             paths_list[0] = pathlib.Path.home()
         elif paths_list[0].startswith("~/"):
-            paths_list[0] = paths_list[0].replace("~", str(pathlib.Path.home()), count=1)
+            paths_list[0] = paths_list[0].replace("~", str(pathlib.Path.home()), 1)
 
     path = pathlib.Path(*paths_list)
 
