@@ -28,7 +28,8 @@ disable=too-many-arguments,
         too-many-positional-arguments,
         logging-fstring-interpolation,
         too-many-branches,
-        too-many-locals
+        too-many-locals,
+        useless-import-alias
 
 [FORMAT]
 
