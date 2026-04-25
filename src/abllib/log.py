@@ -5,13 +5,17 @@ from __future__ import annotations
 import atexit
 import logging
 import sys
-from enum import Enum
 from typing import Literal
 
 from abllib import error
 from abllib._storage import InternalStorage
+from abllib.enum import Enum
 
 DEFAULT_LOG_LEVEL = logging.INFO
+CURRENT_LOG_LEVEL_CACHE = None
+
+# pylint: disable=global-statement
+# mypy: disable-error-code="return-value"
 
 class LogLevel(Enum):
     """An enum holding log levels"""
@@ -44,17 +48,6 @@ class LogLevel(Enum):
             case _:
                 raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
 
-    def __eq__(self, other):
-        return self is other or self.value == other
-
-    def __ne__(self, other):
-        return self is not other and self.value != other
-
-    # for more details look here:
-    # https://stackoverflow.com/a/72664895/15436169
-    def __hash__(self):
-        return hash(self.value)
-
 def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.ERROR]
                           | Literal[LogLevel.WARNING]
@@ -62,7 +55,7 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
                           | Literal[LogLevel.DEBUG]
                           | Literal[LogLevel.ALL]
                           | int
-                          | None = None):
+                          | None = None) -> None:
     """
     Initialize the custom logging module.
 
@@ -71,7 +64,19 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     This function removes any previous logging setup, also overwriting the root logger formatter.
     """
 
+    if not isinstance(log_level, (int, LogLevel)) and log_level is not None:
+        raise error.WrongTypeError.with_values(log_level, int | LogLevel)
+
+    if log_level == LogLevel.NOTSET:
+        raise ValueError("LogLevel.NOTSET is not allowed.")
+
+    if isinstance(log_level, LogLevel):
+        log_level = log_level.value
+
+    assert isinstance(log_level, int) or log_level is None
+
     logging.disable()
+    global CURRENT_LOG_LEVEL_CACHE
 
     root_logger = get_logger()
 
@@ -88,21 +93,12 @@ def initialize(log_level: Literal[LogLevel.CRITICAL]
     if log_level is None:
         InternalStorage["_log.level"] = DEFAULT_LOG_LEVEL
         root_logger.setLevel(DEFAULT_LOG_LEVEL)
+        CURRENT_LOG_LEVEL_CACHE = DEFAULT_LOG_LEVEL
         return
-
-    if not isinstance(log_level, (int, LogLevel)):
-        raise TypeError(f"Expected log_level to be of type {int | LogLevel}, but got {type(log_level)}")
-
-    if log_level == LogLevel.NOTSET:
-        raise ValueError("LogLevel.NOTSET is not allowed.")
-
-    if isinstance(log_level, LogLevel):
-        log_level = log_level.value
-
-    assert isinstance(log_level, int)
 
     InternalStorage["_log.level"] = log_level
     root_logger.setLevel(log_level)
+    CURRENT_LOG_LEVEL_CACHE = log_level
 
 def add_console_handler() -> None:
     """
@@ -170,7 +166,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
         return logging.getLogger()
 
     if not isinstance(name, str):
-        raise TypeError(f"Expected logger name to be of type {str}, but got {type(name)}")
+        raise error.WrongTypeError.with_values(name, str)
 
     return logging.getLogger(name)
 
@@ -183,9 +179,20 @@ def get_loglevel() -> Literal[LogLevel.CRITICAL] \
                       | None:
     """Return the current LogLevel"""
 
-    return InternalStorage["_log.level"] if "_log.level" in InternalStorage else None
+    return LogLevel(InternalStorage["_log.level"]) if "_log.level" in InternalStorage else None
 
-def _get_formatter():
+def get_loglevel_fast() -> int | None:
+    """
+    Return the cached current LogLevel.
+
+    The returned value can be compared to log.LogLevel.SOME_LEVEL.value
+
+    This will be wrong if the log level was changed without calling log.initialize
+    """
+
+    return CURRENT_LOG_LEVEL_CACHE
+
+def _get_formatter() -> logging.Formatter:
     dt_fmt = r"%Y-%m-%d %H:%M:%S"
     formatter = logging.Formatter("[{asctime}] [{levelname:<8}] {name}: {message}", dt_fmt, style="{")
     return formatter

@@ -92,7 +92,7 @@ class MissingInheritanceError(CustomException):
     }
 
     @classmethod
-    def with_values(cls, class_name: Any | type, base_class_name: Any | type):
+    def with_values(cls, class_name: Any | type, base_class_name: Any | type) -> CustomException:
         if not isinstance(class_name, type):
             class_name = type(class_name)
         if not isinstance(base_class_name, type):
@@ -155,7 +155,7 @@ class SingletonInstantiationError(CustomException):
     }
 
     @classmethod
-    def with_values(cls, class_name: Any | type):
+    def with_values(cls, class_name: Any | type) -> CustomException:
         if not isinstance(class_name, type):
             class_name = type(class_name)
 
@@ -183,7 +183,7 @@ class WrongTypeError(CustomException):
     }
 
     @classmethod
-    def with_values(cls, received: Any | type, expected: Any | type | tuple[Any | type]):
+    def with_values(cls, received: Any | type, expected: Any | type | tuple[Any | type]) -> CustomException:
         if not isinstance(received, type):
             received = type(received)
 

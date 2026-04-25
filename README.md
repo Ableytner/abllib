@@ -12,15 +12,16 @@ It is structured into small submodules, which are all optional and not dependent
 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
-2. Errors (`abllib.error`)
-3. File system operations (`abllib.fs`)
-4. Fuzzy matching (`abllib.fuzzy`)
-5. General (`abllib.general`)
-6. Logging (`abllib.log`)
-7. Cleanup on exit (`abllib.onexit`)
-8. Parallel processing (`abllib.pproc`)
-9. Storages (`abllib.storage`)
-10. Function wrappers (`abllib.wrapper`)
+2. Enum (`abllib.enum`)
+3. Errors (`abllib.error`)
+4. File system operations (`abllib.fs`)
+5. Fuzzy matching (`abllib.fuzzy`)
+6. General (`abllib.general`)
+7. Logging (`abllib.log`)
+8. Cleanup on exit (`abllib.onexit`)
+9. Parallel processing (`abllib.pproc`)
+10. Storages (`abllib.storage`)
+11. Function wrappers (`abllib.wrapper`)
 
 ## Installation
 
@@ -34,9 +35,9 @@ This will automatically install all other dependencies.
 
 Alternatively, a specific version can be installed as follows:
 ```bash
-pip install abllib==1.3.6
+pip install abllib==1.4.3
 ```
-where 1.3.6 is the version you want to install.
+where 1.4.3 is the version you want to install.
 
 ### Github
 
@@ -51,9 +52,9 @@ Additionally, a [wheel](https://peps.python.org/pep-0427/) is added to every [st
 
 If you want to include this library as a dependency in your requirements.txt, the syntax is as follows:
 ```text
-abllib==1.3.6
+abllib==1.4.3
 ```
-where 1.3.6 is the version that you want to install.
+where 1.4.3 is the version that you want to install.
 
 To always use the latest stable version:
 ```text
@@ -99,7 +100,51 @@ Example usage:
 If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
 This provides a 10x speedup, but requires an extra package.
 
-### 2. Errors (`abllib.error`)
+### 2. Enum (`abllib.enum`)
+
+This module contains `abllib.enum.Enum`, an extended implementation of the builtin `enum.Enum`.
+
+#### CustomException (`abllib.enum.Enum`)
+
+An extended implementation of the Python-builtin `enum.Enum`, which supports more comparison operations and provides convenience functions.
+
+Enums are still defined exactly the same when using this class
+```py
+>> from abllib.enum import Enum
+>> class Animal(Enum):
+..     DOG = 0
+..     CAT = 1
+..     BIRD = 2
+```
+
+A major difference is that enums can now be correctly compared with its value.
+```py
+>> Animal.DOG == 0
+True
+>> 2 == Animal.BIRD
+True
+```
+
+Enums are now also hashable, which allows them to be used better when checking list contents:
+```py
+>> 0 in [Animal.CAT, Animal.BIRD]
+False
+>> 1 in [Animal.CAT, Animal.BIRD]
+TRUE
+>> Animal.BIRD in [0, 2]
+TRUE
+```
+
+Two convenience methods, `from_name` and `from_value`, have also been added:
+```py
+>> MyEnum.from_name("BIRD") is MyEnum.BIRD
+True
+>> MyEnum.from_value(1) is myEnum.CAT
+TRUE
+```
+Note however that `from_name` is **case-sensitive**!
+
+### 3. Errors (`abllib.error`)
 
 This module contains a custom exception system, which supports default messages for different errors.
 
@@ -153,7 +198,7 @@ This module also contains some premade general-purpose error classes, which all 
 * UninitializedFieldError
 * WrongTypeError
 
-### 3. File system (`abllib.fs`)
+### 4. File system (`abllib.fs`)
 
 This module contains various file system-related functionality. All provided functions are tested and work correctly on Linux and Windows systems.
 
@@ -201,7 +246,7 @@ Currently supported language-specific text transliterations:
 
 Special characters from unsupported languages and any other non-ascii will be removed from the resulting text.
 
-### 4. Fuzzy matching (`abllib.fuzzy`)
+### 5. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
@@ -315,7 +360,7 @@ Example usage:
 1.0
 ```
 
-### 5. General (`abllib.general`)
+### 6. General (`abllib.general`)
 
 This module contains different general-purpose functions that don't warrant an own module.
 
@@ -355,7 +400,7 @@ Traceback (most recent call last):
 abllib.error._general.MissingRequiredModuleError: "The error message"
 ```
 
-### 6. Logging (`abllib.log`)
+### 7. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
@@ -412,6 +457,25 @@ In this case, the logged message is sent to all of them.
 [2025-04-08 23:09:31] [INFO    ] root: this is written to both files
 ```
 
+The current log level can be read as follows:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.get_loglevel()
+LogLevel.INFO
+>> log.get_loglevel().value
+20
+```
+
+If the current log level is requested frequently (e.g. for checking if some part of the code should run), it's recommended to instead use:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.get_loglevel_fast()
+20
+```
+Note, however, that this value will be out of sync if the current log level wasn't changed through `log.initialize()`.
+
 #### Parsing the log level from a string
 
 The libaries' LogLevel enum also contains a convenience function for parsing a log level.
@@ -450,7 +514,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 7. Cleanup on exit (`abllib.onexit`)
+### 8. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 
@@ -488,7 +552,7 @@ Already registered callbacks can also be deregistered:
 >> exit()
 ```
 
-### 8. Parallel processing (`abllib.pproc`)
+### 9. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functionality, both thread-based and process-based.
 
@@ -596,7 +660,7 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 9. Storages (`abllib.storage`)
+### 10. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
 All data stored in these storages is accessible from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
@@ -944,7 +1008,7 @@ True
 True
 ```
 
-### 10. Function wrappers (`abllib.wrapper`)
+### 11. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 
@@ -1139,9 +1203,10 @@ RuntimeError: my message
 ```
 
 Instead of logging, a custom handler function can be provided, which will be passed the error message.
+The custom handler function is expected to take one string argument.
 ```py
 >> from abllib.wrapper import log_error
->> @log_error(handler=lambda exc: print(exc))
+>> @log_error(handler=lambda exc_str: print(exc_str))
 .. def my_func(arg):
 ..   raise RuntimeError("my message")
 >> try:
@@ -1192,6 +1257,18 @@ A custom logger can also be specified by either passing the name or logging.Logg
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: func: my_func
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: in  : 111
 [2025-07-29 11:58:54] [ERROR   ] CustomLogger: out : False
+```
+
+Instead of logging, a custom handler function can be provided, which will be passed the function name / in / out messages.
+The custom handler function is expected to take one string argument.
+```py
+>> @log_io(handler=lambda exc_str: print(exc_str))
+.. def my_func(arg):
+..   return False
+>> _ = my_func(111)
+func: my_func
+in  : 111
+out : False
 ```
 
 #### Log function execution time (`abllib.wrapper.timeit`)

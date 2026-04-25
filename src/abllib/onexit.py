@@ -4,23 +4,26 @@ import atexit
 import functools
 import signal
 import threading
-from typing import Callable
+from types import FrameType
+from typing import Any, Callable
 
 from abllib import error, log
 from abllib._storage import InternalStorage
 
 logger = log.get_logger("onexit")
 
-def _ensure_is_main_thread(func):
+def _ensure_is_main_thread(func: Callable) -> Callable:
     """Ensure that function is only callable from main thread"""
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         if threading.current_thread() is not threading.main_thread():
             logger.warning("Tried to use onexit module from non-main thread")
             return None
 
         return func(*args, **kwargs)
+
+    # https://stackoverflow.com/a/17705456/15436169
+    functools.update_wrapper(wrapper, func)
 
     return wrapper
 
@@ -150,7 +153,7 @@ def reset() -> None:
         for name in list(InternalStorage["_onexit.signal"].keys()):
             deregister_sigterm(name)
 
-def _atexit_func():
+def _atexit_func() -> None:
     if "_onexit.atexit" not in InternalStorage:
         return
 
@@ -162,7 +165,7 @@ def _atexit_func():
             logger.exception(e)
 
 # pylint: disable-next=unused-argument
-def _signal_func(signum, frame):
+def _signal_func(signum: int, frame: FrameType | None) -> Any:
     if "_onexit.signal" not in InternalStorage:
         return
 
@@ -173,7 +176,7 @@ def _signal_func(signum, frame):
         except Exception as e:
             logger.exception(e)
 
-def _ensure_signal_handler():
+def _ensure_signal_handler() -> None:
     if "_onexit.signal" not in InternalStorage:
         if signal.getsignal(signal.SIGTERM) is not InternalStorage["_onexit.orig.signal"]:
             raise RuntimeError("signal handler was overwritten, "

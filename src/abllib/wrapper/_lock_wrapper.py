@@ -5,6 +5,8 @@ from __future__ import annotations
 import functools
 import traceback
 from time import sleep
+from types import TracebackType
+from typing import Any, Callable
 
 from abllib import error, log
 from abllib._storage import InternalStorage
@@ -56,7 +58,7 @@ class NamedLock():
     def acquire(self) -> None:
         """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
 
-        _log_callstack(f"NamedLock '{self.name}' was acquired here:")
+        _log_callstack("NamedLock '%s' was acquired here:", self.name)
 
         if self._timeout is None:
             # ensure the corresponding semaphore is not held
@@ -97,7 +99,7 @@ class NamedLock():
     def release(self) -> None:
         """Release the lock"""
 
-        _log_callstack(f"NamedLock '{self.name}' was released here:")
+        _log_callstack("NamedLock '%s' was released here:", self.name)
 
         self._lock.release()
 
@@ -106,16 +108,19 @@ class NamedLock():
 
         return self._lock.locked()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Callable:
         """Called when instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             with self:
@@ -181,7 +186,7 @@ class NamedSemaphore():
     def acquire(self) -> None:
         """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
 
-        _log_callstack(f"NamedSemaphore '{self.name}' was acquired here:")
+        _log_callstack("NamedSemaphore '%s' was acquired here:", self.name)
 
         if self._timeout is None:
             while self._semaphore.blocked():
@@ -220,7 +225,7 @@ class NamedSemaphore():
     def release(self) -> None:
         """Release the lock"""
 
-        _log_callstack(f"NamedSemaphore '{self.name}' was released here:")
+        _log_callstack("NamedSemaphore '%s' was released here:", self.name)
 
         self._semaphore.release()
 
@@ -239,16 +244,19 @@ class NamedSemaphore():
 
         self._semaphore.unblock()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Callable:
         """Called when instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             with self:
@@ -271,10 +279,10 @@ class NamedSemaphore():
 
         return None
 
-def _log_callstack(message: str):
+def _log_callstack(message: str, arg: Any) -> None:
     """Log the current callstack"""
 
-    if log.get_loglevel() != log.LogLevel.ALL:
+    if log.get_loglevel_fast() != 1: # log.LogLevel.ALL.value
         return
 
     traces = traceback.format_list(traceback.extract_stack())
@@ -287,7 +295,7 @@ def _log_callstack(message: str):
                 ignore = True
 
         if not ignore:
-            logger.debug(message + "\n" + line.strip())
+            logger.debug(message.format(arg) + "\n" + line.strip())
             return
 
 @deprecated

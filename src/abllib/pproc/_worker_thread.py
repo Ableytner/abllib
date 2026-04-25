@@ -1,19 +1,19 @@
 """A module containing the WorkerThread class"""
 
 from threading import Thread
-from typing import Any, Callable
+from typing import Any, Callable, Iterable, Mapping
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
     """Wrapper around `threading.Thread` that stores and returns resulting values and exceptions on join."""
 
     def __init__(self,
-                 group=None,
-                 target=None,
-                 name=None,
-                 args=(),
-                 kwargs=None,
-                 daemon=None):
+                 group: None=None,
+                 target: Callable | None=None,
+                 name: str | None=None,
+                 args: Iterable[Any]=(),
+                 kwargs: Mapping[str, Any] | None=None,
+                 daemon: bool | None=None) -> None:
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
 
         self._return = None

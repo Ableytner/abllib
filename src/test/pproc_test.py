@@ -173,6 +173,13 @@ def test_workerprocess_exception_reraise():
     else:
         pytest.fail("no exception raised")
 
+def test_workerprocess_empty_target():
+    """Ensure that WorkerProcess doesn_t crash if target is empty"""
+
+    t = pproc.WorkerProcess()
+    t.start()
+    assert t.join(reraise=True) is None
+
 def test_lock():
     """Ensure that Lock is imported correctly"""
 

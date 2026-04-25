@@ -1,5 +1,7 @@
 """Module containing the CustomException class"""
 
+from __future__ import annotations
+
 from typing import Any
 
 class CustomException(Exception):
@@ -10,7 +12,7 @@ class CustomException(Exception):
     Otherwise, the provided argument is used as the error message.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         if self.__class__ == CustomException:
             raise NotImplementedError()
 
@@ -28,7 +30,7 @@ class CustomException(Exception):
     default_messages: dict[int, str]
 
     @classmethod
-    def with_values(cls, *args: Any):
+    def with_values(cls, *args: Any) -> CustomException:
         """Instantiate the given exception with the given args"""
 
         if cls == CustomException:
@@ -42,7 +44,7 @@ class CustomException(Exception):
         message = message.format(*args)
         return cls(message)
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls) -> None:
         if 0 not in cls.default_messages:
             # needs to be imported here to prevent circular import
             # pylint: disable-next=cyclic-import, import-outside-toplevel

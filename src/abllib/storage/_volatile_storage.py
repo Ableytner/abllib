@@ -13,7 +13,7 @@ class _VolatileStorage(_ThreadsafeStorage):
 
         _VolatileStorage._instance = self
 
-    def initialize(self):
+    def initialize(self) -> None:
         """
         Initialize only the VolatileStorage.
 
@@ -32,7 +32,7 @@ class _VolatileStorage(_ThreadsafeStorage):
 
     _STORAGE_NAME = "VolatileStorage"
 
-    def _ensure_initialized(self):
+    def _ensure_initialized(self) -> None:
         try:
             super()._ensure_initialized()
         except error.NotInitializedError as exc:

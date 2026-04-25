@@ -1,8 +1,10 @@
 """Module containing the deprecated wrapper"""
 
+from __future__ import annotations
+
 import functools
 import traceback
-from typing import Callable
+from typing import Any, Callable
 
 from abllib import log
 from abllib.error import DeprecatedError
@@ -18,14 +20,16 @@ class deprecated():
     If the optional arg raise_exec is set, raises a deprecation error instead.
     """
 
-    def __new__(cls, message: str | None | Callable = None, raise_exec: bool = False):
+    def __new__(cls, # type: ignore[misc]
+                message: str | None | Callable = None,
+                raise_exec: bool = False) -> _Deprecated | Callable:
         if not raise_exec:
             return deprecated.warning(message)
 
         return deprecated.error(message)
 
     @staticmethod
-    def warning(message: str | None | Callable = None):
+    def warning(message: str | None | Callable = None) -> _Deprecated | Callable:
         """
         Mark a function or class as deprecated.
 
@@ -40,7 +44,7 @@ class deprecated():
         return _Deprecated(None, False)(message)
 
     @staticmethod
-    def error(message: str | None | Callable = None):
+    def error(message: str | None | Callable = None) -> _Deprecated | Callable:
         """
         Mark a function or class as deprecated.
 
@@ -55,17 +59,17 @@ class deprecated():
         return _Deprecated(None, True)(message)
 
 class _Deprecated():
-    def __init__(self, message: str | None, raise_exec: bool):
+    def __init__(self, message: str | None, raise_exec: bool) -> None:
         self._message = message
         self._raise_exec = raise_exec
 
     _message: str | None
     _raise_exec: bool
 
-    def __call__(self, func: Callable):
+    def __call__(self, func: Callable) -> Callable:
         """Called when the class instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             # the default message is used

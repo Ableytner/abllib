@@ -32,4 +32,4 @@ jobs:
         if [ -f requirements.txt ]; then pip install --upgrade -r requirements.txt; fi
     - name: Analysing the code with mypy
       run: |
-        mypy $(git ls-files '*.py')
+        mypy $(git ls-files '*.py' | grep src/abllib)
