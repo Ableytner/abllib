@@ -2,7 +2,7 @@
 
 from multiprocessing import Process, Queue
 from time import sleep
-from typing import Any
+from typing import Any, Callable, Iterable, Mapping
 
 import dill
 
@@ -16,19 +16,26 @@ class WorkerProcess(Process):
     """Wrapper around `multiprocessing.Process` that stores and returns resulting values and exceptions."""
 
     def __init__(self,
-                 group=None,
-                 target=None,
-                 name=None,
-                 args=(),
-                 kwargs={},
-                 daemon=None):
+                 group: None=None,
+                 target: Callable | None=None,
+                 name: str | None=None,
+                 args: Iterable[Any]=(),
+                 kwargs: Mapping[str, Any]={},
+                 daemon: bool | None=None) -> None:
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
 
         # use dill instead of pickle
         # https://stackoverflow.com/a/72776044/15436169
-        self._target = dill.dumps(self._target)
+        if self._target is not None:
+            self._target = dill.dumps(self._target)
         self._return_queue = Queue(maxsize=1)
         self._failed_queue = Queue(maxsize=1)
+
+    _target: bytes | None
+    _return_queue: Queue
+    _failed_queue: Queue
+    _args: tuple
+    _kwargs: dict
 
     def run(self) -> None:
         """Invoke the callable object."""
@@ -46,7 +53,7 @@ class WorkerProcess(Process):
         else:
             self._return_queue.put(None)
 
-    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException:
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException: # type: ignore[override]
         """Wait until the child process terminates."""
 
         super().join(timeout)

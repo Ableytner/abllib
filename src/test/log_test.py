@@ -3,7 +3,11 @@
 import os
 import re
 
+import pytest
+
 from abllib import log
+from abllib._storage import InternalStorage
+from abllib.error import NameNotFoundError, WrongTypeError
 
 def test_initialize():
     """Ensure that log initialization works as expected"""
@@ -124,7 +128,149 @@ def test_deprecated_levels():
     assert hasattr(log.LogLevel, "CRITICAL")
     assert not hasattr(log.LogLevel, "FATAL")
 
-def test_initialize_invalidtypes():
+def test_initialize_invalid():
     """Ensure that initialize only accepts valid arguments"""
 
-    # to be added when abllib.type module is implemented
+    with pytest.raises(WrongTypeError):
+        log.initialize("hello")
+    with pytest.raises(WrongTypeError):
+        log.initialize([])
+    with pytest.raises(WrongTypeError):
+        log.initialize(float(10))
+
+    with pytest.raises(ValueError):
+        log.initialize(log.LogLevel.NOTSET)
+
+    log.initialize(log.LogLevel.ALL)
+    log.initialize(log.LogLevel.DEBUG)
+    log.initialize(log.LogLevel.INFO)
+    log.initialize(log.LogLevel.WARNING)
+    log.initialize(log.LogLevel.ERROR)
+    log.initialize(log.LogLevel.CRITICAL)
+    log.initialize()
+
+def test_get_logger_invalid():
+    """Ensure that get_logger only accepts valid arguments"""
+
+    with pytest.raises(WrongTypeError):
+        log.get_logger(1)
+    with pytest.raises(WrongTypeError):
+        log.get_logger([])
+
+    log.get_logger(None)
+    log.get_logger("test")
+    log.get_logger()
+
+def test_get_loglevel():
+    """Ensure that get_loglevel works as intended"""
+
+    log_levels = [
+        log.LogLevel.ALL,
+        log.LogLevel.DEBUG,
+        log.LogLevel.INFO,
+        log.LogLevel.WARNING,
+        log.LogLevel.ERROR,
+        log.LogLevel.CRITICAL
+    ]
+    for level in log_levels:
+        log.initialize(level)
+        assert isinstance(log.get_loglevel(), log.LogLevel)
+        assert log.get_loglevel() == level
+        assert log.get_loglevel().value == level.value
+
+    log.initialize(None)
+    assert log.get_loglevel() == log.DEFAULT_LOG_LEVEL
+
+    del InternalStorage["_log.level"]
+    assert log.get_loglevel() is None
+
+def test_get_loglevel_fast():
+    """Ensure that get_loglevel_fast works as intended"""
+
+    log_levels = [
+        log.LogLevel.ALL,
+        log.LogLevel.DEBUG,
+        log.LogLevel.INFO,
+        log.LogLevel.WARNING,
+        log.LogLevel.ERROR,
+        log.LogLevel.CRITICAL
+    ]
+    for level in log_levels:
+        log.initialize(level)
+        assert isinstance(log.get_loglevel_fast(), int)
+        assert log.get_loglevel_fast() == level.value
+
+    log.initialize(None)
+    assert log.get_loglevel_fast() == log.DEFAULT_LOG_LEVEL
+
+def test_loglevel_fromstr():
+    """Ensure that LogLevel.from_str works correctly"""
+
+    assert callable(log.LogLevel.from_str)
+    assert log.LogLevel.from_str("CRITICAL") is log.LogLevel.CRITICAL
+    assert log.LogLevel.from_str("ERROR") is log.LogLevel.ERROR
+    assert log.LogLevel.from_str("WARNING") is log.LogLevel.WARNING
+    assert log.LogLevel.from_str("INFO") is log.LogLevel.INFO
+    assert log.LogLevel.from_str("DEBUG") is log.LogLevel.DEBUG
+    assert log.LogLevel.from_str("ALL") is log.LogLevel.ALL
+
+    with pytest.raises(NameNotFoundError):
+        log.LogLevel.from_str("INVALID")
+
+def test_loglevel_fromstr_mixedcase():
+    """Ensure that LogLevel.from_str ignores text case"""
+
+    assert callable(log.LogLevel.from_str)
+    assert log.LogLevel.from_str("crITiCaL") is log.LogLevel.CRITICAL
+    assert log.LogLevel.from_str("error") is log.LogLevel.ERROR
+    assert log.LogLevel.from_str("Warning") is log.LogLevel.WARNING
+    assert log.LogLevel.from_str("iNFO") is log.LogLevel.INFO
+    assert log.LogLevel.from_str("deBuG") is log.LogLevel.DEBUG
+    assert log.LogLevel.from_str("alL") is log.LogLevel.ALL
+
+def test_file_handler_filemodes():
+    """Ensure that file handler works with different file modes"""
+
+    # cleanup if file is left from previous run
+    if os.path.isfile("test.log"):
+        os.remove("test.log")
+
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log")
+    logger = log.get_logger()
+
+    logger.debug("the debug message")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 1
+        assert re.match(r"\[.*\] \[DEBUG   \] root: the debug message", content[0])
+
+    # initialize to overwrite logfile
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log", filemode="w")
+    logger = log.get_logger()
+
+    logger.critical("this is critical")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 1
+        assert re.match(r"\[.*\] \[CRITICAL\] root: this is critical", content[0])
+
+    # initialize to append to logfile
+    log.initialize(log.LogLevel.DEBUG)
+    log.add_file_handler("test.log", filemode="a")
+    logger = log.get_logger()
+
+    logger.debug("the debug message")
+
+    with open("test.log", "r", encoding="utf8") as f:
+        content = f.readlines()
+        assert len(content) == 2
+        assert re.match(r"\[.*\] \[CRITICAL\] root: this is critical", content[0])
+        assert re.match(r"\[.*\] \[DEBUG   \] root: the debug message", content[1])
+
+    # cleanup and remove the file handler
+    log.initialize()
+    os.remove("test.log")

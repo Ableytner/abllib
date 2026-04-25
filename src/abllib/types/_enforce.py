@@ -46,7 +46,8 @@ def enforce(value_or_func: Any | Callable[P, T], target_type_or_None: Any | None
     if inspect.isfunction(value_or_func) and target_type_or_None is None:
         return enforce_args(value_or_func)
 
-    return enforce_var(value_or_func, target_type_or_None)
+    enforce_var(value_or_func, target_type_or_None)
+    return None
 
 def enforce_args(func: Callable[P, T]) -> Callable[Concatenate[str, P], T]:
     """

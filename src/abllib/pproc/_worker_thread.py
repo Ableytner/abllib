@@ -1,22 +1,27 @@
 """A module containing the WorkerThread class"""
 
 from threading import Thread
-from typing import Any
+from typing import Any, Callable, Iterable, Mapping
 
 # original code from https://stackoverflow.com/a/6894023
 class WorkerThread(Thread):
     """Wrapper around `threading.Thread` that stores and returns resulting values and exceptions on join."""
 
     def __init__(self,
-                 group=None,
-                 target=None,
-                 name=None,
-                 args=(),
-                 kwargs=None,
-                 daemon=None):
+                 group: None=None,
+                 target: Callable | None=None,
+                 name: str | None=None,
+                 args: Iterable[Any]=(),
+                 kwargs: Mapping[str, Any] | None=None,
+                 daemon: bool | None=None) -> None:
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
 
         self._return = None
+
+    _target: Callable | None
+    _return: Any | None
+    _args: Any
+    _kwargs: Any
 
     def run(self) -> None:
         """Invoke the callable object."""
@@ -28,7 +33,7 @@ class WorkerThread(Thread):
             except BaseException as e:
                 self._return = e
 
-    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException:
+    def join(self, timeout: float | None = None, reraise: bool = False) -> Any | BaseException: # type:ignore[override]
         """Wait until the thread terminates and return any stored values."""
 
         super().join(timeout)

@@ -2,8 +2,7 @@
 
 import os
 import re
-from datetime import datetime
-from time import sleep
+from time import monotonic, sleep
 
 import pytest
 
@@ -28,6 +27,39 @@ def test_lock():
 
     lock.release()
     assert not lock.locked()
+
+    with lock:
+        assert lock.locked()
+    assert not lock.locked()
+
+    # releasing an unlocked lock should do nothing
+    lock.release()
+
+def test_lock_timeout():
+    """Ensure that Lock timeouts are within expected boundaries"""
+
+    lock = wrapper.Lock()
+
+    lock.acquire(blocking=True, timeout=1)
+
+    start_time = monotonic()
+    assert not lock.acquire(blocking=True, timeout=0.1)
+
+    duration = monotonic() - start_time
+    assert duration > 0.05
+    assert duration < 0.15
+
+def test_lock_nested():
+    """Ensure that Locks can be nested"""
+
+    lock1 = wrapper.Lock()
+    lock2 = wrapper.Lock()
+
+    assert lock1.acquire(timeout=1)
+    assert lock2.acquire(timeout=1)
+
+    lock1.release()
+    lock2.release()
 
 def test_semaphore():
     """Ensure that Semaphore works as expected"""
@@ -55,6 +87,64 @@ def test_semaphore():
     sem.release()
     assert not sem.locked()
 
+    with sem:
+        assert sem.locked()
+    assert not sem.locked()
+
+    # releasing an unlocked semaphore should do nothing
+    sem.release()
+
+def test_semaphore_multi_release():
+    """Ensure that semaphores can be released multiple times at once"""
+
+    sem = wrapper.Semaphore(10)
+
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    sem.release(3)
+    assert not sem.locked()
+
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    sem.release(2)
+    assert sem.locked()
+    sem.release()
+    assert not sem.locked()
+
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    assert sem.acquire(blocking=True, timeout=1)
+    sem.release(4)
+    assert not sem.locked()
+
+def test_semaphore_timeout():
+    """Ensure that Semaphore timeouts are within expected boundaries"""
+
+    sem = wrapper.Semaphore(1)
+
+    sem.acquire(blocking=True, timeout=1)
+
+    start_time = monotonic()
+    assert not sem.acquire(blocking=True, timeout=0.4)
+
+    duration = monotonic() - start_time
+    assert duration > 0.3
+    assert duration < 0.5
+
+def test_semaphore_nested():
+    """Ensure that Semaphores can be nested"""
+
+    sem1 = wrapper.Semaphore()
+    sem2 = wrapper.Semaphore()
+
+    assert sem1.acquire(timeout=1)
+    assert sem2.acquire(timeout=1)
+
+    sem1.release()
+    sem2.release()
+
 def test_namedlock():
     """Ensure that NamedLock works as expected"""
 
@@ -73,20 +163,32 @@ def test_namedlock():
     assert wrapper.NamedLock("test2").locked()
     assert wrapper.NamedLock("test2", timeout=1).locked()
 
+def test_namedlock_timeout():
+    """Ensure that NamedLock timeouts are within expected boundaries"""
+
     wrapper.NamedLock("test3").acquire()
     def func2():
         assert wrapper.NamedLock("test3").locked()
-        wrapper.NamedLock("test3", timeout=4).acquire()
+        wrapper.NamedLock("test3", timeout=0.7).acquire()
 
-    start_time = datetime.now()
+    start_time = monotonic()
     thread = WorkerThread(target=func2)
     thread.start()
     with pytest.raises(error.LockAcquisitionTimeoutError):
         thread.join(reraise=True)
 
-    duration = datetime.now() - start_time
-    assert duration.total_seconds() > 3.5
-    assert duration.total_seconds() < 4.5
+    duration = monotonic() - start_time
+    assert duration > 0.6
+    assert duration < 0.8
+
+def test_namedlock_nested():
+    """Ensure that NamedLocks can be nested"""
+
+    wrapper.NamedLock("test1", timeout=0.1).acquire()
+    wrapper.NamedLock("test2", timeout=0.1).acquire()
+
+    wrapper.NamedLock("test1").release()
+    wrapper.NamedLock("test2").release()
 
 def test_namedsemaphore():
     """Ensure that NamedSemaphore works as expected"""
@@ -106,20 +208,34 @@ def test_namedsemaphore():
     assert wrapper.NamedSemaphore("test2").locked()
     assert wrapper.NamedSemaphore("test2", timeout=1).locked()
 
+    wrapper.NamedSemaphore("test2").release()
+
+def test_namedsemaphore_timeout():
+    """Ensure that NamedSemaphore timeouts are within expected boundaries"""
+
     wrapper.NamedLock("test3").acquire()
     def func2():
         assert not wrapper.NamedSemaphore("test3").locked()
-        wrapper.NamedSemaphore("test3", timeout=4).acquire()
+        wrapper.NamedSemaphore("test3", timeout=0.2).acquire()
 
-    start_time = datetime.now()
+    start_time = monotonic()
     thread = WorkerThread(target=func2)
     thread.start()
     with pytest.raises(error.LockAcquisitionTimeoutError):
         thread.join(reraise=True)
 
-    duration = datetime.now() - start_time
-    assert duration.total_seconds() > 3.5
-    assert duration.total_seconds() < 4.5
+    duration = monotonic() - start_time
+    assert duration > 0.1
+    assert duration < 0.3
+
+def test_namedsemaphore_nested():
+    """Ensure that NamedSemaphores can be nested"""
+
+    wrapper.NamedSemaphore("test1", timeout=0.1).acquire()
+    wrapper.NamedSemaphore("test2", timeout=0.1).acquire()
+
+    wrapper.NamedSemaphore("test1").release()
+    wrapper.NamedSemaphore("test2").release()
 
 def test_namedlocks_combined():
     """Ensure that NamedLock and NamedSemaphore work together correctly"""

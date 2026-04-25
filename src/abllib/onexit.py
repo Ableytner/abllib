@@ -1,14 +1,33 @@
 """Module for running code on application exit"""
 
 import atexit
+import functools
 import signal
-from typing import Callable
+import threading
+from types import FrameType
+from typing import Any, Callable
 
 from abllib import error, log
 from abllib._storage import InternalStorage
 
 logger = log.get_logger("onexit")
 
+def _ensure_is_main_thread(func: Callable) -> Callable:
+    """Ensure that function is only callable from main thread"""
+
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        if threading.current_thread() is not threading.main_thread():
+            logger.warning("Tried to use onexit module from non-main thread")
+            return None
+
+        return func(*args, **kwargs)
+
+    # https://stackoverflow.com/a/17705456/15436169
+    functools.update_wrapper(wrapper, func)
+
+    return wrapper
+
+@_ensure_is_main_thread
 def register(name: str, callback: Callable) -> None:
     """
     Run the given callback regardless of how the application exits.
@@ -32,6 +51,7 @@ def register(name: str, callback: Callable) -> None:
     if not registered:
         raise error.RegisteredMultipleTimesError.with_values(name)
 
+@_ensure_is_main_thread
 def register_normal_exit(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application exits normally or with an exception.
@@ -47,6 +67,7 @@ def register_normal_exit(name: str, callback: Callable) -> None:
 
     InternalStorage[f"_onexit.atexit.{name}"] = callback
 
+@_ensure_is_main_thread
 def register_sigterm(name: str, callback: Callable) -> None:
     """
     Run the given callback if the application is killed with SIGTERM.
@@ -68,6 +89,7 @@ def register_sigterm(name: str, callback: Callable) -> None:
     if len(InternalStorage["_onexit.signal"]) == 1:
         signal.signal(signal.SIGTERM, _signal_func)
 
+@_ensure_is_main_thread
 def deregister(name: str) -> None:
     """
     Deregister the callback with the given name.
@@ -88,6 +110,7 @@ def deregister(name: str) -> None:
         # no callback was deleted
         raise error.NameNotFoundError.with_values(name)
 
+@_ensure_is_main_thread
 def deregister_normal_exit(name: str) -> None:
     """
     Deregister the callback with the given name.
@@ -100,6 +123,7 @@ def deregister_normal_exit(name: str) -> None:
 
     del InternalStorage[f"_onexit.atexit.{name}"]
 
+@_ensure_is_main_thread
 def deregister_sigterm(name: str) -> None:
     """
     Deregister the callback with the given name.
@@ -129,7 +153,7 @@ def reset() -> None:
         for name in list(InternalStorage["_onexit.signal"].keys()):
             deregister_sigterm(name)
 
-def _atexit_func():
+def _atexit_func() -> None:
     if "_onexit.atexit" not in InternalStorage:
         return
 
@@ -141,7 +165,7 @@ def _atexit_func():
             logger.exception(e)
 
 # pylint: disable-next=unused-argument
-def _signal_func(signum, frame):
+def _signal_func(signum: int, frame: FrameType | None) -> Any:
     if "_onexit.signal" not in InternalStorage:
         return
 
@@ -152,7 +176,7 @@ def _signal_func(signum, frame):
         except Exception as e:
             logger.exception(e)
 
-def _ensure_signal_handler():
+def _ensure_signal_handler() -> None:
     if "_onexit.signal" not in InternalStorage:
         if signal.getsignal(signal.SIGTERM) is not InternalStorage["_onexit.orig.signal"]:
             raise RuntimeError("signal handler was overwritten, "

@@ -3,6 +3,7 @@
 import functools
 from typing import Any, Callable
 
+from abllib.log import LogLevel
 from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
 class log_io(BaseLogWrapper):
@@ -15,22 +16,24 @@ class log_io(BaseLogWrapper):
     If the optional argument logger is set and of type str, request that logger and log the values.
 
     Otherwise, the values are logged to the root logger.
+
+    Can also be directly used as a wrapper.
     """
 
-    def __call__(self, func: Callable):
+    def __call__(self, func: Callable) -> Callable:
         """Called when the class instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             res = func(*args, **kwargs)
 
-            self.logger.debug(f"func: {func.__name__}")
+            self.log(f"func: {func.__name__}", LogLevel.DEBUG)
             form_args = [self._format(item) for item in args]
             form_kwargs = [f"{key}={self._format(value)}" for key, value in kwargs.items()]
             arg_str = ", ".join(form_args + form_kwargs)
-            self.logger.debug(f"in  : {arg_str}")
-            self.logger.debug(f"out : {self._format(res)}")
+            self.log(f"in  : {arg_str}", LogLevel.DEBUG)
+            self.log(f"out : {self._format(res)}", LogLevel.DEBUG)
 
             return res
 

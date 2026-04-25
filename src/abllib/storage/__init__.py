@@ -8,7 +8,7 @@ from abllib.storage._volatile_storage import _VolatileStorage
 
 # pylint: disable=protected-access
 
-def initialize(filename: str = "storage.json", save_on_exit: bool = False):
+def initialize(filename: str = "storage.json", save_on_exit: bool = False) -> None:
     """
     Initialize the storage module.
 

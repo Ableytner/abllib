@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import functools
 import traceback
-from datetime import datetime
 from time import sleep
+from types import TracebackType
+from typing import Any, Callable
 
 from abllib import error, log, types
 from abllib._storage import InternalStorage
@@ -14,9 +15,14 @@ from abllib.wrapper._lock import Lock, Semaphore
 
 logger = log.get_logger("LockWrapper")
 
-class _BaseNamedLock():
+class NamedLock():
     """
-    The base class for the NamedLock and NamedSemaphore classes.
+    Make a function require a lock to be held during execution.
+
+    Only a single NamedLock can hold the lock, but only if the NamedSemaphore is not currently held.
+
+    Optionally provide a timeout in seconds,
+    after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
     """
 
     @types.enforce
@@ -27,20 +33,21 @@ class _BaseNamedLock():
         if not isinstance(lock_name, str):
             raise error.WrongTypeError.with_values(lock_name, str)
         if not isinstance(timeout, float) and timeout is not None:
-            raise error.WrongTypeError.with_values(timeout, float, None)
+            raise error.WrongTypeError.with_values(timeout, (float, None))
 
         self._name = lock_name
         self._timeout = timeout
+        self._corresponding_semaphore = None
 
-        if "_locks" not in InternalStorage:
-            InternalStorage["_locks.global"] = Lock()
-        self._allocation_lock: Lock = InternalStorage["_locks.global"]
+        if f"_locks.{lock_name}.l" not in InternalStorage:
+            InternalStorage[f"_locks.{lock_name}.l"] = Lock()
+
+        self._lock = InternalStorage[f"_locks.{lock_name}.l"]
 
     _name: str
     _lock: Lock | Semaphore
     _timeout: float | None
-    _allocation_lock: Lock
-    _other_lock: _BaseNamedLock | None = None
+    _corresponding_semaphore: NamedSemaphore | None
 
     @property
     def name(self) -> str:
@@ -51,64 +58,69 @@ class _BaseNamedLock():
     def acquire(self) -> None:
         """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
 
-        if self._timeout is None:
-            self._allocation_lock.acquire()
+        _log_callstack("NamedLock '%s' was acquired here:", self.name)
 
-            # ensure the other lock is not held
-            other = self._get_other()
+        if self._timeout is None:
+            # ensure the corresponding semaphore is not held
+            other = self._get_corresponding_semaphore()
             if other is not None:
+                other.block()
                 while other.locked():
                     sleep(0.025)
 
             if not self._lock.acquire():
-                self._allocation_lock.release()
+                if other is not None:
+                    other.unblock()
                 raise error.LockAcquisitionTimeoutError()
 
-            self._allocation_lock.release()
+            if other is not None:
+                other.unblock()
             return
 
-        initial_time = datetime.now()
-        if not self._allocation_lock.acquire(timeout=self._timeout):
-            raise error.LockAcquisitionTimeoutError(error.INTERNAL)
-
-        elapsed_time = (datetime.now() - initial_time).total_seconds()
-
-        # ensure the other lock is not held
-        other = self._get_other()
+        elapsed_time = 0.0
+        # ensure the corresponding semaphore is not held
+        other = self._get_corresponding_semaphore()
         if other is not None:
             while other.locked():
                 sleep(0.025)
                 elapsed_time += 0.025
                 if elapsed_time > self._timeout:
-                    self._allocation_lock.release()
+                    other.unblock()
                     raise error.LockAcquisitionTimeoutError()
 
         if not self._lock.acquire(timeout=self._timeout - elapsed_time):
-            self._allocation_lock.release()
+            if other is not None:
+                other.unblock()
             raise error.LockAcquisitionTimeoutError()
 
-        self._allocation_lock.release()
+        if other is not None:
+            other.unblock()
 
     def release(self) -> None:
         """Release the lock"""
 
+        _log_callstack("NamedLock '%s' was released here:", self.name)
+
         self._lock.release()
 
     def locked(self) -> bool:
-        """Return whether the lock is currentyl held"""
+        """Return whether the lock is currently held"""
 
         return self._lock.locked()
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         self.acquire()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
         self.release()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> Callable:
         """Called when instance is used as a decorator"""
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             """The wrapped function that is called on function execution"""
 
             with self:
@@ -121,46 +133,17 @@ class _BaseNamedLock():
 
         return wrapper
 
-    def _get_other(self) -> _BaseNamedLock | None:
-        raise NotImplementedError()
-
-class NamedLock(_BaseNamedLock):
-    """
-    Make a function require a lock to be held during execution.
-
-    Only a single NamedLock can hold the lock, but only if the NamedSemaphore is not currently held.
-
-    Optionally provide a timeout in seconds,
-    after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
-    """
-
-    def __init__(self, lock_name, timeout = None):
-        super().__init__(lock_name, timeout)
-
-        if f"_locks.{lock_name}.l" not in InternalStorage:
-            InternalStorage[f"_locks.{lock_name}.l"] = Lock()
-
-        self._lock = InternalStorage[f"_locks.{lock_name}.l"]
-
-    def acquire(self):
-        _log_callstack(f"NamedLock '{self.name}' was acquired here:")
-        return super().acquire()
-
-    def release(self):
-        _log_callstack(f"NamedLock '{self.name}' was released here:")
-        return super().release()
-
-    def _get_other(self):
-        if self._other_lock is not None:
-            return self._other_lock
+    def _get_corresponding_semaphore(self) -> NamedSemaphore | None:
+        if self._corresponding_semaphore is not None:
+            return self._corresponding_semaphore
 
         if f"_locks.{self.name}.s" in InternalStorage:
-            self._other_lock = InternalStorage[f"_locks.{self.name}.s"]
-            return self._other_lock
+            self._corresponding_semaphore = InternalStorage[f"_locks.{self.name}.s"]
+            return self._corresponding_semaphore
 
         return None
 
-class NamedSemaphore(_BaseNamedLock):
+class NamedSemaphore():
     """
     Make a function require a lock to be held during execution.
 
@@ -170,36 +153,136 @@ class NamedSemaphore(_BaseNamedLock):
     after which an LockAcquisitionTimeoutError is thrown (disabled if timeout is None).
     """
 
-    def __init__(self, lock_name, timeout = None):
-        super().__init__(lock_name, timeout)
+    def __init__(self, lock_name: str, timeout: int | float | None = None):
+        if isinstance(timeout, int):
+            timeout = float(timeout)
+
+        # TODO: add type validation
+        if not isinstance(lock_name, str):
+            raise error.WrongTypeError.with_values(lock_name, str)
+        if not isinstance(timeout, float) and timeout is not None:
+            raise error.WrongTypeError.with_values(timeout, (float, None))
+
+        self._name = lock_name
+        self._timeout = timeout
+        self._corresponding_lock = None
 
         if f"_locks.{lock_name}.s" not in InternalStorage:
             InternalStorage[f"_locks.{lock_name}.s"] = Semaphore(999)
 
-        self._lock = InternalStorage[f"_locks.{lock_name}.s"]
+        self._semaphore = InternalStorage[f"_locks.{lock_name}.s"]
 
-    def acquire(self):
-        _log_callstack(f"NamedSemaphore '{self.name}' was acquired here:")
-        return super().acquire()
+    _name: str
+    _semaphore: Semaphore
+    _timeout: float | None
+    _corresponding_lock: NamedLock | None
 
-    def release(self):
-        _log_callstack(f"NamedSemaphore '{self.name}' was released here:")
-        return super().release()
+    @property
+    def name(self) -> str:
+        """Return the lock's name"""
 
-    def _get_other(self):
-        if self._other_lock is not None:
-            return self._other_lock
+        return self._name
+
+    def acquire(self) -> None:
+        """Acquire the lock, or throw an LockAcquisitionTimeoutError if timeout is not None"""
+
+        _log_callstack("NamedSemaphore '%s' was acquired here:", self.name)
+
+        if self._timeout is None:
+            while self._semaphore.blocked():
+                sleep(0.025)
+
+            # ensure the other lock is not held
+            other = self._get_corresponding_lock()
+            if other is not None:
+                while other.locked():
+                    sleep(0.025)
+
+            if not self._semaphore.acquire_unsafe():
+                raise error.LockAcquisitionTimeoutError()
+
+            return
+
+        elapsed_time = 0.0
+        while self._semaphore.blocked():
+            sleep(0.025)
+            elapsed_time += 0.025
+            if elapsed_time > self._timeout:
+                raise error.LockAcquisitionTimeoutError()
+
+        # ensure the other lock is not held
+        other = self._get_corresponding_lock()
+        if other is not None:
+            while other.locked():
+                sleep(0.025)
+                elapsed_time += 0.025
+                if elapsed_time > self._timeout:
+                    raise error.LockAcquisitionTimeoutError()
+
+        if not self._semaphore.acquire_unsafe(timeout=self._timeout - elapsed_time):
+            raise error.LockAcquisitionTimeoutError()
+
+    def release(self) -> None:
+        """Release the lock"""
+
+        _log_callstack("NamedSemaphore '%s' was released here:", self.name)
+
+        self._semaphore.release()
+
+    def locked(self) -> bool:
+        """Return whether the lock is currently held"""
+
+        return self._semaphore.locked()
+
+    def block(self) -> None:
+        """Prevent this semaphore from being acquired"""
+
+        self._semaphore.block()
+
+    def unblock(self) -> None:
+        """Allow this semaphore to be acquired again"""
+
+        self._semaphore.unblock()
+
+    def __enter__(self) -> None:
+        self.acquire()
+
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+                 exc_tb: TracebackType | None) -> None:
+        self.release()
+
+    def __call__(self, func: Callable) -> Callable:
+        """Called when instance is used as a decorator"""
+
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """The wrapped function that is called on function execution"""
+
+            with self:
+                ret = func(*args, **kwargs)
+
+            return ret
+
+        # https://stackoverflow.com/a/17705456/15436169
+        functools.update_wrapper(wrapper, func)
+
+        return wrapper
+
+    def _get_corresponding_lock(self) -> NamedLock | None:
+        if self._corresponding_lock is not None:
+            return self._corresponding_lock
 
         if f"_locks.{self.name}.l" in InternalStorage:
-            self._other_lock = InternalStorage[f"_locks.{self.name}.l"]
-            return self._other_lock
+            self._corresponding_lock = InternalStorage[f"_locks.{self.name}.l"]
+            return self._corresponding_lock
 
         return None
 
-def _log_callstack(message: str):
+def _log_callstack(message: str, arg: Any) -> None:
     """Log the current callstack"""
 
-    if log.get_loglevel() != log.LogLevel.ALL:
+    if log.get_loglevel_fast() != 1: # log.LogLevel.ALL.value
         return
 
     traces = traceback.format_list(traceback.extract_stack())
@@ -212,7 +295,7 @@ def _log_callstack(message: str):
                 ignore = True
 
         if not ignore:
-            logger.debug(message + "\n" + line.strip())
+            logger.debug(message.format(arg) + "\n" + line.strip())
             return
 
 @deprecated

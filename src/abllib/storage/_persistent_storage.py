@@ -12,6 +12,7 @@ from abllib.storage._storage_view import _StorageView
 from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
 # pylint: disable=protected-access
+# mypy: ignore-errors
 
 VALID_ITEM_TYPES = bool | int | float | str | list["VALID_ITEM_TYPES"] \
                    | dict["VALID_ITEM_TYPES", "VALID_ITEM_TYPES"] | tuple["VALID_ITEM_TYPES", ...]
@@ -81,7 +82,7 @@ class _PersistentStorage(_ThreadsafeStorage):
         # TODO: type check list / dict content types
 
         if not isinstance(item, (bool, int, float, str, list, dict, tuple)) and item is not None:
-            raise TypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
+            raise error.WrongTypeError(f"Tried to add item with type {type(item)} to PersistentStorage")
 
         return super().__setitem__(key, item)
 

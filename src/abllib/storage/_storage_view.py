@@ -9,6 +9,7 @@ from abllib._storage._base_storage import _BaseStorage
 from abllib.storage._cache_storage import _CacheStorage
 
 # pylint: disable=protected-access
+# mypy: ignore-errors
 
 class _StorageView():
     """A read-only view on both the PersistentStorage and VolatileStorage"""
