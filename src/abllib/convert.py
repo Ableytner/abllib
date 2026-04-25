@@ -26,6 +26,34 @@ PREFIXES = {
     "30": "Q"
 }
 
+def as_time(value: int | float) -> str:
+    """Format the given number of seconds to a human-readable format"""
+
+    if not isinstance(value, (int, float)):
+        raise WrongTypeError.with_values(value, (int, float))
+
+    if value < 1:
+        return f"{_append_si_prefix(value)}s"
+
+    if value < 60:
+        return f"{value:.1f}s"
+    value /= 60
+
+    if value < 60:
+        return f"{value:.1f}min"
+    value /= 60
+
+    if value < 24:
+        return f"{value:.1f}h"
+    value /= 24
+
+    if value < 365:
+        return f"{value:.1f}d"
+    # a leap year every 4 years, this guess is good enough
+    value /= 365.25
+
+    return f"{value:.1f}y"
+
 def as_bytes(value: int | float) -> str:
     """Format the given number of bytes to a human-readable format"""
 
