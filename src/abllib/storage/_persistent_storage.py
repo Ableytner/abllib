@@ -1,16 +1,21 @@
 """Module containing the _PersistentStorage class"""
 
+# pylint: disable=protected-access
+from __future__ import annotations
+
 import json
 import os
-from typing import Any
 
-from abllib import error, fs, onexit
+from abllib import error, fs, onexit, types
 from abllib._storage import InternalStorage
 from abllib.storage._storage_view import _StorageView
 from abllib.storage._threadsafe_storage import _ThreadsafeStorage
 
 # pylint: disable=protected-access
 # mypy: ignore-errors
+
+VALID_ITEM_TYPES = bool | int | float | str | list["VALID_ITEM_TYPES"] \
+                   | dict["VALID_ITEM_TYPES", "VALID_ITEM_TYPES"] | tuple["VALID_ITEM_TYPES", ...]
 
 class _PersistentStorage(_ThreadsafeStorage):
     """Storage that persists across restarts"""
@@ -72,7 +77,8 @@ class _PersistentStorage(_ThreadsafeStorage):
 
     _STORAGE_NAME = "PersistentStorage"
 
-    def __setitem__(self, key: str, item: Any) -> None:
+    @types.enforce
+    def __setitem__(self, key: str, item: VALID_ITEM_TYPES) -> None:
         # TODO: type check list / dict content types
 
         if not isinstance(item, (bool, int, float, str, list, dict, tuple)) and item is not None:

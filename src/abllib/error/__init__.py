@@ -5,7 +5,7 @@ from abllib.error._general import (ArgumentCombinationError,
                                    CalledMultipleTimesError, DeprecatedError,
                                    DirNotFoundError, InternalCalculationError,
                                    InternalFunctionUsedError, InvalidKeyError,
-                                   KeyNotFoundError,
+                                   InvalidTypeHintError, KeyNotFoundError,
                                    LockAcquisitionTimeoutError,
                                    MissingDefaultMessageError,
                                    MissingInheritanceError,
@@ -14,7 +14,8 @@ from abllib.error._general import (ArgumentCombinationError,
                                    NotInitializedError, ReadonlyError,
                                    RegisteredMultipleTimesError,
                                    SingletonInstantiationError,
-                                   UninitializedFieldError, WrongTypeError)
+                                   UninitializedFieldError, WrongTypeError,
+                                   WrongValueError)
 
 INTERNAL =  "Internal error, please report it on github!"
 
@@ -27,6 +28,7 @@ __exports__ = [
     InternalCalculationError,
     InternalFunctionUsedError,
     InvalidKeyError,
+    InvalidTypeHintError,
     KeyNotFoundError,
     LockAcquisitionTimeoutError,
     MissingDefaultMessageError,
@@ -40,5 +42,6 @@ __exports__ = [
     SingletonInstantiationError,
     UninitializedFieldError,
     WrongTypeError,
+    WrongValueError,
     INTERNAL
 ]
