@@ -16,6 +16,6 @@ else:
 
 levenshtein_distance: Callable[[str, str], int]
 
-__exports__ = [
-    levenshtein_distance
+__all__ = [
+    "levenshtein_distance"
 ]

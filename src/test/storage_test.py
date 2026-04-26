@@ -7,8 +7,7 @@ import pytest
 
 from abllib import _storage, error
 from abllib._storage._base_storage import _BaseStorage
-from abllib.storage import (_CacheStorage, _PersistentStorage, _StorageView,
-                            _ThreadsafeStorage, _VolatileStorage)
+from abllib.storage import _CacheStorage, _PersistentStorage, _StorageView, _ThreadsafeStorage, _VolatileStorage
 
 # pylint: disable=protected-access, missing-class-docstring, pointless-statement, expression-not-assigned
 
