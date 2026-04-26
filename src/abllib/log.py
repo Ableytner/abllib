@@ -48,14 +48,7 @@ class LogLevel(Enum):
             case _:
                 raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
 
-def initialize(log_level: Literal[LogLevel.CRITICAL]
-                          | Literal[LogLevel.ERROR]
-                          | Literal[LogLevel.WARNING]
-                          | Literal[LogLevel.INFO]
-                          | Literal[LogLevel.DEBUG]
-                          | Literal[LogLevel.ALL]
-                          | int
-                          | None = None) -> None:
+def initialize(log_level: LogLevel | int | None = None) -> None:
     """
     Initialize the custom logging module.
 
@@ -170,13 +163,7 @@ def get_logger(name: str | None = None) -> logging.Logger:
 
     return logging.getLogger(name)
 
-def get_loglevel() -> Literal[LogLevel.CRITICAL] \
-                      | Literal[LogLevel.ERROR] \
-                      | Literal[LogLevel.INFO] \
-                      | Literal[LogLevel.WARNING] \
-                      | Literal[LogLevel.DEBUG] \
-                      | Literal[LogLevel.ALL] \
-                      | None:
+def get_loglevel() -> LogLevel | None:
     """Return the current LogLevel"""
 
     return LogLevel(InternalStorage["_log.level"]) if "_log.level" in InternalStorage else None
