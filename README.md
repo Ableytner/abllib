@@ -116,9 +116,9 @@ Example:
 >> from abllib import convert
 >> convert.as_time(17.4163)
 '17.4s'
->> convert.as_bytes(86000)
+>> convert.as_time(86000)
 '23.9h'
->> convert.as_bytes(1 * (10 ** 9))
+>> convert.as_time(1 * (10 ** 9))
 '31.7y'
 ```
 
