@@ -105,6 +105,23 @@ This provides a 10x speedup, but requires an extra package.
 
 This module contains converters between raw data and human-readable formats.
 
+#### Seconds to human-readable format (`abllib.convert.as_time`)
+
+This function converts a number (in seconds) to human-readable format.
+
+Leap years are assumed to happen every 4 years, so years not divisible by 4 may be slightly off.
+
+Example:
+```py
+>> from abllib import convert
+>> convert.as_time(17.4163)
+'17.4s'
+>> convert.as_bytes(86000)
+'23.9h'
+>> convert.as_bytes(1 * (10 ** 9))
+'31.7y'
+```
+
 #### Bytes to human-readable format (`abllib.convert.as_bytes`)
 
 This function converts a number (in bytes) to human-readable format.
