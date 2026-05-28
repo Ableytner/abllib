@@ -5,6 +5,7 @@ Contains many general-purpose functions which can be used across projects.
 """
 
 from abllib import alg as alg
+from abllib import convert as convert
 from abllib import enum as enum
 from abllib import error as error
 from abllib import fs as fs
@@ -29,6 +30,7 @@ from abllib.wrapper import Semaphore as Semaphore
 
 __exports__ = [
     alg,
+    convert,
     enum,
     error,
     fs,

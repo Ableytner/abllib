@@ -12,16 +12,17 @@ It is structured into small submodules, which are all optional and not dependent
 
 The following submodules are available:
 1. Algorithms (`abllib.alg`)
-2. Enum (`abllib.enum`)
-3. Errors (`abllib.error`)
-4. File system operations (`abllib.fs`)
-5. Fuzzy matching (`abllib.fuzzy`)
-6. General (`abllib.general`)
-7. Logging (`abllib.log`)
-8. Cleanup on exit (`abllib.onexit`)
-9. Parallel processing (`abllib.pproc`)
-10. Storages (`abllib.storage`)
-11. Function wrappers (`abllib.wrapper`)
+2. Converters (`abllib.convert`)
+3. Enum (`abllib.enum`)
+4. Errors (`abllib.error`)
+5. File system operations (`abllib.fs`)
+6. Fuzzy matching (`abllib.fuzzy`)
+7. General (`abllib.general`)
+8. Logging (`abllib.log`)
+9. Cleanup on exit (`abllib.onexit`)
+10. Parallel processing (`abllib.pproc`)
+11. Storages (`abllib.storage`)
+12. Function wrappers (`abllib.wrapper`)
 
 ## Installation
 
@@ -100,7 +101,54 @@ Example usage:
 If the optional package 'Levenshtein' is installed (`pip install Levenshtein`), its C implementation is used instead.
 This provides a 10x speedup, but requires an extra package.
 
-### 2. Enum (`abllib.enum`)
+### 2. Converters (`abllib.convert`)
+
+This module contains converters between raw data and human-readable formats.
+
+#### Seconds to human-readable format (`abllib.convert.as_time`)
+
+This function converts a number (in seconds) to human-readable format.
+
+Leap years are assumed to happen every 4 years, so years not divisible by 4 may be slightly off.
+
+Example:
+```py
+>> from abllib import convert
+>> convert.as_time(17.4163)
+'17.4s'
+>> convert.as_time(86000)
+'23.9h'
+>> convert.as_time(1 * (10 ** 9))
+'31.7y'
+```
+
+#### Bytes to human-readable format (`abllib.convert.as_bytes`)
+
+This function converts a number (in bytes) to human-readable format.
+
+Example:
+```py
+>> from abllib import convert
+>> convert.as_bytes(12700)
+'12.7kB'
+>> convert.as_bytes(1000**4)
+'1.0TB'
+```
+
+#### Bytes representation to number (`abllib.convert.get_bytes`)
+
+This function converts a bytes representation to a number (in bytes).
+
+Example:
+```py
+>> from abllib import convert
+>> convert.get_bytes("16.2MB")
+16200000000
+>> convert.get_bytes("251b")
+251
+```
+
+### 3. Enum (`abllib.enum`)
 
 This module contains `abllib.enum.Enum`, an extended implementation of the builtin `enum.Enum`.
 
@@ -144,7 +192,7 @@ TRUE
 ```
 Note however that `from_name` is **case-sensitive**!
 
-### 3. Errors (`abllib.error`)
+### 4. Errors (`abllib.error`)
 
 This module contains a custom exception system, which supports default messages for different errors.
 
@@ -198,7 +246,7 @@ This module also contains some premade general-purpose error classes, which all 
 * UninitializedFieldError
 * WrongTypeError
 
-### 4. File system (`abllib.fs`)
+### 5. File system (`abllib.fs`)
 
 This module contains various file system-related functionality. All provided functions are tested and work correctly on Linux and Windows systems.
 
@@ -246,7 +294,7 @@ Currently supported language-specific text transliterations:
 
 Special characters from unsupported languages and any other non-ascii will be removed from the resulting text.
 
-### 5. Fuzzy matching (`abllib.fuzzy`)
+### 6. Fuzzy matching (`abllib.fuzzy`)
 
 This module contains functions to search for strings within a list of strings, while applying [fuzzy searching logic](https://en.wikipedia.org/wiki/Approximate_string_matching).
 
@@ -360,7 +408,7 @@ Example usage:
 1.0
 ```
 
-### 6. General (`abllib.general`)
+### 7. General (`abllib.general`)
 
 This module contains different general-purpose functions that don't warrant an own module.
 
@@ -400,7 +448,7 @@ Traceback (most recent call last):
 abllib.error._general.MissingRequiredModuleError: "The error message"
 ```
 
-### 7. Logging (`abllib.log`)
+### 8. Logging (`abllib.log`)
 
 This module contains functions to easily log to the console or specified log files.
 It can be used without initialization, or customized.
@@ -514,7 +562,7 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
-### 8. Cleanup on exit (`abllib.onexit`)
+### 9. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.
 
@@ -552,7 +600,7 @@ Already registered callbacks can also be deregistered:
 >> exit()
 ```
 
-### 9. Parallel processing (`abllib.pproc`)
+### 10. Parallel processing (`abllib.pproc`)
 
 This module contains parallel processing-related functionality, both thread-based and process-based.
 
@@ -660,7 +708,7 @@ Traceback (most recent call last):
 ValueError: The answer is not yet calculated!
 ```
 
-### 10. Storages (`abllib.storage`)
+### 11. Storages (`abllib.storage`)
 
 This module contains multiple storage types.
 All data stored in these storages is accessible from anywhere within the program, as each storage is a global [singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
@@ -1007,7 +1055,7 @@ True
 True
 ```
 
-### 11. Function wrappers (`abllib.wrapper`)
+### 12. Function wrappers (`abllib.wrapper`)
 
 This module contains general-purpose [wrappers](https://www.geeksforgeeks.org/function-wrappers-in-python/).
 

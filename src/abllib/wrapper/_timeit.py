@@ -4,6 +4,7 @@ import functools
 from time import perf_counter_ns
 from typing import Any, Callable
 
+from abllib import convert
 from abllib.log import LogLevel
 from abllib.wrapper._base_log_wrapper import BaseLogWrapper
 
@@ -32,32 +33,8 @@ class timeit(BaseLogWrapper):
             res = func(*args, **kwargs)
 
             elapsed = float(perf_counter_ns() - start)
-
-            log_msg = f"{func.__name__}: "
-
-            for unit in ["ns", "μs", "ms"]:
-                if elapsed < 1000:
-                    log_msg += f"{elapsed:3.2f} {unit} elapsed"
-                    self.log(log_msg, LogLevel.DEBUG)
-                    return res
-
-                elapsed /= 1000
-
-            for unit in ["s", "min"]:
-                if elapsed < 60:
-                    log_msg += f"{elapsed:2.2f} {unit} elapsed"
-                    self.log(log_msg, LogLevel.DEBUG)
-                    return res
-
-                elapsed /= 60
-
-            if elapsed < 24:
-                log_msg += f"{elapsed:2.2f} hours elapsed"
-                self.log(log_msg, LogLevel.DEBUG)
-                return res
-
-            elapsed /= 24
-            log_msg += f"{elapsed:.2f} days elapsed"
+            elapsed *= (10 ** -9)
+            log_msg = f"{func.__name__}: {convert.as_time(elapsed)} elapsed"
             self.log(log_msg, LogLevel.DEBUG)
             return res
 
