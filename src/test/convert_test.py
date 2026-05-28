@@ -23,6 +23,9 @@ def test_as_time():
     assert convert.as_time(300000000) == "9.5y"
     assert convert.as_time(0) == "0.0s"
 
+    assert convert.as_time(1 * (10 ** 9)) == "31.7y"
+    assert convert.as_time(1 * (10 ** -9)) == "1.0ns"
+
     with pytest.raises(WrongTypeError):
         convert.as_time(None)
     with pytest.raises(WrongTypeError):

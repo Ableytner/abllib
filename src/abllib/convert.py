@@ -3,29 +3,32 @@
 from typing import TypeVar
 
 from abllib.error import WrongTypeError
+from abllib.log import get_logger
+
+logger = get_logger("convert")
 
 PREFIXES = {
-    "-30": "q",
-    "-27": "r",
-    "-24": "y",
-    "-21": "z",
-    "-18": "a",
-    "-15": "f",
-    "-12": "p",
-    "-9": "n",
-    "-6": "μ",
-    "-3": "m",
-    "0": "",
-    "3": "k",
-    "6": "M",
-    "9": "G",
-    "12": "T",
-    "15": "P",
-    "18": "E",
-    "21": "Z",
-    "24": "Y",
-    "27": "R",
-    "30": "Q"
+    -30: "q",
+    -27: "r",
+    -24: "y",
+    -21: "z",
+    -18: "a",
+    -15: "f",
+    -12: "p",
+    -9: "n",
+    -6: "μ",
+    -3: "m",
+    0: "",
+    3: "k",
+    6: "M",
+    9: "G",
+    12: "T",
+    15: "P",
+    18: "E",
+    21: "Z",
+    24: "Y",
+    27: "R",
+    30: "Q"
 }
 
 def as_time(value: int | float) -> str:
@@ -111,7 +114,7 @@ def _append_si_prefix(value: int | float) -> str:
             bases_changed += 3
             value /= 1000
 
-    return f"{value:.1f}{PREFIXES[str(bases_changed)]}"
+    return f"{value:.1f}{PREFIXES[bases_changed]}"
 
 T = TypeVar('T', int, float)
 

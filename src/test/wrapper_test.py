@@ -518,7 +518,7 @@ def test_timeit_default(capture_logs):
         sleep(1)
     @wrapper.timeit
     def func5():
-        sleep(10)
+        sleep(2.7)
 
 
     func1()
@@ -532,11 +532,11 @@ def test_timeit_default(capture_logs):
         content = f.readlines()
 
         assert len(content) == 5
-        assert re.match(r'\[.*\] \[DEBUG   \] root: func1: \d{1}\.\d{2} ms elapsed', content[0])
-        assert re.match(r'\[.*\] \[DEBUG   \] root: func2: \d{2}\.\d{2} ms elapsed', content[1])
-        assert re.match(r'\[.*\] \[DEBUG   \] root: func3: \d{3}\.\d{2} ms elapsed', content[2])
-        assert re.match(r'\[.*\] \[DEBUG   \] root: func4: \d{1}\.\d{2} s elapsed', content[3])
-        assert re.match(r'\[.*\] \[DEBUG   \] root: func5: \d{2}\.\d{2} s elapsed', content[4])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func1: \d{1}\.\d{1}ms elapsed', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func2: \d{2}\.\d{1}ms elapsed', content[1])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func3: \d{3}\.\d{1}ms elapsed', content[2])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func4: \d{1}\.\d{1}s elapsed', content[3])
+        assert re.match(r'\[.*\] \[DEBUG   \] root: func5: \d{1}\.\d{1}s elapsed', content[4])
 
 def test_timeit_loggername(capture_logs):
     """Ensure that timeit uses the provided logger name"""
@@ -552,7 +552,7 @@ def test_timeit_loggername(capture_logs):
         content = f.readlines()
 
         assert len(content) == 1
-        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] SpecialLogger: func1: \d{1}\.\d{1}ms elapsed', content[0])
 
 def test_timeit_custom_logger(capture_logs):
     """Ensure that timeit uses a custom provided logger"""
@@ -568,4 +568,4 @@ def test_timeit_custom_logger(capture_logs):
         content = f.readlines()
 
         assert len(content) == 1
-        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func1: \d{1}\.\d{2} ms elapsed', content[0])
+        assert re.match(r'\[.*\] \[DEBUG   \] ExtraLogger: func1: \d{1}\.\d{1}ms elapsed', content[0])
