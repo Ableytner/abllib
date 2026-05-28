@@ -57,7 +57,9 @@ select = ["TID252"]
 ban-relative-imports = "all"
 
 [tool.isort]
-lines_after_imports=1
+lines_after_imports = 1
+line_length = 120
+multi_line_output = 1
 
 [tool.mypy]
 warn_return_any = true

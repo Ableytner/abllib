@@ -1,9 +1,9 @@
 """A module containing fuzzy matching-related functionality"""
 
-from abllib.fuzzy._all import match_all
-from abllib.fuzzy._closest import match_closest
-from abllib.fuzzy._matchresult import MatchResult
-from abllib.fuzzy._similarity import Similarity
+from abllib.fuzzy._all import match_all as match_all
+from abllib.fuzzy._closest import match_closest as match_closest
+from abllib.fuzzy._matchresult import MatchResult as MatchResult
+from abllib.fuzzy._similarity import Similarity as Similarity
 
 def similarity(target: str, candidate: str) -> float:
     """
