@@ -21,6 +21,7 @@ def test_as_time():
     assert convert.as_time(100000) == "1.2d"
     assert convert.as_time(30000000) == "347.2d"
     assert convert.as_time(300000000) == "9.5y"
+    assert convert.as_time(0) == "0.0s"
 
     with pytest.raises(WrongTypeError):
         convert.as_time(None)
@@ -30,6 +31,8 @@ def test_as_time():
         convert.as_time("1")
     with pytest.raises(WrongTypeError):
         convert.as_time([1, 2])
+    with pytest.raises(ValueError):
+        convert.as_time(-1)
 
 def test_as_bytes():
     """Ensure that convert.as_bytes works as expected"""
@@ -38,7 +41,9 @@ def test_as_bytes():
     assert convert.as_bytes(1000) == "1.0kB"
     assert convert.as_bytes(1000.00) == "1.0kB"
     assert convert.as_bytes(12345678) == "12.3MB"
+    assert convert.as_bytes(12300000000) == "12.3GB"
     assert convert.as_bytes(9876543219876) == "9.9TB"
+    assert convert.as_bytes(0) == "0.0B"
 
     with pytest.raises(WrongTypeError):
         convert.as_bytes(None)
@@ -48,6 +53,8 @@ def test_as_bytes():
         convert.as_bytes("1")
     with pytest.raises(WrongTypeError):
         convert.as_bytes([1, 2])
+    with pytest.raises(ValueError):
+        convert.as_bytes(-1)
 
 def test_get_bytes():
     """Ensure that convert.get_bytes works as expected"""
@@ -55,7 +62,12 @@ def test_get_bytes():
     assert callable(convert.get_bytes)
     assert convert.get_bytes("1.0kB") == 1000
     assert convert.get_bytes("12.3MB") == 12300000
+    assert convert.get_bytes("12.3GB") == 12300000000
     assert convert.get_bytes("9.9TB") == 9900000000000
+    assert convert.get_bytes("0.0B") == 0
+    assert convert.get_bytes("0B") == 0
+    assert convert.get_bytes("0.0") == 0
+    assert convert.get_bytes("0") == 0
 
     with pytest.raises(WrongTypeError):
         convert.get_bytes(None)
@@ -67,3 +79,11 @@ def test_get_bytes():
         convert.get_bytes("test")
     with pytest.raises(ValueError):
         convert.get_bytes("1a2.3B")
+    with pytest.raises(ValueError):
+        convert.get_bytes("-1")
+    with pytest.raises(ValueError):
+        convert.get_bytes("-1.0")
+    with pytest.raises(ValueError):
+        convert.get_bytes("-1B")
+    with pytest.raises(ValueError):
+        convert.get_bytes("-1.0TB")

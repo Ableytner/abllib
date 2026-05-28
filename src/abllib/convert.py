@@ -1,5 +1,7 @@
 """A module containing formatting functions"""
 
+from typing import TypeVar
+
 from abllib.error import WrongTypeError
 
 PREFIXES = {
@@ -31,6 +33,7 @@ def as_time(value: int | float) -> str:
 
     if not isinstance(value, (int, float)):
         raise WrongTypeError.with_values(value, (int, float))
+    _ensure_positive_value(value)
 
     if value < 1:
         return f"{_append_si_prefix(value)}s"
@@ -59,6 +62,7 @@ def as_bytes(value: int | float) -> str:
 
     if not isinstance(value, (int, float)):
         raise WrongTypeError.with_values(value, (int, float))
+    _ensure_positive_value(value)
 
     return f"{_append_si_prefix(value)}B"
 
@@ -69,12 +73,15 @@ def get_bytes(text: str) -> int:
         raise WrongTypeError.with_values(text, str)
 
     if text.isdigit():
-        return int(text)
+        return _ensure_positive_value(int(text))
 
     if text[-1].lower() == "b":
         text = text[:-1]
         if text.isdigit():
-            return int(text)
+            return _ensure_positive_value(int(text))
+
+    if text[-1].isdigit():
+        return _ensure_positive_value(int(float(text)))
 
     number = float(text[:-1])
     multiplier = text[-1].upper()
@@ -91,12 +98,12 @@ def get_bytes(text: str) -> int:
         case _:
             raise ValueError(f"Unknown SI prefix {multiplier} in {text}")
 
-    return int(number)
+    return _ensure_positive_value(int(number))
 
 def _append_si_prefix(value: int | float) -> str:
     bases_changed = 0
 
-    while value < 1 or value >= 1000:
+    while value != 0 and (value < 1 or value >= 1000):
         if value < 1:
             bases_changed -= 3
             value *= 1000
@@ -105,3 +112,11 @@ def _append_si_prefix(value: int | float) -> str:
             value /= 1000
 
     return f"{value:.1f}{PREFIXES[str(bases_changed)]}"
+
+T = TypeVar('T', int, float)
+
+def _ensure_positive_value(value: T) -> T:
+    if value < 0:
+        raise ValueError(f"expected value >= 0, but received '{value}'")
+
+    return value
