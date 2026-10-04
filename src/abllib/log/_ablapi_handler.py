@@ -131,7 +131,7 @@ class AblapiHandler(logging.Handler):
                         if retry_response.status != 200:
                             raise AblapiConnectionError(
                                 f"Log request failed with status {retry_response.status}"
-                            )
+                            ) from exc
                 except urllib.error.HTTPError as retry_exc:
                     raise AblapiConnectionError(
                         f"Log request failed with status {retry_exc.code}"

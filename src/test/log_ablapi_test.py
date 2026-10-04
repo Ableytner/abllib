@@ -1,15 +1,15 @@
 """Module containing tests for the abllib.log ablapi handler"""
 
-import json
 import os
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 from abllib import error, log
 from abllib._storage import InternalStorage
-from abllib.error import AblapiConnectionError, NameNotFoundError, WrongTypeError
+from abllib.error import WrongTypeError
 from abllib.log._ablapi_handler import AblapiHandler, _LOG_LEVEL_MAP
+
+# pylint: disable=protected-access, import-outside-toplevel
 
 def test_log_level_map():
     """Ensure that _LOG_LEVEL_MAP contains all expected mappings"""
