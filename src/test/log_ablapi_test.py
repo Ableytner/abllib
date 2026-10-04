@@ -7,7 +7,7 @@ import pytest
 from abllib import error, log
 from abllib._storage import InternalStorage
 from abllib.error import WrongTypeError
-from abllib.log._ablapi_handler import AblapiHandler, _LOG_LEVEL_MAP
+from abllib.log._ablapi_handler import _LOG_LEVEL_MAP
 
 # pylint: disable=protected-access, import-outside-toplevel
 
@@ -75,10 +75,10 @@ def test_add_ablapi_handler_integration():
     token = os.environ["ABLAPI_TOKEN"]
 
     log.initialize(log.LogLevel.DEBUG)
-    log.add_ablapi_handler(user_id=user_id, token=token, sender="integration-test")
+    log.add_ablapi_handler(user_id, token, "integration-test", "http://localhost:44331")
 
     logger = log.get_logger("integration")
-    logger.info("integration test via add_ablapi_handler")
+    logger.error("integration test via add_ablapi_handler")
 
     # Verify handler was registered
     assert "_log.handlers" in InternalStorage
