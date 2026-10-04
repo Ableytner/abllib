@@ -91,7 +91,7 @@ def get_loglevel_fast() -> int | None:
 
     return CURRENT_LOG_LEVEL_CACHE
 
-def _setup_handler(handler: logging.Handler):
+def _setup_handler(handler: logging.Handler) -> None:
     logging.disable(0)
 
     handler.setLevel(InternalStorage["_log.level"])
