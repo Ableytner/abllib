@@ -562,6 +562,31 @@ Code in the application which runs later:
 
 This results in a final setup which writes to mylogfile.txt and doesn't produce console output.
 
+#### Sending logs to ablapi (`abllib.log.add_ablapi_handler`)
+
+This function adds a logging handler that sends log messages to the [ablapi](https://github.com/Ableytner/ablapi) LogController endpoint.
+It authenticates using Basic auth (userId:token) to obtain a JWT, then uses that JWT as a Bearer token for all subsequent log requests.
+
+Example usage:
+```py
+>> from abllib import log
+>> log.initialize(log.LogLevel.INFO)
+>> log.add_console_handler()
+>> log.add_ablapi_handler(user_id="my-user-id", token="my-token", sender="my-app")
+>> logger = log.get_logger()
+>> logger.info("this is sent to both console and ablapi")
+[2025-04-08 23:03:08] [INFO    ] root: this is sent to both console and ablapi
+```
+
+The `api_url` parameter can be used to specify a custom API endpoint (defaults to `https://api.ableytner.at`):
+```py
+>> log.add_ablapi_handler(user_id="my-user-id", token="my-token", sender="my-app", api_url="https://my-custom-api.com")
+```
+
+Note that `log.initialize()` must be called before `add_ablapi_handler`.
+All arguments must be strings; otherwise, a `WrongTypeError` is raised.
+If the API connection fails, an `AblapiConnectionError` is raised.
+
 ### 9. Cleanup on exit (`abllib.onexit`)
 
 This module contains functions to register callbacks which run on application exit.

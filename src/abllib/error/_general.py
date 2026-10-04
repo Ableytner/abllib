@@ -6,6 +6,13 @@ from abllib.error._custom_exception import CustomException
 
 # pylint: disable=arguments-differ
 
+class AblapiConnectionError(CustomException):
+    """Exception raised when connecting to the ablapi fails"""
+
+    default_messages = {
+        0: "Failed to connect to the ablapi"
+    }
+
 class ArgumentCombinationError(CustomException):
     """Exception raised when the given combination of arguments is invalid"""
 
