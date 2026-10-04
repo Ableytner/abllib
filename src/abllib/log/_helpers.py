@@ -91,11 +91,15 @@ def get_loglevel_fast() -> int | None:
 
     return CURRENT_LOG_LEVEL_CACHE
 
-def _setup_handler(handler: logging.Handler) -> None:
+def _setup_handler(handler: logging.Handler, format_str: str | None = None) -> None:
     logging.disable(0)
 
     handler.setLevel(InternalStorage["_log.level"])
-    handler.setFormatter(_get_formatter())
+
+    if format_str is None:
+        handler.setFormatter(_get_formatter())
+    else:
+        handler.setFormatter(logging.Formatter(format_str, style="{"))
 
     get_logger().addHandler(handler)
 

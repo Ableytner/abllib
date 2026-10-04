@@ -68,36 +68,6 @@ def test_add_ablapi_handler_invalid_args():
     not (os.environ.get("ABLAPI_USER_ID") and os.environ.get("ABLAPI_TOKEN")),
     reason="ABLAPI_USER_ID and ABLAPI_TOKEN environment variables not set",
 )
-def test_ablapi_handler_integration():
-    """Integration test that sends a real log message to the ablapi endpoint"""
-
-    user_id = os.environ["ABLAPI_USER_ID"]
-    token = os.environ["ABLAPI_TOKEN"]
-
-    handler = AblapiHandler(user_id, token, "abllib")
-    handler.setFormatter(log._helpers._get_formatter())
-
-    import logging
-
-    record = logging.LogRecord(
-        name="integration-test",
-        level=logging.INFO,
-        pathname="log_test.py",
-        lineno=1,
-        msg="integration test message",
-        args=(),
-        exc_info=None,
-    )
-
-    # This should not raise
-    handler.emit(record)
-
-    assert handler._bearer_token is not None
-
-@pytest.mark.skipif(
-    not (os.environ.get("ABLAPI_USER_ID") and os.environ.get("ABLAPI_TOKEN")),
-    reason="ABLAPI_USER_ID and ABLAPI_TOKEN environment variables not set",
-)
 def test_add_ablapi_handler_integration():
     """Integration test for add_ablapi_handler with real API"""
 
