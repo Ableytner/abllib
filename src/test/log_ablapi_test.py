@@ -75,7 +75,7 @@ def test_add_ablapi_handler_integration():
     token = os.environ["ABLAPI_TOKEN"]
 
     log.initialize(log.LogLevel.DEBUG)
-    log.add_ablapi_handler(user_id, token, "integration-test", "http://localhost:44331")
+    log.add_ablapi_handler(user_id, token, "integration-test") #, "http://localhost:44331")
 
     logger = log.get_logger("integration")
     logger.error("integration test via add_ablapi_handler")

@@ -31,5 +31,8 @@ jobs:
         pip install pytest
         if [ -f requirements.txt ]; then pip install --upgrade -r requirements.txt; fi
     - name: Run tests with pytest
+      env:
+        ABLAPI_TOKEN: ${{ secrets.ABLAPI_TOKEN }}
+        ABLAPI_USER_ID: ${{ secrets.ABLAPI_USER_ID }}
       run: |
         pytest src --skip-linting
