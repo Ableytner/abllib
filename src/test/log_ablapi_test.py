@@ -78,7 +78,7 @@ def test_add_ablapi_handler_integration():
     log.add_ablapi_handler(user_id, token, "integration-test") #, "http://localhost:44331")
 
     logger = log.get_logger("integration")
-    logger.error("integration test via add_ablapi_handler")
+    logger.info("integration test via add_ablapi_handler")
 
     # Verify handler was registered
     assert "_log.handlers" in InternalStorage
