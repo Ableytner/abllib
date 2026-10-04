@@ -1,52 +1,19 @@
-"""A module containing the logger creation"""
+"""A module containing logger helper functions"""
 
 from __future__ import annotations
 
 import atexit
 import logging
-import sys
-from typing import Literal
 
 from abllib import error
 from abllib._storage import InternalStorage
-from abllib.enum import Enum
+from abllib.log._log_level import LogLevel
 
 DEFAULT_LOG_LEVEL = logging.INFO
 CURRENT_LOG_LEVEL_CACHE = None
 
 # pylint: disable=global-statement
 # mypy: disable-error-code="return-value"
-
-class LogLevel(Enum):
-    """An enum holding log levels"""
-
-    CRITICAL = logging.CRITICAL
-    ERROR = logging.ERROR
-    WARNING = logging.WARNING
-    INFO = logging.INFO
-    DEBUG = logging.DEBUG
-    ALL = 1
-    NOTSET = logging.NOTSET
-
-    @staticmethod
-    def from_str(log_level: str) -> LogLevel:
-        """Return the matching LogLevel enum value from the given string"""
-
-        match log_level.lower():
-            case "all":
-                return LogLevel.ALL
-            case "debug":
-                return LogLevel.DEBUG
-            case "info":
-                return LogLevel.INFO
-            case "warning":
-                return LogLevel.WARNING
-            case "error":
-                return LogLevel.ERROR
-            case "critical":
-                return LogLevel.CRITICAL
-            case _:
-                raise error.NameNotFoundError(f"'{log_level}' isn't a known log level")
 
 def initialize(log_level: LogLevel | int | None = None) -> None:
     """
@@ -93,61 +60,6 @@ def initialize(log_level: LogLevel | int | None = None) -> None:
     root_logger.setLevel(log_level)
     CURRENT_LOG_LEVEL_CACHE = log_level
 
-def add_console_handler() -> None:
-    """
-    Add a console handler to the root logger.
-
-    This configures all loggers to also print to sys.stdout.
-    """
-
-    if "_log.level" not in InternalStorage:
-        raise error.NotInitializedError("log.initialize() needs to be called first")
-
-    logging.disable(0)
-
-    stream_handler = logging.StreamHandler(sys.stdout)
-
-    stream_handler.setLevel(InternalStorage["_log.level"])
-
-    stream_handler.setFormatter(_get_formatter())
-
-    get_logger().addHandler(stream_handler)
-
-    # add logger to storage
-    if "_log.handlers" not in InternalStorage:
-        InternalStorage["_log.handlers"] = []
-    InternalStorage["_log.handlers"].append(stream_handler)
-
-def add_file_handler(filename: str = "latest.log", filemode: Literal["w"] | Literal["a"] = "w") -> None:
-    """
-    Add a file handler to the root logger.
-
-    This configures all loggers to also print to a given file, or 'latest.log' if not provided.
-    """
-
-    if "_log.level" not in InternalStorage:
-        raise error.NotInitializedError("log.initialize() needs to be called first")
-
-    logging.disable(0)
-
-    # needs to be imported here to prevent circular import
-    # pylint: disable-next=cyclic-import, import-outside-toplevel
-    from abllib.fs import absolute
-    file_handler = logging.FileHandler(filename=absolute(filename), encoding="utf-8", mode=filemode, delay=True)
-
-    file_handler.setLevel(InternalStorage["_log.level"])
-
-    file_handler.setFormatter(_get_formatter())
-
-    get_logger().addHandler(file_handler)
-
-    atexit.register(file_handler.close)
-
-    # add logger to storage
-    if "_log.handlers" not in InternalStorage:
-        InternalStorage["_log.handlers"] = []
-    InternalStorage["_log.handlers"].append(file_handler)
-
 def get_logger(name: str | None = None) -> logging.Logger:
     """
     Return a logger with the given name, or the root logger if name is None.
@@ -178,6 +90,19 @@ def get_loglevel_fast() -> int | None:
     """
 
     return CURRENT_LOG_LEVEL_CACHE
+
+def _setup_handler(handler: logging.Handler):
+    logging.disable(0)
+
+    handler.setLevel(InternalStorage["_log.level"])
+    handler.setFormatter(_get_formatter())
+
+    get_logger().addHandler(handler)
+
+    # add logger to storage
+    if "_log.handlers" not in InternalStorage:
+        InternalStorage["_log.handlers"] = []
+    InternalStorage["_log.handlers"].append(handler)
 
 def _get_formatter() -> logging.Formatter:
     dt_fmt = r"%Y-%m-%d %H:%M:%S"
