@@ -172,6 +172,7 @@ def add_ablapi_handler(user_id: str, token: str, sender: str, api_url: str = "ht
         api_url,
     )
 
+    # pylint: disable-next=protected-access
     handler._authenticate()
 
     _setup_handler(handler, "{message}")
