@@ -585,7 +585,8 @@ The `api_url` parameter can be used to specify a custom API endpoint (defaults t
 
 Note that `log.initialize()` must be called before `add_ablapi_handler`.
 All arguments must be strings; otherwise, a `WrongTypeError` is raised.
-If the API connection fails, an `AblapiConnectionError` is raised.
+Authentication is attempted when the handler is added.
+If the API connection fails or the credentials are invalid, an `AblapiConnectionError` is raised and the handler is not added.
 
 ### 9. Cleanup on exit (`abllib.onexit`)
 
