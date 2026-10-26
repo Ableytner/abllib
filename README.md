@@ -143,7 +143,7 @@ Example:
 ```py
 >> from abllib import convert
 >> convert.get_bytes("16.2MB")
-16200000000
+16200000
 >> convert.get_bytes("251b")
 251
 ```
@@ -227,6 +227,8 @@ A default message for 0 arguments is mandatory.
 #### General purpose errors
 
 This module also contains some premade general-purpose error classes, which all derive from `CustomException`. The following classes are provided:
+* AblapiConnectionError
+* ArgumentCombinationError
 * CalledMultipleTimesError
 * DeprecatedError
 * DirNotFoundError
@@ -237,6 +239,7 @@ This module also contains some premade general-purpose error classes, which all 
 * LockAcquisitionTimeoutError
 * MissingDefaultMessageError
 * MissingInheritanceError
+* MissingRequiredModuleError
 * NameNotFoundError
 * NoneTypeError
 * NotInitializedError
@@ -254,6 +257,8 @@ This module contains various file system-related functionality. All provided fun
 
 A function which accepts filenames / paths and makes them absolute, also resolving all symlinks and '..'-calls. If a relative path is provided, the current working directory is prepended.
 
+Multiple path components can also be passed as separate arguments, which are joined together. A leading `~` or `~/` is expanded to the user's home directory.
+
 Example usage:
 ```py
 >> from abllib.fs import absolute
@@ -263,6 +268,12 @@ Example usage:
 'C:\\MyUser\\Some\\image.png'
 >> absolute("C:\\MyUser\\Some\\image.png")
 'C:\\MyUser\\Some\\image.png'
+>> absolute("a", "b", "c.png")
+'C:\\MyUser\\Some\\sub\\dir\\a\\b\\c.png'
+>> absolute("~")
+'C:\\Users\\MyUser'
+>> absolute("~/image.png")
+'C:\\Users\\MyUser\\image.png'
 ```
 
 #### Filename sanitization (`abllib.fs.sanitize`)
@@ -326,9 +337,9 @@ This index corresponds to the sub-candidate within the matching iterable candida
 Example usage, assuming that result was received from a match function:
 ```py
 >> result
-MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+MatchResult(score=1.0, value=['book', 'libro', 'Buch'], index=1, inner_index=2)
 >> result.score
-np.float64(1.0)
+1.0
 >> result.value
 ['book', 'libro', 'Buch']
 ```
@@ -339,7 +350,7 @@ Example for using the inner_index:
 >> candidates = [["house", "casa", "Haus"], ["book", "libro", "Buch"]]
 >> result = match_closest("Buch", candidates)
 >> result
-MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+MatchResult(score=1.0, value=['book', 'libro', 'Buch'], index=1, inner_index=2)
 >> result.value[result.inner_index]
 Buch
 >> candidates[result.index][result.inner_index]
@@ -361,9 +372,9 @@ Example usage:
 ```py
 >> from abllib.fuzzy import match_closest
 >> match_closest("cat", ["dog", "car"])
-MatchResult(score=np.float64(0.67), value='car', index=1, inner_index=None)
+MatchResult(score=0.67, value='car', index=1, inner_index=None)
 >> match_closest("Buch", [["house", "casa", "Haus"], ["book", "libro", "Buch"]])
-MatchResult(score=np.float64(1.0), value=['book', 'libro', 'Buch'], index=1, inner_index=2)
+MatchResult(score=1.0, value=['book', 'libro', 'Buch'], index=1, inner_index=2)
 ```
 
 #### Find all matching candidates (`abllib.fuzzy.match_all`)
@@ -381,7 +392,7 @@ Example usage:
 >> from abllib.fuzzy import match_all
 >> results = match_all("cat", ["dog", "car", "card", "horse", "mouse", "cat"])
 >> results
-[MatchResult(score=np.float64(0.67), value='car', index=1, inner_index=None), MatchResult(score=np.float64(0.5), value='card', index=2, inner_index=None), MatchResult(score=np.float64(1.0), value='cat', index=5, inner_index=None)]
+[MatchResult(score=0.67, value='car', index=1, inner_index=None), MatchResult(score=0.5, value='card', index=2, inner_index=None), MatchResult(score=1.0, value='cat', index=5, inner_index=None)]
 >> len(results)
 3
 ```
@@ -524,6 +535,18 @@ If the current log level is requested frequently (e.g. for checking if some part
 ```
 Note, however, that this value will be out of sync if the current log level wasn't changed through `log.initialize()`.
 
+#### Available log levels
+
+The LogLevel enum contains the following levels, from least to most verbose:
+* CRITICAL
+* ERROR
+* WARNING
+* INFO
+* DEBUG
+* ALL
+
+ALL is the most verbose level and captures every message, including those below DEBUG.
+
 #### Parsing the log level from a string
 
 The libaries' LogLevel enum also contains a convenience function for parsing a log level.
@@ -657,6 +680,7 @@ TLDR: If you are not sure what to use, use thread-based processing.
 This class represents a separate thread that runs a given function until completion.
 If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
+The .failed() method returns whether the target raised an exception.
 
 Example usage:
 
@@ -668,6 +692,17 @@ Example usage:
 >> wt.start()
 >> wt.join()
 42
+```
+
+Arguments can be passed to the worker function using the `args` and `kwargs` parameters:
+```py
+>> from abllib.pproc import WorkerThread
+>> def add(a, b):
+..     return a + b
+>> wt = WorkerThread(target=add, args=(1, 2))
+>> wt.start()
+>> wt.join()
+3
 ```
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
@@ -698,6 +733,7 @@ ValueError: The answer is not yet calculated!
 This class represents a separate process that runs a given function until completion.
 If .join() is called, the functions return value or any occurred exception is returned.
 If .join() is called with reraise=True, any caught exception will be reraised.
+The .failed() method returns whether the target raised an exception.
 
 Example usage:
 
@@ -709,6 +745,17 @@ Example usage:
 >> wp.start()
 >> wp.join()
 42
+```
+
+Arguments can be passed to the worker function using the `args` and `kwargs` parameters:
+```py
+>> from abllib.pproc import WorkerProcess
+>> def add(a, b):
+..     return a + b
+>> wp = WorkerProcess(target=add, args=(1, 2))
+>> wp.start()
+>> wp.join()
+3
 ```
 
 Exceptions that occur are caught and returned. The exception object can be reraised manually.
@@ -750,6 +797,13 @@ Enable all storages:
 ```py
 >> from abllib import storage
 >> storage.initialize()
+```
+
+The optional `filename` parameter sets the file the PersistentStorage loads from and saves to (defaults to `storage.json`).
+The optional `save_on_exit` parameter, when set to True, automatically saves the PersistentStorage to disk on application exit.
+```py
+>> from abllib import storage
+>> storage.initialize(filename="mydata.json", save_on_exit=True)
 ```
 
 Alternatively, only the needed storages can be enabled:
@@ -1142,7 +1196,7 @@ The semaphore can be blocked, which halts all new acquisitions.
 
 There are two classes which help with multi-threaded synchronisation:
 * NamedLock
-* namedSemaphore
+* NamedSemaphore
 
 NamedLock works like a normal [lock](https://en.wikipedia.org/wiki/Lock_(computer_science)), while NamedSemaphore works like a [semaphore](https://en.wikipedia.org/wiki/Semaphore_(programming)).
 
@@ -1181,7 +1235,7 @@ abllib.error._general.LockAcquisitionTimeoutError: The requested lock could not 
 #### Deprecated marker (`abllib.wrapper.deprecated`)
 
 The deprecate wrapper marks a function or class as deprecated.
-If a deprecated function is called, a deprecation warning is logged using the current root logger.
+If a deprecated function is called, a deprecation warning is logged using the named logger `deprecated`.
 
 ```py
 >> from abllib.wrapper import deprecated

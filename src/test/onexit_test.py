@@ -1,10 +1,13 @@
 """Module containing tests for the abllib.onexit module"""
 
 import re
+import signal
+import subprocess
+import sys
 
 import pytest
 
-from abllib import error, onexit
+from abllib import error, fs, onexit
 from abllib.pproc import WorkerThread
 
 # pylint: disable=protected-access, unused-argument
@@ -114,6 +117,43 @@ def test_call_signal():
     onexit._signal_func(None, None)
 
     assert data[0]
+
+def test_ctrl_c():
+    """Ensure that the callback runs exactly once when the process is interrupted by CTRL+C (SIGINT)"""
+
+    src_dir = fs.absolute(__file__, "..", "..")
+
+    script = f"""
+import os
+import signal
+import sys
+import threading
+import time
+
+sys.path.insert(0, {src_dir!r})
+
+from abllib import onexit
+
+def cleanup():
+    print("CLEANUP_RAN", flush=True)
+
+onexit.register("ctrl_c", cleanup)
+
+def send_sigint():
+    time.sleep(0.5)
+    # send KeyboardInterrupt
+    os.kill(os.getpid(), signal.SIGINT)
+
+threading.Thread(target=send_sigint, daemon=True).start()
+time.sleep(10)
+print("SURVIVED", flush=True)
+"""
+
+    result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, timeout=15, check=False)
+
+    assert result.returncode == -signal.SIGINT
+    assert result.stdout.count("CLEANUP_RAN") == 1
+    assert "SURVIVED" not in result.stdout
 
 def test_dotname():
     """Ensure that names containing a "." work as expected"""

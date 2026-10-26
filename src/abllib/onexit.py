@@ -2,6 +2,7 @@
 
 import atexit
 import functools
+import os
 import signal
 import threading
 from types import FrameType
@@ -88,6 +89,7 @@ def register_sigterm(name: str, callback: Callable) -> None:
     # set handler if first signal callback is registered
     if len(InternalStorage["_onexit.signal"]) == 1:
         signal.signal(signal.SIGTERM, _signal_func)
+        signal.signal(signal.SIGINT, _signal_func)
 
 @_ensure_is_main_thread
 def deregister(name: str) -> None:
@@ -140,7 +142,8 @@ def deregister_sigterm(name: str) -> None:
 
     # reset handler if no signal callback is registered anymore
     if "_onexit.signal" not in InternalStorage:
-        signal.signal(signal.SIGTERM, InternalStorage["_onexit.orig.signal"])
+        signal.signal(signal.SIGTERM, InternalStorage["_onexit.orig.SIGTERM"])
+        signal.signal(signal.SIGINT, InternalStorage["_onexit.orig.SIGINT"])
 
 def reset() -> None:
     """Reset all registered callbacks"""
@@ -165,7 +168,12 @@ def _atexit_func() -> None:
             logger.exception(e)
 
 # pylint: disable-next=unused-argument
-def _signal_func(signum: int, frame: FrameType | None) -> Any:
+def _signal_func(signum: int | None, frame: FrameType | None) -> Any:
+    # SIGINT: restore default callback and run the callbacks during exception exit
+    if signum == signal.SIGINT:
+        signal.signal(signal.SIGINT, InternalStorage["_onexit.orig.SIGINT"])
+        raise KeyboardInterrupt()
+
     if "_onexit.signal" not in InternalStorage:
         return
 
@@ -176,16 +184,24 @@ def _signal_func(signum: int, frame: FrameType | None) -> Any:
         except Exception as e:
             logger.exception(e)
 
+    # SIGTERM: restore default callback for clean process termination
+    if signum is not None:
+        signal.signal(signum, InternalStorage["_onexit.orig.SIGTERM"])
+        os.kill(os.getpid(), signum)
+
 def _ensure_signal_handler() -> None:
     if "_onexit.signal" not in InternalStorage:
-        if signal.getsignal(signal.SIGTERM) is not InternalStorage["_onexit.orig.signal"]:
+        if signal.getsignal(signal.SIGTERM) is not InternalStorage["_onexit.orig.SIGTERM"] \
+                or signal.getsignal(signal.SIGINT) is not InternalStorage["_onexit.orig.SIGINT"]:
             raise RuntimeError("signal handler was overwritten, "
                                + "make sure to only use this module to set signal handlers")
     else:
-        if signal.getsignal(signal.SIGTERM) is not _signal_func:
+        if signal.getsignal(signal.SIGTERM) is not _signal_func \
+                or signal.getsignal(signal.SIGINT) is not _signal_func:
             raise RuntimeError("signal handler was overwritten, "
                                + "make sure to only use this module to set signal handlers")
 
-InternalStorage["_onexit.orig.signal"] = signal.getsignal(signal.SIGTERM)
+InternalStorage["_onexit.orig.SIGTERM"] = signal.getsignal(signal.SIGTERM)
+InternalStorage["_onexit.orig.SIGINT"] = signal.getsignal(signal.SIGINT)
 
 atexit.register(_atexit_func)
